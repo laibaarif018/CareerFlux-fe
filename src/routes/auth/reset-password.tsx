@@ -1,105 +1,356 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Eye, EyeOff, Check, Circle } from 'lucide-react'
+import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import Header from '@/components/Header'
+import { useResetPassword } from '@/hooks/useAuth'
+import { PublicRoute } from '@/components/PRoutes'
 
 export const Route = createFileRoute('/auth/reset-password')({
-  component: ForgotPassword,
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: (search.token as string) || '',
+    email: (search.email as string) || '',
+  }),
+
+  component: () => (
+    <PublicRoute>
+      <ResetPassword />
+    </PublicRoute>
+  ),
 })
 
-function ForgotPassword() {
+function ResetPassword() {
+  const navigate = useNavigate()
+  const { email: searchEmail } = useSearch({ from: '/auth/reset-password' })
   const [email, setEmail] = useState('')
+  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const resetPassword = useResetPassword()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const emailToUse = searchEmail || localStorage.getItem('email') || ''
+    if (emailToUse) {
+      setEmail(emailToUse)
+    } else {
+      navigate({ to: '/auth/forgot-password' })
+    }
+  }, [searchEmail, navigate])
+
+  const handleCodeChange = (index: number, value: string) => {
+    if (value.length > 1) value = value[0]
+    if (!/^\d*$/.test(value)) return
+
+    const newCode = [...code]
+    newCode[index] = value
+    setCode(newCode)
+
+    // Clear API errors when user types
+    if (resetPassword.isError) {
+      resetPassword.reset()
+    }
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`code-${index + 1}`)
+      if (nextInput) (nextInput as HTMLInputElement).focus()
+    }
+  }
+
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
+      const prevInput = document.getElementById(`code-${index - 1}`)
+      if (prevInput) (prevInput as HTMLInputElement).focus()
+    }
+  }
+
+  const handlePasswordChange = (
+    field: 'newPassword' | 'confirmPassword',
+    value: string,
+  ) => {
+    if (field === 'newPassword') {
+      setNewPassword(value)
+    } else {
+      setConfirmPassword(value)
+    }
+
+    // Clear API errors when user types
+    if (resetPassword.isError) {
+      resetPassword.reset()
+    }
+  }
+
+  const hasMinLength = newPassword.length >= 8
+  const hasNumber = /\d/.test(newPassword)
+  const hasUppercase = /[A-Z]/.test(newPassword)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword)
+
+  const allRequirementsMet =
+    hasMinLength && hasNumber && hasUppercase && hasSpecialChar
+  const passwordsMatch =
+    newPassword === confirmPassword && confirmPassword.length > 0
+  const codeComplete = code.every((digit) => digit !== '')
+
+  const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email) return
-    // Implement your reset password logic here
-    console.log('Reset link requested for:', email)
+
+    if (!allRequirementsMet) return
+    if (!passwordsMatch) return
+    if (!codeComplete) return
+
+    resetPassword.mutate(
+      {
+        email,
+        code: code.join(''),
+        newPassword,
+        confirmPassword,
+      },
+      {
+        onSuccess: () => {
+          localStorage.removeItem('email') // Clean up
+          navigate({ to: '/auth/login' })
+        },
+      },
+    )
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark text-[#0d121b] dark:text-white font-display">
-      {/* Navigation Bar */}
-      <header className="flex items-center justify-between border-b border-solid border-b-[#e7ebf3] dark:border-b-[#2a3441] px-10 py-3 bg-white dark:bg-[#1a202c]">
-        <div className="flex items-center gap-4 text-[#0d121b] dark:text-white">
-          <div className="size-8 text-primary">
-            <span className="material-symbols-outlined !text-[32px]">psychology</span>
-          </div>
-          <h2 className="text-lg font-bold leading-tight tracking-[-0.015em]">ResumeAI</h2>
-        </div>
-        <div className="flex gap-2">
-          <button className="flex min-w-[84px] items-center justify-center rounded-lg h-10 px-4 bg-background-light dark:bg-[#2a3441] text-sm font-bold hover:bg-[#e7ebf3] dark:hover:bg-[#374151] transition-colors">
-            Don't have an account? Sign Up
-          </button>
-        </div>
-      </header>
+    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900">
+      <Header />
 
-      {/* Main Content */}
-      <div className="layout-container flex h-full grow flex-col justify-center items-center p-4">
-        <div className="w-full max-w-[480px] bg-white dark:bg-[#1a202c] rounded-xl shadow-lg border border-[#e7ebf3] dark:border-[#2a3441] p-8 md:p-12">
-          {/* Back Link */}
-          <div className="mb-6">
-            <a className="inline-flex items-center gap-2 text-sm font-bold text-[#637588] dark:text-[#9ca3af] hover:text-primary transition-colors" href="#">
-              <span className="material-symbols-outlined !text-lg">arrow_back</span>
-              Back to Login
-            </a>
+      <div className="flex h-full grow flex-col justify-center items-center p-4 py-12">
+        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+              Reset Password
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">
+              A secure code has been sent to{' '}
+              <strong className="text-slate-700 dark:text-slate-300">
+                {email}
+              </strong>
+              . Enter the code and your new password below.
+            </p>
           </div>
 
-          {/* Icon */}
-          <div className="flex justify-center mb-6">
-            <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined !text-[32px]">lock_reset</span>
-            </div>
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-[32px] font-bold leading-tight text-center mb-2">Forgot Password?</h1>
-          <p className="text-[#637588] dark:text-[#9ca3af] text-base font-normal leading-normal text-center mb-8">
-            No worries, we'll send you reset instructions. Please enter the email address associated with your account.
-          </p>
-
-          {/* Form */}
-          <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-            <div className="flex flex-col gap-2">
-              <label className="text-base font-medium text-[#0d121b] dark:text-white" htmlFor="email-address">
-                Email Address
+          <form onSubmit={handleResetPassword} noValidate>
+            {/* Verification Code */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">
+                Verification Code
               </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#9ca3af]">mail</span>
-                <input
-                  id="email-address"
-                  type="email"
-                  placeholder="john.doe@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="form-input w-full h-14 pl-12 pr-4 text-base rounded-lg border border-[#cfd7e7] dark:border-[#4b5563] bg-background-light dark:bg-[#101622] text-[#0d121b] dark:text-white placeholder:text-[#9ca3af] focus:outline-0 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
-                />
+              <div className="flex gap-2 justify-center mb-6">
+                {code.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`code-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(index, e)}
+                    className="w-12 h-14 text-center text-xl font-semibold border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none transition-all"
+                  />
+                ))}
               </div>
             </div>
 
+            {/* New Password */}
+            <div className="mb-4">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPassword ? 'text' : 'password'}
+                  placeholder="Enter your new password"
+                  value={newPassword}
+                  onChange={(e) =>
+                    handlePasswordChange('newPassword', e.target.value)
+                  }
+                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder-slate-400 dark:placeholder:text-slate-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Confirm New Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  placeholder="Confirm your new password"
+                  value={confirmPassword}
+                  onChange={(e) =>
+                    handlePasswordChange('confirmPassword', e.target.value)
+                  }
+                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder-slate-400 dark:placeholder:text-slate-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
+
+              {/* Password Match Indicator */}
+              {confirmPassword && (
+                <p
+                  className={`text-xs mt-2 ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                >
+                  {passwordsMatch
+                    ? '✓ Passwords match'
+                    : '✗ Passwords do not match'}
+                </p>
+              )}
+            </div>
+
+            {/* Password Requirements */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-6 text-sm">
+              <div className="flex items-center gap-2">
+                {hasMinLength ? (
+                  <Check size={16} className="text-green-500" />
+                ) : (
+                  <Circle size={16} className="text-slate-300" />
+                )}
+                <span
+                  className={
+                    hasMinLength
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }
+                >
+                  8+ characters
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasUppercase ? (
+                  <Check size={16} className="text-green-500" />
+                ) : (
+                  <Circle size={16} className="text-slate-300" />
+                )}
+                <span
+                  className={
+                    hasUppercase
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }
+                >
+                  1 uppercase letter
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasNumber ? (
+                  <Check size={16} className="text-green-500" />
+                ) : (
+                  <Circle size={16} className="text-slate-300" />
+                )}
+                <span
+                  className={
+                    hasNumber
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }
+                >
+                  1 number
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasSpecialChar ? (
+                  <Check size={16} className="text-green-500" />
+                ) : (
+                  <Circle size={16} className="text-slate-300" />
+                )}
+                <span
+                  className={
+                    hasSpecialChar
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-slate-500 dark:text-slate-400'
+                  }
+                >
+                  1 special character
+                </span>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {resetPassword.isError && (
+              <div className="mb-4 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
+                <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
+                  error
+                </span>
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  {(resetPassword.error as any)?.response?.data?.message ||
+                    'Failed to reset password. Please try again.'}
+                </p>
+              </div>
+            )}
+
+            {/* Submit Button */}
             <button
               type="submit"
-              className="flex w-full items-center justify-center h-12 px-5 bg-primary hover:bg-blue-700 text-white font-bold rounded-lg tracking-[0.015em] shadow-md shadow-blue-500/20 transition-colors"
+              disabled={
+                resetPassword.isPending ||
+                !allRequirementsMet ||
+                !passwordsMatch ||
+                !codeComplete
+              }
+              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm mb-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Send Reset Link
+              {resetPassword.isPending ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-lg">
+                    progress_activity
+                  </span>
+                  Resetting...
+                </>
+              ) : (
+                'Reset Password'
+              )}
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-8 text-center border-t border-[#e7ebf3] dark:border-[#2a3441] pt-6">
-            <p className="text-sm text-[#637588] dark:text-[#9ca3af]">
+          {/* Sign In Link */}
+          <div className="text-center text-sm border-t border-slate-200 dark:border-slate-700 pt-4">
+            <span className="text-slate-500 dark:text-slate-400">
               Remember your password?{' '}
-              <a className="text-primary font-bold hover:underline" href="#">
-                Log in
-              </a>
-            </p>
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate({ to: '/auth/login' })}
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
+            >
+              Sign In
+            </button>
           </div>
         </div>
+      </div>
 
-        {/* Security Footer */}
-        <div className="mt-8 flex items-center justify-center gap-2 text-[#9ca3af] text-xs">
-          <span className="material-symbols-outlined !text-sm">verified_user</span>
-          <span>Secure 256-bit SSL Encrypted</span>
-        </div>
+      {/* Security Footer */}
+      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4">
+        <span className="material-symbols-outlined text-sm">verified_user</span>
+        <span>Secure 256-bit SSL Encrypted</span>
       </div>
     </div>
   )

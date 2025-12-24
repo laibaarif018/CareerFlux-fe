@@ -34,12 +34,14 @@ import { Route as CompanyCadidateMatchRouteImport } from './routes/company/cadid
 import { Route as CompanyAddJobRouteImport } from './routes/company/addJob'
 import { Route as AuthVerificationRouteImport } from './routes/auth/verification'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthSetPasswordRouteImport } from './routes/auth/set-password'
 import { Route as AuthRolesRouteImport } from './routes/auth/roles'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthPasswordRouteImport } from './routes/auth/password'
+import { Route as AuthOauthCallbackRouteImport } from './routes/auth/oauth-callback'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
-import { Route as AuthGoogleVerificationRouteImport } from './routes/auth/googleVerification'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
+import { Route as AuthConnectGoogleRouteImport } from './routes/auth/connect-google'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoFormSimpleRouteImport } from './routes/demo/form.simple'
@@ -176,6 +178,11 @@ const AuthSignupRoute = AuthSignupRouteImport.update({
   path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthSetPasswordRoute = AuthSetPasswordRouteImport.update({
+  id: '/auth/set-password',
+  path: '/auth/set-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRolesRoute = AuthRolesRouteImport.update({
   id: '/auth/roles',
   path: '/auth/roles',
@@ -191,19 +198,24 @@ const AuthPasswordRoute = AuthPasswordRouteImport.update({
   path: '/auth/password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthOauthCallbackRoute = AuthOauthCallbackRouteImport.update({
+  id: '/auth/oauth-callback',
+  path: '/auth/oauth-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/auth/login',
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthGoogleVerificationRoute = AuthGoogleVerificationRouteImport.update({
-  id: '/auth/googleVerification',
-  path: '/auth/googleVerification',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   id: '/auth/forgot-password',
   path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConnectGoogleRoute = AuthConnectGoogleRouteImport.update({
+  id: '/auth/connect-google',
+  path: '/auth/connect-google',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
@@ -271,12 +283,14 @@ export interface FileRoutesByFullPath {
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
   '/uploadResume': typeof UploadResumeRoute
+  '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/googleVerification': typeof AuthGoogleVerificationRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/roles': typeof AuthRolesRoute
+  '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
   '/company/addJob': typeof CompanyAddJobRoute
@@ -314,12 +328,14 @@ export interface FileRoutesByTo {
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
   '/uploadResume': typeof UploadResumeRoute
+  '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/googleVerification': typeof AuthGoogleVerificationRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/roles': typeof AuthRolesRoute
+  '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
   '/company/addJob': typeof CompanyAddJobRoute
@@ -358,12 +374,14 @@ export interface FileRoutesById {
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
   '/uploadResume': typeof UploadResumeRoute
+  '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
-  '/auth/googleVerification': typeof AuthGoogleVerificationRoute
   '/auth/login': typeof AuthLoginRoute
+  '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/roles': typeof AuthRolesRoute
+  '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
   '/company/addJob': typeof CompanyAddJobRoute
@@ -403,12 +421,14 @@ export interface FileRouteTypes {
     | '/resumeReport'
     | '/skillGap'
     | '/uploadResume'
+    | '/auth/connect-google'
     | '/auth/forgot-password'
-    | '/auth/googleVerification'
     | '/auth/login'
+    | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
     | '/auth/roles'
+    | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
     | '/company/addJob'
@@ -446,12 +466,14 @@ export interface FileRouteTypes {
     | '/resumeReport'
     | '/skillGap'
     | '/uploadResume'
+    | '/auth/connect-google'
     | '/auth/forgot-password'
-    | '/auth/googleVerification'
     | '/auth/login'
+    | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
     | '/auth/roles'
+    | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
     | '/company/addJob'
@@ -489,12 +511,14 @@ export interface FileRouteTypes {
     | '/resumeReport'
     | '/skillGap'
     | '/uploadResume'
+    | '/auth/connect-google'
     | '/auth/forgot-password'
-    | '/auth/googleVerification'
     | '/auth/login'
+    | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
     | '/auth/roles'
+    | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
     | '/company/addJob'
@@ -533,12 +557,14 @@ export interface RootRouteChildren {
   ResumeReportRoute: typeof ResumeReportRoute
   SkillGapRoute: typeof SkillGapRoute
   UploadResumeRoute: typeof UploadResumeRoute
+  AuthConnectGoogleRoute: typeof AuthConnectGoogleRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
-  AuthGoogleVerificationRoute: typeof AuthGoogleVerificationRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthOauthCallbackRoute: typeof AuthOauthCallbackRoute
   AuthPasswordRoute: typeof AuthPasswordRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthRolesRoute: typeof AuthRolesRoute
+  AuthSetPasswordRoute: typeof AuthSetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerificationRoute: typeof AuthVerificationRoute
   CompanyAddJobRoute: typeof CompanyAddJobRoute
@@ -740,6 +766,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/set-password': {
+      id: '/auth/set-password'
+      path: '/auth/set-password'
+      fullPath: '/auth/set-password'
+      preLoaderRoute: typeof AuthSetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/roles': {
       id: '/auth/roles'
       path: '/auth/roles'
@@ -761,6 +794,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/oauth-callback': {
+      id: '/auth/oauth-callback'
+      path: '/auth/oauth-callback'
+      fullPath: '/auth/oauth-callback'
+      preLoaderRoute: typeof AuthOauthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
       id: '/auth/login'
       path: '/auth/login'
@@ -768,18 +808,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/googleVerification': {
-      id: '/auth/googleVerification'
-      path: '/auth/googleVerification'
-      fullPath: '/auth/googleVerification'
-      preLoaderRoute: typeof AuthGoogleVerificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth/forgot-password': {
       id: '/auth/forgot-password'
       path: '/auth/forgot-password'
       fullPath: '/auth/forgot-password'
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/connect-google': {
+      id: '/auth/connect-google'
+      path: '/auth/connect-google'
+      fullPath: '/auth/connect-google'
+      preLoaderRoute: typeof AuthConnectGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/server-funcs': {
@@ -869,12 +909,14 @@ const rootRouteChildren: RootRouteChildren = {
   ResumeReportRoute: ResumeReportRoute,
   SkillGapRoute: SkillGapRoute,
   UploadResumeRoute: UploadResumeRoute,
+  AuthConnectGoogleRoute: AuthConnectGoogleRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthGoogleVerificationRoute: AuthGoogleVerificationRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthOauthCallbackRoute: AuthOauthCallbackRoute,
   AuthPasswordRoute: AuthPasswordRoute,
   AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthRolesRoute: AuthRolesRoute,
+  AuthSetPasswordRoute: AuthSetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
   AuthVerificationRoute: AuthVerificationRoute,
   CompanyAddJobRoute: CompanyAddJobRoute,

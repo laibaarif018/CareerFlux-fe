@@ -1,7 +1,9 @@
+import { useLogout } from '@/hooks/useAuth'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 
 export default function UserHeader() {
+  const logout = useLogout()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
   const [hovering, setHovering] = useState(false)
@@ -19,40 +21,51 @@ export default function UserHeader() {
   }, [])
 
   const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...')
-    navigate({ to: '/auth/login' })
+    logout.mutate(undefined, {
+      onSuccess: () => {
+        console.log('Logged out successfully')
+        navigate({ to: '/auth/login' })
+      },
+      onError: (error) => {
+        console.error('Logout failed', error)
+      },
+    })
   }
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
       <div className="px-4 md:px-10 py-3 flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
-        <Link to="/dashboard" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
           <div className="flex items-center justify-center text-blue-600 dark:text-blue-400 w-8 h-8">
-            <span className="material-symbols-outlined text-3xl">smart_toy</span>
+            <span className="material-symbols-outlined text-3xl">
+              smart_toy
+            </span>
           </div>
           <h2 className="text-slate-900 dark:text-white text-xl font-bold tracking-tight">
             ResumeAI
           </h2>
         </Link>
-        
+
         {/* Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <nav className="flex gap-6">
-            <Link 
+            <Link
               to="/dashboard"
               className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
             >
               Dashboard
             </Link>
-            <Link 
+            <Link
               to="/jobs"
               className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
             >
               Jobs
             </Link>
-            <Link 
+            <Link
               to="/myResumes"
               className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
             >
@@ -60,7 +73,7 @@ export default function UserHeader() {
             </Link>
           </nav>
         </div>
-        
+
         {/* Right Side - Profile & Settings */}
         <div className="flex items-center gap-3">
           {/* Settings Icon */}
@@ -94,25 +107,33 @@ export default function UserHeader() {
               }`}
             >
               <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-700">
-                <p className="text-sm font-semibold text-slate-900 dark:text-white">Alex Johnson</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">alex@example.com</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Alex Johnson
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  alex@example.com
+                </p>
               </div>
-              
+
               <Link
                 to="/profile"
                 onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
-                <span className="material-symbols-outlined text-lg">person</span>
+                <span className="material-symbols-outlined text-lg">
+                  person
+                </span>
                 My Profile
               </Link>
 
               <div className="border-t border-slate-200 dark:border-slate-700 mt-1 pt-1">
-                <button 
+                <button
                   onClick={handleLogout}
                   className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-lg">logout</span>
+                  <span className="material-symbols-outlined text-lg">
+                    logout
+                  </span>
                   Logout
                 </button>
               </div>

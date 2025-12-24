@@ -1,205 +1,210 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/Header'
-
+import { useVerify } from '@/hooks/useAuth'
+import { PublicRoute } from '@/components/PRoutes'
 export const Route = createFileRoute('/auth/verification')({
-  component: OtpVerification,
+  validateSearch: (search: Record<string, unknown>) => ({
+    email: (search.email as string) || '',
+  }),
+
+  component: () => (
+    <PublicRoute>
+      <VerificationPage />
+    </PublicRoute>
+  ),
 })
-
-function OtpVerification() {
+function VerificationPage() {
   const navigate = useNavigate()
-  const [code, setCode] = useState(['', '', '', '', '', ''])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
-  const email = 'your.email@example.com' // Get from route params or context
+  const { email: searchEmail } = Route.useSearch()
+  const verify = useVerify()
 
-  const handleCodeChange = (index: number, value: string) => {
-    if (value.length > 1) return
-    if (!/^\d*$/.test(value)) return // Only allow digits
-    
+  const [code, setCode] = useState(['', '', '', '', '', ''])
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  // Get email from search params or localStorage
+  const email = searchEmail || localStorage.getItem('email') || ''
+
+  useEffect(() => {
+    // Focus first input on mount
+    inputRefs.current[0]?.focus()
+  }, [])
+
+  const handleChange = (index: number, value: string) => {
+    // Only allow numbers
+    if (value && !/^\d$/.test(value)) return
+
     const newCode = [...code]
     newCode[index] = value
     setCode(newCode)
 
     // Auto-focus next input
     if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`)
-      nextInput?.focus()
+      inputRefs.current[index + 1]?.focus()
     }
   }
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`)
-      prevInput?.focus()
+      inputRefs.current[index - 1]?.focus()
     }
   }
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault()
     const pastedData = e.clipboardData.getData('text').slice(0, 6)
-    if (!/^\d+$/.test(pastedData)) return
+    const digits = pastedData.split('').filter((char) => /^\d$/.test(char))
 
-    const newCode = [...code]
-    pastedData.split('').forEach((char, i) => {
-      if (i < 6) newCode[i] = char
-    })
-    setCode(newCode)
-    
-    // Focus last filled input or first empty
-    const lastIndex = Math.min(pastedData.length, 5)
-    document.getElementById(`otp-${lastIndex}`)?.focus()
+    if (digits.length > 0) {
+      const newCode = [...code]
+      digits.forEach((digit, i) => {
+        if (i < 6) newCode[i] = digit
+      })
+      setCode(newCode)
+
+      // Focus the next empty input or last input
+      const nextIndex = Math.min(digits.length, 5)
+      inputRefs.current[nextIndex]?.focus()
+    }
   }
 
-  const handleVerify = async () => {
+  const handleVerify = (e: React.FormEvent) => {
+    e.preventDefault()
+
     const verificationCode = code.join('')
-    
     if (verificationCode.length !== 6) {
-      setError('Please enter the complete 6-digit code')
       return
     }
 
-    setIsLoading(true)
-    setError('')
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Simulate verification (replace with actual logic)
-    if (verificationCode === '123456') {
-      setIsLoading(false)
-      navigate({ to: '/auth/roles' })
-    } else {
-      setIsLoading(false)
-      setError('Invalid verification code. Please try again.')
-      setCode(['', '', '', '', '', ''])
-      document.getElementById('otp-0')?.focus()
-    }
+    verify.mutate(
+      { email, code: verificationCode },
+      {
+        onSuccess: () => {
+          localStorage.removeItem('email')
+          navigate({ to: '/dashboard' })
+        },
+      },
+    )
   }
 
-  const handleResend = async () => {
-    setIsLoading(true)
-    setError('')
-    
-    // Simulate resending code
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    setCode(['', '', '', '', '', ''])
-    alert('New verification code sent to your email!')
-    document.getElementById('otp-0')?.focus()
+  const handleResendCode = () => {
+    // TODO: Implement resend code functionality
+    console.log('Resend code clicked')
   }
+
+  const isCodeComplete = code.every((digit) => digit !== '')
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 font-sans overflow-x-hidden transition-colors">
-      {/* HEADER */}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">
       <Header />
 
-      {/* MAIN */}
-      <main className="flex flex-1 justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
-          
-          <div className="flex flex-col items-center">
-            {/* Icon */}
-            <div className="mb-6 w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-4xl">
-                mail_lock
-              </span>
-            </div>
-
-            {/* Heading */}
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white text-center mb-3">
-              Verify Your Email
-            </h1>
-
-            <p className="text-center text-slate-600 dark:text-slate-400 text-sm mb-8 leading-relaxed">
-              We've sent a 6-digit verification code to{' '}
-              <strong className="text-slate-900 dark:text-white">
-                {email}
-              </strong>
-            </p>
-
-            {/* OTP INPUTS */}
-            <div className="w-full mb-6">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 text-center">
-                Enter Verification Code
-              </label>
-              <div className="flex justify-center gap-2">
-                {code.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`otp-${index}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleCodeChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    onPaste={handlePaste}
-                    className="w-12 h-14 text-center text-2xl font-bold text-slate-900 dark:text-white bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-                  />
-                ))}
+      <main className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-xl">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
+                <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">
+                  mail
+                </span>
               </div>
-              {error && (
-                <p className="text-red-600 dark:text-red-400 text-sm text-center mt-3 flex items-center justify-center gap-1">
-                  <span className="material-symbols-outlined text-base">error</span>
-                  {error}
-                </p>
-              )}
-            </div>
-
-            {/* BUTTONS */}
-            <div className="flex flex-col w-full gap-3 mb-6">
-              <button 
-                onClick={handleVerify}
-                disabled={isLoading || code.some(d => !d)}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <>
-                    <span className="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    <span className="material-symbols-outlined text-lg">check_circle</span>
-                    Verify Code
-                  </>
-                )}
-              </button>
-
-              <button 
-                onClick={handleResend}
-                disabled={isLoading}
-                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-lg">refresh</span>
-                Resend Code
-              </button>
-            </div>
-
-            {/* Info Box */}
-            <div className="w-full p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 mb-6">
-              <p className="text-xs text-blue-900 dark:text-blue-300 text-center">
-                Check your spam folder if you don't see the email. The code expires in 10 minutes.
+              <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
+                Check your email
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400">
+                We sent a verification code to
+              </p>
+              <p className="text-slate-900 dark:text-white font-semibold mt-1">
+                {email}
               </p>
             </div>
 
-            {/* FOOTER LINK */}
-            <Link
-              to="/auth/login"
-              className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
-            >
-              Back to Log In
-            </Link>
+            <form onSubmit={handleVerify} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 text-center">
+                  Enter verification code
+                </label>
+                <div className="flex gap-2 justify-center">
+                  {code.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {
+                        inputRefs.current[index] = el
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-colors"
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {verify.isError && (
+                <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
+                  <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
+                    error
+                  </span>
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {(verify.error as any)?.message ||
+                      'Invalid verification code. Please try again.'}
+                  </p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={!isCodeComplete || verify.isPending}
+                className="w-full h-12 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {verify.isPending ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-lg">
+                      progress_activity
+                    </span>
+                    Verifying...
+                  </>
+                ) : (
+                  'Verify Email'
+                )}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Didn't receive the code?{' '}
+                <button
+                  onClick={handleResendCode}
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                >
+                  Resend
+                </button>
+              </p>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+                Wrong email?{' '}
+                <button
+                  onClick={() => navigate({ to: '/auth/signup' })}
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                >
+                  Change email
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              This code will expire in 10 minutes
+            </p>
           </div>
         </div>
       </main>
-
-      {/* Security Footer */}
-      <div className="pb-8 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs">
-        <span className="material-symbols-outlined text-sm">verified_user</span>
-        <span>Secure 256-bit SSL Encrypted</span>
-      </div>
     </div>
   )
 }

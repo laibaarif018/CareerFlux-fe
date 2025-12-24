@@ -1,12 +1,32 @@
 import UserHeader from '@/components/UserHeader'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
+import { getAuthToken } from '@/utils/auth'
+import { useEffect } from 'react'
+import { ProtectedRoute } from '@/components/PRoutes'
 
 export const Route = createFileRoute('/dashboard')({
-  component: DashboardPage,
+  //  beforeLoad: () => {
+  //     const token = getAuthToken()
+  //     if (!token) {
+  //       throw redirect({
+  //         to: '/auth/login',
+  //       })
+  //     }
+  //   },
+  component: () => (
+    <ProtectedRoute>
+      <DashboardPage />
+    </ProtectedRoute>
+  )
 })
 
 function DashboardPage() {
   const navigate = useNavigate()
+  useEffect(() => {
+    if (!getAuthToken()) {
+      navigate({ to: '/auth/login' })
+    }
+  }, [navigate])
 
   // replace later with TanStack Query / API
   const stats = {
@@ -60,15 +80,29 @@ function DashboardPage() {
 
         {/* Stats */}
         <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <StatCard icon="description" label="Total Resumes" value={stats.totalResumes} />
-          <StatCard icon="star" label="Best Resume Score" value={stats.bestScore ?? '—'} />
-          <StatCard icon="bookmark" label="Saved Jobs Count" value={stats.savedJobs} />
+          <StatCard
+            icon="description"
+            label="Total Resumes"
+            value={stats.totalResumes}
+          />
+          <StatCard
+            icon="star"
+            label="Best Resume Score"
+            value={stats.bestScore ?? '—'}
+          />
+          <StatCard
+            icon="bookmark"
+            label="Saved Jobs Count"
+            value={stats.savedJobs}
+          />
         </div>
 
         {/* Activity */}
         <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
           <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              Recent Activity
+            </h3>
           </header>
 
           {/* Empty State */}
@@ -83,14 +117,17 @@ function DashboardPage() {
                 No activity yet
               </h4>
               <p className="mt-2 max-w-sm text-sm text-slate-600 dark:text-slate-400">
-                Upload your first resume to start analyzing and matching with jobs.
+                Upload your first resume to start analyzing and matching with
+                jobs.
               </p>
             </div>
             <button
               onClick={() => navigate({ to: '/uploadResume' })}
               className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-colors hover:bg-blue-700"
             >
-              <span className="material-symbols-outlined text-lg">upload_file</span>
+              <span className="material-symbols-outlined text-lg">
+                upload_file
+              </span>
               Upload Resume
             </button>
           </div>
@@ -128,15 +165,27 @@ function ActionButton({
 }
 
 // ---------------- STAT CARD ----------------
-function StatCard({ icon, label, value }: { icon: string; label: string; value: number | string }) {
+function StatCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: string
+  label: string
+  value: number | string
+}) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
         <span className="material-symbols-outlined text-3xl">{icon}</span>
       </div>
       <div>
-        <p className="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{label}</p>
+        <p className="text-3xl font-bold text-slate-900 dark:text-white">
+          {value}
+        </p>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+          {label}
+        </p>
       </div>
     </div>
   )
@@ -157,11 +206,17 @@ function ActivityItem({
   return (
     <li className="flex items-center gap-4 border-b border-slate-200 dark:border-slate-700 p-4 transition-colors last:border-b-0 hover:bg-slate-50 dark:hover:bg-slate-700/50">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700">
-        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">{icon}</span>
+        <span className="material-symbols-outlined text-slate-600 dark:text-slate-400">
+          {icon}
+        </span>
       </div>
       <div className="flex-1">
-        <p className="text-sm font-semibold text-slate-900 dark:text-white">{title}</p>
-        <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-white">
+          {title}
+        </p>
+        <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">
+          {subtitle}
+        </p>
       </div>
       <span className="text-sm text-slate-500 dark:text-slate-400">{time}</span>
     </li>
