@@ -1,18 +1,11 @@
 import UserHeader from '@/components/UserHeader'
-import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { getAuthToken } from '@/utils/auth'
 import { useEffect } from 'react'
 import { ProtectedRoute } from '@/components/PRoutes'
+import { useGetProfile } from '@/hooks/useUser'
 
 export const Route = createFileRoute('/dashboard')({
-  //  beforeLoad: () => {
-  //     const token = getAuthToken()
-  //     if (!token) {
-  //       throw redirect({
-  //         to: '/auth/login',
-  //       })
-  //     }
-  //   },
   component: () => (
     <ProtectedRoute>
       <DashboardPage />
@@ -22,11 +15,17 @@ export const Route = createFileRoute('/dashboard')({
 
 function DashboardPage() {
   const navigate = useNavigate()
+  const { data } = useGetProfile()
+  
   useEffect(() => {
     if (!getAuthToken()) {
       navigate({ to: '/auth/login' })
     }
   }, [navigate])
+
+  // Get user name
+  const userName = data?.payload?.user?.name || 'User'
+  const firstName = userName.split(' ')[0]
 
   // replace later with TanStack Query / API
   const stats = {
@@ -36,7 +35,7 @@ function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       {/* Header */}
       <UserHeader />
 
@@ -45,10 +44,10 @@ function DashboardPage() {
         {/* Welcome + Actions */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
-              Welcome back, Alex!
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white" style={{ letterSpacing: '-0.01em' }}>
+              Welcome back, {firstName}!
             </h2>
-            <p className="mt-1 text-slate-600 dark:text-slate-400">
+            <p className="mt-1 text-slate-600 dark:text-slate-400 font-normal">
               Here's what's happening with your career journey today.
             </p>
           </div>
@@ -100,7 +99,7 @@ function DashboardPage() {
         {/* Activity */}
         <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
           <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white" style={{ letterSpacing: '-0.01em' }}>
               Recent Activity
             </h3>
           </header>
@@ -116,14 +115,14 @@ function DashboardPage() {
               <h4 className="text-lg font-semibold text-slate-900 dark:text-white">
                 No activity yet
               </h4>
-              <p className="mt-2 max-w-sm text-sm text-slate-600 dark:text-slate-400">
+              <p className="mt-2 max-w-sm text-sm text-slate-600 dark:text-slate-400 font-normal">
                 Upload your first resume to start analyzing and matching with
                 jobs.
               </p>
             </div>
             <button
               onClick={() => navigate({ to: '/uploadResume' })}
-              className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-colors hover:bg-blue-700"
+              className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-[#0E7C8C] px-5 text-sm font-semibold text-white shadow-lg shadow-[#0E7C8C]/20 transition-colors hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90"
             >
               <span className="material-symbols-outlined text-lg">
                 upload_file
@@ -154,8 +153,8 @@ function ActionButton({
       onClick={onClick}
       className={
         primary
-          ? 'inline-flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition-colors hover:bg-blue-700'
-          : 'inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 text-sm font-bold text-slate-900 dark:text-white transition-colors hover:bg-slate-50 dark:hover:bg-slate-700'
+          ? 'inline-flex h-10 items-center gap-2 rounded-lg bg-[#0E7C8C] px-4 text-sm font-semibold text-white shadow-lg shadow-[#0E7C8C]/20 transition-colors hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90'
+          : 'inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 text-sm font-semibold text-slate-900 dark:text-white transition-colors hover:bg-slate-50 dark:hover:bg-slate-700'
       }
     >
       <span className="material-symbols-outlined text-lg">{icon}</span>
@@ -176,14 +175,14 @@ function StatCard({
 }) {
   return (
     <div className="flex items-center gap-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400">
+      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/30 text-[#0E7C8C] dark:text-[#3EC3BC]">
         <span className="material-symbols-outlined text-3xl">{icon}</span>
       </div>
       <div>
         <p className="text-3xl font-bold text-slate-900 dark:text-white">
           {value}
         </p>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 font-normal">
           {label}
         </p>
       </div>
@@ -214,11 +213,11 @@ function ActivityItem({
         <p className="text-sm font-semibold text-slate-900 dark:text-white">
           {title}
         </p>
-        <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-400 font-normal">
           {subtitle}
         </p>
       </div>
-      <span className="text-sm text-slate-500 dark:text-slate-400">{time}</span>
+      <span className="text-sm text-slate-500 dark:text-slate-400 font-normal">{time}</span>
     </li>
   )
 }

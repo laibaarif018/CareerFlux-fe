@@ -70,7 +70,7 @@ function ForgotPassword() {
   const hasError = Boolean(error || forgotPassword.isError)
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-sans transition-colors">
+    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       <Header />
 
       {/* Main Content */}
@@ -78,7 +78,7 @@ function ForgotPassword() {
         <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
           {/* Icon */}
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <div className="w-16 h-16 rounded-full bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/30 flex items-center justify-center text-[#0E7C8C] dark:text-[#3EC3BC]">
               <span className="material-symbols-outlined text-4xl">
                 lock_reset
               </span>
@@ -86,10 +86,10 @@ function ForgotPassword() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-3xl font-bold text-center mb-3 text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-extrabold text-center mb-3 text-slate-900 dark:text-white" style={{ letterSpacing: '-0.01em' }}>
             Forgot Password?
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm text-center mb-8 leading-relaxed">
+          <p className="text-slate-600 dark:text-slate-400 text-sm text-center mb-8 leading-relaxed font-normal">
             Enter your email address and we'll send you a verification code to
             reset your password.
           </p>
@@ -114,10 +114,10 @@ function ForgotPassword() {
                   value={email}
                   onChange={handleEmailChange}
                   onBlur={() => setTouched(true)}
-                  className={`w-full h-12 pl-12 pr-4 text-sm rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none transition-colors ${
+                  className={`w-full h-12 pl-12 pr-4 text-sm rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none transition-colors font-normal ${
                     hasError
                       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
-                      : 'border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600'
+                      : 'border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
                   }`}
                 />
               </div>
@@ -129,7 +129,7 @@ function ForgotPassword() {
                 <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
                   error
                 </span>
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-sm text-red-600 dark:text-red-400 font-normal">
                   {error ||
                     (forgotPassword.error as any)?.response?.data?.message ||
                     'Failed to send verification code. Please try again.'}
@@ -140,7 +140,7 @@ function ForgotPassword() {
             <button
               type="submit"
               disabled={forgotPassword.isPending}
-              className="flex w-full items-center justify-center gap-2 h-12 px-5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold rounded-lg shadow-lg shadow-blue-600/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex w-full items-center justify-center gap-2 h-12 px-5 bg-[#0E7C8C] hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 text-white font-semibold rounded-lg shadow-lg shadow-[#0E7C8C]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {forgotPassword.isPending ? (
                 <>
@@ -162,12 +162,12 @@ function ForgotPassword() {
 
           {/* Footer */}
           <div className="mt-8 text-center border-t border-slate-200 dark:border-slate-700 pt-6">
-            <p className="text-sm text-slate-600 dark:text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
               Remember your password?{' '}
               <button
                 type="button"
                 onClick={() => navigate({ to: '/auth/login' })}
-                className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 hover:underline transition-colors"
+                className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] hover:underline transition-colors"
               >
                 Log in
               </button>
@@ -177,11 +177,13 @@ function ForgotPassword() {
       </div>
 
       {/* Security Footer */}
-      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4">
+      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4 font-normal">
         <span className="material-symbols-outlined text-sm">verified_user</span>
         <span>Secure 256-bit SSL Encrypted</span>
       </div>
     </div>
   )
 }
-             
+
+
+

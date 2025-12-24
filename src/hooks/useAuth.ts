@@ -1,89 +1,97 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { authService } from '../services/auth.service'
+import type {
+  ILogin,
+  ISignup,
+  IVerify,
+  IForgotPassword,
+  IResetPassword,
+  ISetPassword,
+  IConnectGoogle,
+} from '../services/auth.service'
 
-// src/hooks/useAuth.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authService } from '../services/auth.service';
-import type { ILogin, ISignup, IVerify, IForgotPassword, IResetPassword,ISetPassword,IConnectGoogle } from '../services/auth.service';
 
 export function useCheckEmail() {
   return useMutation({
     mutationFn: (email: string) => authService.checkEmail(email),
-  });
+  })
 }
 
 export function useLogin() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (credentials: ILogin) => authService.login(credentials),
     onSuccess: () => {
       // Invalidate and refetch user data
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
     },
-  });
+  })
 }
 
 export function useLogout() {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: () => authService.logout(),
     onSuccess: () => {
       // Clear all queries
-      queryClient.clear();
+      queryClient.clear()
     },
-  });
+  })
 }
 
 export function useSignup() {
   return useMutation({
     mutationFn: (userData: ISignup) => authService.signup(userData),
-  });
+  })
 }
 
 export function useVerify() {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (verifyData: IVerify) => authService.verify(verifyData),
     onSuccess: () => {
       // Invalidate and refetch user data
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
     },
-  });
+  })
 }
 
 export function useForgotPassword() {
   return useMutation({
-    mutationFn: (payload: IForgotPassword) => authService.forgotPassword(payload),
-  });
+    mutationFn: (payload: IForgotPassword) =>
+      authService.forgotPassword(payload),
+  })
 }
 
 export function useResetPassword() {
   return useMutation({
     mutationFn: (payload: IResetPassword) => authService.resetPassword(payload),
-  });
+  })
 }
 
 export function useRole() {
-  const queryClient = useQueryClient();
-  
+  const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (role: string) => authService.setRole(role),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUser'] });
+      queryClient.invalidateQueries({ queryKey: ['currentUser'] })
     },
-  });
+  })
 }
 
 export function useSetPassword() {
   return useMutation({
     mutationFn: (password: ISetPassword) => authService.setPassword(password),
-  });
+  })
 }
 
-export function useConnetGoogle(){
+export function useConnetGoogle() {
   return useMutation({
-    mutationFn:(payload:IConnectGoogle)=>authService.connectGoogle(payload),
-  });
+    mutationFn: (payload: IConnectGoogle) => authService.connectGoogle(payload),
+  })
 }
 
 export function useCurrentUser() {
@@ -92,5 +100,5 @@ export function useCurrentUser() {
     queryFn: () => authService.getCurrentUser(),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+  })
 }

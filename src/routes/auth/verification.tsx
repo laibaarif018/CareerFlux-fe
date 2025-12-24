@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/Header'
 import { useVerify } from '@/hooks/useAuth'
 import { PublicRoute } from '@/components/PRoutes'
+
 export const Route = createFileRoute('/auth/verification')({
   validateSearch: (search: Record<string, unknown>) => ({
     email: (search.email as string) || '',
@@ -14,6 +15,7 @@ export const Route = createFileRoute('/auth/verification')({
     </PublicRoute>
   ),
 })
+
 function VerificationPage() {
   const navigate = useNavigate()
   const { email: searchEmail } = Route.useSearch()
@@ -81,7 +83,7 @@ function VerificationPage() {
       {
         onSuccess: () => {
           localStorage.removeItem('email')
-          navigate({ to: '/dashboard' })
+          navigate({ to: '/profile' })
         },
       },
     )
@@ -95,22 +97,22 @@ function VerificationPage() {
   const isCodeComplete = code.every((digit) => digit !== '')
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       <Header />
 
       <main className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-xl">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4">
-                <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#3EC3BC]/20 dark:bg-[#3EC3BC]/10 mb-4">
+                <span className="material-symbols-outlined text-[#0E7C8C] dark:text-[#3EC3BC] text-3xl">
                   mail
                 </span>
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">
+              <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2" style={{ letterSpacing: '-0.01em' }}>
                 Check your email
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-slate-600 dark:text-slate-400 font-normal">
                 We sent a verification code to
               </p>
               <p className="text-slate-900 dark:text-white font-semibold mt-1">
@@ -137,7 +139,7 @@ function VerificationPage() {
                       onChange={(e) => handleChange(index, e.target.value)}
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       onPaste={handlePaste}
-                      className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 transition-colors"
+                      className="w-12 h-14 text-center text-2xl font-bold rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20 transition-colors"
                     />
                   ))}
                 </div>
@@ -148,7 +150,7 @@ function VerificationPage() {
                   <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
                     error
                   </span>
-                  <p className="text-sm text-red-600 dark:text-red-400">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-normal">
                     {(verify.error as any)?.message ||
                       'Invalid verification code. Please try again.'}
                   </p>
@@ -158,7 +160,7 @@ function VerificationPage() {
               <button
                 type="submit"
                 disabled={!isCodeComplete || verify.isPending}
-                className="w-full h-12 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full h-12 rounded-lg bg-[#0E7C8C] text-white font-semibold hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors shadow-lg shadow-[#0E7C8C]/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {verify.isPending ? (
                   <>
@@ -174,11 +176,11 @@ function VerificationPage() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
                 Didn't receive the code?{' '}
                 <button
                   onClick={handleResendCode}
-                  className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors"
                 >
                   Resend
                 </button>
@@ -186,11 +188,11 @@ function VerificationPage() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+              <p className="text-center text-sm text-slate-600 dark:text-slate-400 font-normal">
                 Wrong email?{' '}
                 <button
                   onClick={() => navigate({ to: '/auth/signup' })}
-                  className="text-blue-600 dark:text-blue-400 font-semibold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors"
                 >
                   Change email
                 </button>
@@ -199,7 +201,7 @@ function VerificationPage() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">
               This code will expire in 10 minutes
             </p>
           </div>

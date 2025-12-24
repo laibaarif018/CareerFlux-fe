@@ -119,19 +119,19 @@ function ResetPassword() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900">
+    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       <Header />
 
       <div className="flex h-full grow flex-col justify-center items-center p-4 py-12">
         <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3" style={{ letterSpacing: '-0.01em' }}>
               Reset Password
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-normal">
               A secure code has been sent to{' '}
-              <strong className="text-slate-700 dark:text-slate-300">
+              <strong className="text-slate-700 dark:text-slate-300 font-semibold">
                 {email}
               </strong>
               . Enter the code and your new password below.
@@ -155,7 +155,7 @@ function ResetPassword() {
                     value={digit}
                     onChange={(e) => handleCodeChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-14 text-center text-xl font-semibold border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-800 outline-none transition-all"
+                    className="w-12 h-14 text-center text-xl font-semibold border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none transition-all"
                   />
                 ))}
               </div>
@@ -174,12 +174,12 @@ function ResetPassword() {
                   onChange={(e) =>
                     handlePasswordChange('newPassword', e.target.value)
                   }
-                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder-slate-400 dark:placeholder:text-slate-500"
+                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C] outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal"
                 />
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
                 >
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -199,12 +199,12 @@ function ResetPassword() {
                   onChange={(e) =>
                     handlePasswordChange('confirmPassword', e.target.value)
                   }
-                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none placeholder-slate-400 dark:placeholder:text-slate-500"
+                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C] outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={20} />
@@ -217,7 +217,7 @@ function ResetPassword() {
               {/* Password Match Indicator */}
               {confirmPassword && (
                 <p
-                  className={`text-xs mt-2 ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
+                  className={`text-xs mt-2 font-medium ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
                 >
                   {passwordsMatch
                     ? '✓ Passwords match'
@@ -235,11 +235,11 @@ function ResetPassword() {
                   <Circle size={16} className="text-slate-300" />
                 )}
                 <span
-                  className={
+                  className={`font-normal ${
                     hasMinLength
                       ? 'text-green-600 dark:text-green-400'
                       : 'text-slate-500 dark:text-slate-400'
-                  }
+                  }`}
                 >
                   8+ characters
                 </span>
@@ -251,11 +251,11 @@ function ResetPassword() {
                   <Circle size={16} className="text-slate-300" />
                 )}
                 <span
-                  className={
+                  className={`font-normal ${
                     hasUppercase
                       ? 'text-green-600 dark:text-green-400'
                       : 'text-slate-500 dark:text-slate-400'
-                  }
+                  }`}
                 >
                   1 uppercase letter
                 </span>
@@ -267,11 +267,11 @@ function ResetPassword() {
                   <Circle size={16} className="text-slate-300" />
                 )}
                 <span
-                  className={
+                  className={`font-normal ${
                     hasNumber
                       ? 'text-green-600 dark:text-green-400'
                       : 'text-slate-500 dark:text-slate-400'
-                  }
+                  }`}
                 >
                   1 number
                 </span>
@@ -283,11 +283,11 @@ function ResetPassword() {
                   <Circle size={16} className="text-slate-300" />
                 )}
                 <span
-                  className={
+                  className={`font-normal ${
                     hasSpecialChar
                       ? 'text-green-600 dark:text-green-400'
                       : 'text-slate-500 dark:text-slate-400'
-                  }
+                  }`}
                 >
                   1 special character
                 </span>
@@ -300,7 +300,7 @@ function ResetPassword() {
                 <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
                   error
                 </span>
-                <p className="text-sm text-red-600 dark:text-red-400">
+                <p className="text-sm text-red-600 dark:text-red-400 font-normal">
                   {(resetPassword.error as any)?.response?.data?.message ||
                     'Failed to reset password. Please try again.'}
                 </p>
@@ -316,7 +316,7 @@ function ResetPassword() {
                 !passwordsMatch ||
                 !codeComplete
               }
-              className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm mb-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[#0E7C8C] text-white font-semibold rounded-lg hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors shadow-lg shadow-[#0E7C8C]/20 mb-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {resetPassword.isPending ? (
                 <>
@@ -333,13 +333,13 @@ function ResetPassword() {
 
           {/* Sign In Link */}
           <div className="text-center text-sm border-t border-slate-200 dark:border-slate-700 pt-4">
-            <span className="text-slate-500 dark:text-slate-400">
+            <span className="text-slate-500 dark:text-slate-400 font-normal">
               Remember your password?{' '}
             </span>
             <button
               type="button"
               onClick={() => navigate({ to: '/auth/login' })}
-              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold"
+              className="text-[#0E7C8C] dark:text-[#3EC3BC] hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] font-semibold transition-colors"
             >
               Sign In
             </button>
@@ -348,7 +348,7 @@ function ResetPassword() {
       </div>
 
       {/* Security Footer */}
-      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4">
+      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4 font-normal">
         <span className="material-symbols-outlined text-sm">verified_user</span>
         <span>Secure 256-bit SSL Encrypted</span>
       </div>

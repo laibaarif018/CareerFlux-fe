@@ -42,7 +42,7 @@ function SelectRole() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 font-sans overflow-x-hidden transition-colors">
+    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 overflow-x-hidden transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       <Header />
       <div className="flex h-full grow flex-col">
         <div className="flex flex-1 justify-center items-center px-4 py-12">
@@ -50,10 +50,10 @@ function SelectRole() {
             <div className="rounded-2xl bg-white dark:bg-slate-800 p-8 md:p-10 shadow-xl border border-slate-200 dark:border-slate-700">
               {/* Header */}
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3" style={{ letterSpacing: '-0.01em' }}>
                   What describes you best?
                 </h1>
-                <p className="text-base text-slate-600 dark:text-slate-400">
+                <p className="text-base text-slate-600 dark:text-slate-400 font-normal">
                   Select your role to personalize your experience.
                 </p>
               </div>
@@ -67,21 +67,21 @@ function SelectRole() {
                   className={`flex flex-1 flex-col items-center justify-center gap-4 rounded-xl border-2 p-8 text-base font-semibold cursor-pointer transition-all duration-200 hover:shadow-lg
                     ${
                       selectedRole === 'jobseeker'
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-600/20 shadow-md'
+                        ? 'border-[#0E7C8C] bg-[#3EC3BC]/10 dark:bg-[#0E7C8C]/20 ring-2 ring-[#0E7C8C]/20 shadow-md'
                         : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                     }`}
                 >
                   <div
                     className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
                       selectedRole === 'jobseeker'
-                        ? 'bg-blue-100 dark:bg-blue-900/50'
+                        ? 'bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/50'
                         : 'bg-slate-100 dark:bg-slate-700'
                     }`}
                   >
                     <span
                       className={`material-symbols-outlined text-4xl ${
                         selectedRole === 'jobseeker'
-                          ? 'text-blue-600 dark:text-blue-400'
+                          ? 'text-[#0E7C8C] dark:text-[#3EC3BC]'
                           : 'text-slate-600 dark:text-slate-400'
                       }`}
                     >
@@ -91,7 +91,7 @@ function SelectRole() {
                   <span
                     className={`${
                       selectedRole === 'jobseeker'
-                        ? 'text-blue-700 dark:text-blue-300'
+                        ? 'text-[#0E7C8C] dark:text-[#3EC3BC]'
                         : 'text-slate-700 dark:text-slate-300'
                     }`}
                   >
@@ -111,21 +111,21 @@ function SelectRole() {
                   className={`flex flex-1 flex-col items-center justify-center gap-4 rounded-xl border-2 p-8 text-base font-semibold cursor-pointer transition-all duration-200 hover:shadow-lg
                     ${
                       selectedRole === 'company'
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-600/20 shadow-md'
+                        ? 'border-[#0E7C8C] bg-[#3EC3BC]/10 dark:bg-[#0E7C8C]/20 ring-2 ring-[#0E7C8C]/20 shadow-md'
                         : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'
                     }`}
                 >
                   <div
                     className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
                       selectedRole === 'company'
-                        ? 'bg-blue-100 dark:bg-blue-900/50'
+                        ? 'bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/50'
                         : 'bg-slate-100 dark:bg-slate-700'
                     }`}
                   >
                     <span
                       className={`material-symbols-outlined text-4xl ${
                         selectedRole === 'company'
-                          ? 'text-blue-600 dark:text-blue-400'
+                          ? 'text-[#0E7C8C] dark:text-[#3EC3BC]'
                           : 'text-slate-600 dark:text-slate-400'
                       }`}
                     >
@@ -135,7 +135,7 @@ function SelectRole() {
                   <span
                     className={`${
                       selectedRole === 'company'
-                        ? 'text-blue-700 dark:text-blue-300'
+                        ? 'text-[#0E7C8C] dark:text-[#3EC3BC]'
                         : 'text-slate-700 dark:text-slate-300'
                     }`}
                   >
@@ -158,7 +158,7 @@ function SelectRole() {
                   <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
                     error
                   </span>
-                  <p className="text-sm text-red-600 dark:text-red-400">
+                  <p className="text-sm text-red-600 dark:text-red-400 font-normal">
                     {(role.error as any)?.response?.data?.message ||
                       'Failed to save your role. Please try again.'}
                   </p>
@@ -169,10 +169,10 @@ function SelectRole() {
               <button
                 onClick={handleContinue}
                 disabled={!selectedRole || role.isPending}
-                className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 h-12 text-base font-bold text-white transition-all shadow-lg
+                className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 h-12 text-base font-semibold text-white transition-all shadow-lg
                   ${
                     selectedRole && !role.isPending
-                      ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-blue-600/20 cursor-pointer'
+                      ? 'bg-[#0E7C8C] hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 shadow-[#0E7C8C]/20 cursor-pointer'
                       : 'bg-slate-300 dark:bg-slate-700 cursor-not-allowed opacity-50'
                   }`}
               >
@@ -190,7 +190,7 @@ function SelectRole() {
 
               {/* Helper text */}
               {!selectedRole && (
-                <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-4">
+                <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-4 font-normal">
                   Please select a role to continue
                 </p>
               )}

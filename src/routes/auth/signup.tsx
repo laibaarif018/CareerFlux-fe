@@ -358,7 +358,8 @@ function SignUpPage() {
                       onChange={(e) =>
                         handleInputChange('agreedToTerms', e.target.checked)
                       }
-                      className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-2 focus:ring-blue-600/20"
+                      className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 
+text-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20"
                     />
                     <span>I agree to the Terms & Privacy Policy</span>
                   </label>
@@ -384,7 +385,7 @@ function SignUpPage() {
                 <button
                   type="submit"
                   disabled={signup.isPending}
-                  className="w-full h-11 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full h-11 rounded-lg bg-[#0E7C8C] text-white font-bold hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-[#0E7C8C]/25"
                 >
                   {signup.isPending ? (
                     <>
@@ -403,7 +404,7 @@ function SignUpPage() {
                 Already have an account?{' '}
                 <Link
                   to="/auth/login"
-                  className="text-blue-600 dark:text-blue-400 font-bold hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  className="text-[#0E7C8C] font-bold hover:text-[#3EC3BC]"
                 >
                   Log in
                 </Link>

@@ -26,7 +26,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="relative flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">
+    <div className="relative flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
       {/* Header */}
       <Header />
 
@@ -38,14 +38,14 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col gap-6 text-center lg:text-left">
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.02em' }}>
                   Optimize Your Resume & Find Your{' '}
                   <span className="bg-clip-text text-transparent font-extrabold"
                         style={{ backgroundImage: 'linear-gradient(90deg, #3B4DA5, #3EC3BC)' }}>
                     Dream Job
                   </span>
                 </h1>
-                <p className="text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed tracking-wide">
+                <p className="text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal" style={{ letterSpacing: '0.01em' }}>
                   Get instant feedback on your CV, beat the ATS, and get matched with jobs that fit your unique skills perfectly using our advanced AI.
                 </p>
               </div>
@@ -54,7 +54,7 @@ export default function HomePage() {
                 <label className="flex flex-col w-full h-16 relative cursor-pointer group">
                   <div className="absolute inset-0 flex items-center pl-4 pr-36 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 group-hover:border-[#0E7C8C] transition-colors">
                     <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 mr-3">upload_file</span>
-                    <span className="text-slate-500 dark:text-slate-400 text-sm truncate pr-2">
+                    <span className="text-slate-500 dark:text-slate-400 text-sm truncate pr-2 font-medium">
                       {fileName || 'Drop your resume (PDF, DOCX)'}
                     </span>
                   </div>
@@ -68,7 +68,7 @@ export default function HomePage() {
                   <div className="absolute right-2 top-2 bottom-2">
                     <button
                       onClick={handleAnalyze}
-                      className="h-full px-6 bg-[#0E7C8C] hover:bg-[#3EC3BC] text-white rounded-md text-sm font-bold shadow-md transition-all"
+                      className="h-full px-6 bg-[#0E7C8C] hover:bg-[#3EC3BC] text-white rounded-md text-sm font-semibold shadow-md transition-all tracking-wide"
                     >
                       Analyze
                     </button>
@@ -95,7 +95,7 @@ export default function HomePage() {
                     <span className="material-symbols-outlined">trending_up</span>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase">Resume Score</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Resume Score</p>
                     <p className="text-xl font-bold text-slate-900 dark:text-white">94/100</p>
                   </div>
                 </div>
@@ -110,8 +110,8 @@ export default function HomePage() {
         <section id="features" className="py-16 bg-white dark:bg-slate-800">
           <div className="max-w-6xl mx-auto px-4 md:px-10">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Why Choose ResumeAI?</h2>
-              <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto tracking-wide">
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4" style={{ letterSpacing: '-0.01em' }}>Why Choose CareerFlux?</h2>
+              <p className="text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
                 We use advanced natural language processing to read your resume exactly like a recruiter would.
               </p>
             </div>
@@ -122,8 +122,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-lg bg-[#0E7C8C]/20 dark:bg-[#0E7C8C]/40 flex items-center justify-center text-[#0E7C8C] dark:text-[#3EC3BC] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-3xl">fact_check</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">ATS Scoring</h3>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed tracking-wide">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">ATS Scoring</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                   Identify if your resume is readable by Applicant Tracking Systems used by 99% of Fortune 500 companies.
                 </p>
               </div>
@@ -133,8 +133,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-lg bg-[#3EC3BC]/20 dark:bg-[#3EC3BC]/40 flex items-center justify-center text-[#3EC3BC] dark:text-[#0E7C8C] mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-3xl">psychology</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Smart Keywords</h3>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed tracking-wide">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Smart Keywords</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                   Get suggestions for high-impact action verbs and industry-specific keywords missing from your profile.
                 </p>
               </div>
@@ -144,8 +144,8 @@ export default function HomePage() {
                 <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/50 flex items-center justify-center text-green-600 dark:text-green-400 mb-6 group-hover:scale-110 transition-transform">
                   <span className="material-symbols-outlined text-3xl">handshake</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Job Matching</h3>
-                <p className="text-slate-600 dark:text-slate-300 leading-relaxed tracking-wide">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Job Matching</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
                   We scan thousands of live job listings to match your optimized resume with roles that fit you perfectly.
                 </p>
               </div>
@@ -157,9 +157,9 @@ export default function HomePage() {
         <section id="how-it-works" className="py-20 bg-slate-50 dark:bg-slate-900 overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 md:px-10 relative">
             <div className="text-center max-w-3xl mx-auto mb-16">
-              <span className="text-[#0E7C8C] dark:text-[#3EC3BC] font-bold tracking-wider uppercase text-xs mb-3 block">Simple Process</span>
-              <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white mb-6">From Resume to Hired in 3 Steps</h2>
-              <p className="text-lg text-slate-600 dark:text-slate-300 tracking-wide">
+              <span className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold tracking-widest uppercase text-xs mb-3 block">Simple Process</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-6" style={{ letterSpacing: '-0.01em' }}>From Resume to Hired in 3 Steps</h2>
+              <p className="text-base text-slate-600 dark:text-slate-300 font-normal leading-relaxed">
                 Stop guessing what recruiters want. Our AI-driven process guides you from your first upload to your final interview with data-backed precision.
               </p>
             </div>
@@ -174,8 +174,8 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-5xl text-[#0E7C8C]">upload_file</span>
                   <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#0E7C8C] text-white rounded-full flex items-center justify-center font-bold shadow-md border-2 border-white dark:border-slate-800">1</div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Upload Your Resume</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed tracking-wide px-4">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Upload Your Resume</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal px-4">
                   Drag & drop your CV (PDF/DOCX). We instantly parse your skills and experience securely.
                 </p>
               </div>
@@ -186,8 +186,8 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-5xl text-[#3EC3BC]">smart_toy</span>
                   <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#0E7C8C] text-white rounded-full flex items-center justify-center font-bold shadow-md border-2 border-white dark:border-slate-800">2</div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">AI Analysis & Scoring</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed tracking-wide px-4">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">AI Analysis & Scoring</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal px-4">
                   Our deep learning model evaluates 50+ data points to score your resume against ATS standards.
                 </p>
               </div>
@@ -198,15 +198,15 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-5xl text-[#0E7C8C]">work_history</span>
                   <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#0E7C8C] text-white rounded-full flex items-center justify-center font-bold shadow-md border-2 border-white dark:border-slate-800">3</div>
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">Get Matched & Hired</h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed tracking-wide px-4">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">Get Matched & Hired</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal px-4">
                   Unlock a personalized list of active job openings that perfectly match your optimized profile.
                 </p>
               </div>
             </div>
 
             <div className="mt-16 text-center">
-              <button className="inline-flex items-center gap-2 text-[#0E7C8C] dark:text-[#3EC3BC] font-bold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors border-b-2 border-[#0E7C8C]/20 hover:border-[#0E7C8C] pb-0.5">
+              <button className="inline-flex items-center gap-2 text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors border-b-2 border-[#0E7C8C]/20 hover:border-[#0E7C8C] pb-0.5">
                 See a sample analysis report
                 <span className="material-symbols-outlined text-sm">arrow_forward</span>
               </button>
@@ -214,91 +214,164 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Testimonials Section */}
+        <section className="py-20 bg-white dark:bg-slate-800">
+          <div className="max-w-6xl mx-auto px-4 md:px-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-12 text-center" style={{ letterSpacing: '-0.01em' }}>Success Stories</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Testimonial 1 */}
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                <div className="flex gap-1 text-yellow-400 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-sm">star</span>
+                  ))}
+                </div>
+                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-6 italic font-normal">
+                  "I was applying for months with no response. After using CareerFlux to optimize my keywords, I got 3 callbacks in one week!"
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3EC3BC] to-[#0E7C8C] flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-lg">person</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Sarah Jenkins</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">Marketing Manager</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Testimonial 2 */}
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow">
+                <div className="flex gap-1 text-yellow-400 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-sm">star</span>
+                  ))}
+                </div>
+                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-6 italic font-normal">
+                  "The job matching feature is incredible. It didn't just find random jobs, it found roles that actually fit my career trajectory."
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#3B4DA5] to-[#0E7C8C] flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-lg">person</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">David Chen</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">Software Engineer</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Testimonial 3 */}
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-shadow hidden lg:block">
+                <div className="flex gap-1 text-yellow-400 mb-4">
+                  {[...Array(4)].map((_, i) => (
+                    <span key={i} className="material-symbols-outlined text-sm">star</span>
+                  ))}
+                  <span className="material-symbols-outlined text-sm">star_half</span>
+                </div>
+                <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-6 italic font-normal">
+                  "Simple, fast, and effective. The initial score was a wake-up call, but the actionable tips helped me fix it in minutes."
+                </p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-white text-lg">person</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Elena Rodriguez</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-normal">Product Designer</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section className="py-20 bg-[#0E7C8C] text-white">
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Land Your Dream Job?</h2>
-            <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto tracking-wide">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6" style={{ letterSpacing: '-0.01em' }}>Ready to Land Your Dream Job?</h2>
+            <p className="text-white/90 text-base md:text-lg mb-8 max-w-xl mx-auto font-normal leading-relaxed">
               Join 50,000+ job seekers who have optimized their resumes with AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => document.getElementById('resume-upload')?.click()}
-                className="px-8 py-3 bg-[#3EC3BC] text-[#0E7C8C] font-bold rounded-lg hover:bg-[#0E7C8C] hover:text-white transition-colors shadow-lg"
+                className="px-8 py-3 bg-[#3EC3BC] text-[#0E7C8C] font-semibold rounded-lg hover:bg-[#0E7C8C] hover:text-white transition-colors shadow-lg"
               >
                 Upload Resume Now
               </button>
-              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-lg hover:bg-white/10 transition-colors">
+              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
                 View Sample Report
               </button>
             </div>
           </div>
         </section>
       </main>
+
       {/* Footer */}
-<footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 font-sans">
-  <div className="max-w-7xl mx-auto px-4 md:px-10">
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-      {/* Brand */}
-      <div className="col-span-2 md:col-span-1">
-        <div className="flex items-center gap-2 mb-4 text-white">
-          <span className="material-symbols-outlined text-[#3EC3BC]">smart_toy</span>
-          <span className="font-bold text-lg tracking-tight" style={{ background: 'linear-gradient(90deg, #3B4DA5, #3EC3BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>areerFlux</span>
+      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 md:px-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-4 text-white">
+                <span className="material-symbols-outlined text-[#3EC3BC]">smart_toy</span>
+                <span className="font-bold text-lg" style={{ background: 'linear-gradient(90deg, #3B4DA5, #3EC3BC)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em' }}>CareerFlux</span>
+              </div>
+              <p className="text-sm leading-relaxed font-normal">
+                AI-powered tools to help you build a better resume and find the perfect job faster.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Product</h4>
+              <ul className="space-y-2 text-sm font-normal">
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Resume Checker</Link></li>
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Job Matcher</Link></li>
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Cover Letter Gen</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Resources</h4>
+              <ul className="space-y-2 text-sm font-normal">
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Blog</Link></li>
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Career Advice</Link></li>
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Resume Examples</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold text-white mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm font-normal">
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Privacy Policy</Link></li>
+                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs font-normal">© 2023 CareerFlux Inc. All rights reserved.</p>
+            <div className="flex gap-4">
+              <Link to="#" className="text-slate-400 hover:text-[#3EC3BC] transition-colors" aria-label="Twitter">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
+                </svg>
+              </Link>
+              <Link to="#" className="text-slate-400 hover:text-[#3EC3BC] transition-colors" aria-label="LinkedIn">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
+                </svg>
+              </Link>
+            </div>
+          </div>
         </div>
-        <p className="text-sm leading-relaxed tracking-wide">
-          AI-powered tools to help you build a better resume and find the perfect job faster.
-        </p>
-      </div>
-
-      {/* Product */}
-      <div>
-        <h4 className="font-bold text-white mb-4 tracking-wide">Product</h4>
-        <ul className="space-y-2 text-sm">
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Resume Checker</Link></li>
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Job Matcher</Link></li>
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Cover Letter Gen</Link></li>
-        </ul>
-      </div>
-
-      {/* Resources */}
-      <div>
-        <h4 className="font-bold text-white mb-4 tracking-wide">Resources</h4>
-        <ul className="space-y-2 text-sm">
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Blog</Link></li>
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Career Advice</Link></li>
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Resume Examples</Link></li>
-        </ul>
-      </div>
-
-      {/* Legal */}
-      <div>
-        <h4 className="font-bold text-white mb-4 tracking-wide">Legal</h4>
-        <ul className="space-y-2 text-sm">
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Privacy Policy</Link></li>
-          <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Terms of Service</Link></li>
-        </ul>
-      </div>
-    </div>
-
-    {/* Bottom bar */}
-    <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p className="text-xs tracking-wide">© 2023 areerFlux Inc. All rights reserved.</p>
-      <div className="flex gap-4">
-        <Link to="#" className="text-slate-400 hover:text-[#3EC3BC] transition-colors" aria-label="Twitter">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-          </svg>
-        </Link>
-        <Link to="#" className="text-slate-400 hover:text-[#3EC3BC] transition-colors" aria-label="LinkedIn">
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path>
-          </svg>
-        </Link>
-      </div>
-    </div>
-  </div>
-</footer>
-
+      </footer>
     </div>
   );
 }
