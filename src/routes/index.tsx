@@ -84,25 +84,136 @@ export default function HomePage() {
             </div>
 
             <div className="w-full h-full flex justify-center lg:justify-end relative">
-              <div className="relative z-10 w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700">
-                <img
-                  alt="Dashboard displaying resume analysis and job matching statistics"
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5WCadfhZsa9g08MIq5t_K7fNyQ5iKfRboL_aw-0JxLBahzwUsRjGCn1gqAlLHN4mQHVATU7-mSegBSjsF2KvN3IwCs0_YQ6Fq-555bX6yvGNGPJXDECtQMODdCKbTL1a8UDXuJ1-QfMEhwgSRV49itLJ-P8-Kza-yzDznTjSrHr9c0dKVsy-2YLlakjGsZyOsQyJtYLMmfEsXL1W4QF7x1JPjMX-DR-x96S2jVM8sDlfowR131GI2EF-Eu5XTak9pSOgulu0TRI7k"
-                />
-                <div className="absolute bottom-6 left-6 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg flex items-center gap-4 max-w-[200px] animate-bounce" style={{ animationDuration: '3s' }}>
-                  <div className="bg-green-100 dark:bg-green-900/50 p-2 rounded-full text-green-600 dark:text-green-400">
-                    <span className="material-symbols-outlined">trending_up</span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Resume Score</p>
-                    <p className="text-xl font-bold text-slate-900 dark:text-white">94/100</p>
-                  </div>
-                </div>
-              </div>
-              <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#0E7C8C]/20 rounded-full blur-3xl -z-0"></div>
-              <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#3EC3BC]/20 rounded-full blur-3xl -z-0"></div>
-            </div>
+  <div className="relative z-10 w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+    {/* Background pattern */}
+    <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.1]" style={{backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
+    
+    {/* Glow effects */}
+    <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#0E7C8C]/20 rounded-full blur-3xl"></div>
+    <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-[#3EC3BC]/20 rounded-full blur-3xl"></div>
+    
+    {/* Main resume mockup card */}
+    <div className="absolute top-8 left-8 right-20 bottom-12 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-6 flex flex-col gap-4 transform rotate-[-2deg] transition-transform hover:rotate-0 duration-500 origin-bottom-left group">
+      {/* Header with avatar and name */}
+      <div className="flex gap-4 items-center border-b border-slate-100 dark:border-slate-800 pb-4">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0E7C8C] to-[#3EC3BC] flex items-center justify-center text-white">
+          <span className="material-symbols-outlined text-lg">person</span>
+        </div>
+        <div className="flex-1 space-y-1">
+          <div className="text-base font-bold text-slate-900 dark:text-white">Alex Morgan</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">Senior Product Manager</div>
+        </div>
+      </div>
+      
+      {/* Resume content lines with actual text */}
+      <div className="space-y-3 pt-1">
+        {/* Experience section */}
+        <div className="space-y-1">
+          <div className="text-xs font-semibold text-[#0E7C8C] dark:text-[#3EC3BC] uppercase tracking-wide">Experience</div>
+          <div className="text-xs text-slate-700 dark:text-slate-300">
+            • Led cross-functional teams of 10+ to launch 3 new features
+          </div>
+          <div className="text-xs text-slate-700 dark:text-slate-300">
+            • Increased user engagement by 42% through data-driven optimizations
+          </div>
+          <div className="text-xs text-slate-700 dark:text-slate-300">
+            • Managed $2M product budget with 15% cost reduction
+          </div>
+        </div>
+        
+        {/* Skills section */}
+        <div className="space-y-1 mt-2">
+          <div className="text-xs font-semibold text-[#0E7C8C] dark:text-[#3EC3BC] uppercase tracking-wide">Skills</div>
+          <div className="flex flex-wrap gap-1.5">
+            <span className="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded">Product Strategy</span>
+            <span className="text-[10px] bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-300 px-2 py-0.5 rounded">Agile</span>
+            <span className="text-[10px] bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-300 px-2 py-0.5 rounded">Data Analysis</span>
+          </div>
+        </div>
+        
+        {/* Education section */}
+        <div className="space-y-1 mt-2">
+          <div className="text-xs font-semibold text-[#0E7C8C] dark:text-[#3EC3BC] uppercase tracking-wide">Education</div>
+          <div className="text-xs text-slate-700 dark:text-slate-300">
+            MBA, Stanford University • 2018
+          </div>
+        </div>
+        
+        {/* Contact info */}
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+            <span className="material-symbols-outlined text-[10px]">mail</span>
+            <span>alex.morgan@email.com</span>
+          </div>
+        </div>
+      </div>
+      
+      {/* Animated scanning line */}
+      <div className="absolute top-1/3 left-0 w-full h-[2px] bg-[#3EC3BC] shadow-[0_0_12px_2px_rgba(62,195,188,0.5)] z-10 animate-pulse"></div>
+      
+      {/* Analysis highlights overlay */}
+      <div className="absolute -bottom-2 -right-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-slate-200 dark:border-slate-700">
+        <div className="text-[8px] font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider">AI Analysis Active</div>
+      </div>
+    </div>
+    
+    {/* ATS Score card */}
+    <div className="absolute top-12 right-5 w-44 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-4 rounded-xl shadow-xl border border-white/50 dark:border-slate-600 animate-bounce" style={{animationDuration: '3s'}}>
+      <div className="flex justify-between items-center mb-2">
+        <span className="text-[10px] font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">ATS Score</span>
+        <span className="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/30 px-1.5 py-0.5 rounded">94/100</span>
+      </div>
+      <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+        <div className="bg-gradient-to-r from-[#0E7C8C] to-[#3EC3BC] h-full rounded-full w-[94%]"></div>
+      </div>
+      <div className="mt-2 flex gap-1 items-center">
+        <span className="material-symbols-outlined text-[10px] text-[#3EC3BC]">check_circle</span>
+        <span className="text-[10px] text-slate-500 dark:text-slate-400">Keywords Optimized</span>
+      </div>
+      <div className="mt-1 flex gap-1 items-center">
+        <span className="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+        <span className="text-[10px] text-slate-500 dark:text-slate-400">Format ✓</span>
+      </div>
+    </div>
+    
+    {/* Job Match card */}
+    <div className="absolute bottom-6 right-6 bg-white dark:bg-slate-800 p-4 pr-8 rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 flex items-center gap-3 max-w-[240px]">
+      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#0E7C8C] to-[#3EC3BC] flex items-center justify-center">
+        <span className="material-symbols-outlined text-white text-lg">work</span>
+      </div>
+      <div>
+        <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Best Match</div>
+        <div className="text-sm font-bold text-slate-900 dark:text-white">Product Manager</div>
+        <div className="text-[10px] text-slate-400">Tech Corp • $140-160k</div>
+      </div>
+      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-green-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">98%</div>
+    </div>
+    
+    {/* Skill Match card */}
+    <div className="absolute top-1/2 left-6 w-36 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
+      <div className="flex items-center gap-2 mb-1">
+        <div className="w-6 h-6 rounded-md bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+          <span className="material-symbols-outlined text-white text-sm">psychology</span>
+        </div>
+        <span className="text-[10px] font-semibold text-slate-900 dark:text-white">Skill Match</span>
+      </div>
+      <div className="space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-[8px] text-slate-500 dark:text-slate-400">Product Strategy</span>
+          <span className="text-[8px] font-bold text-green-600">95%</span>
+        </div>
+        <div className="flex justify-between items-center">
+          <span className="text-[8px] text-slate-500 dark:text-slate-400">Leadership</span>
+          <span className="text-[8px] font-bold text-green-600">92%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  {/* Background glow effects */}
+  <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#0E7C8C]/20 rounded-full blur-3xl -z-0"></div>
+  <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#3EC3BC]/20 rounded-full blur-3xl -z-0"></div>
+</div>
           </div>
         </section>
 
