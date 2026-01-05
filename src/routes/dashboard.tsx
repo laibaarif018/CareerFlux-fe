@@ -4,6 +4,8 @@ import { getAuthToken } from '@/utils/auth'
 import { useEffect } from 'react'
 import { ProtectedRoute } from '@/components/PRoutes'
 import { useGetProfile } from '@/hooks/useUser'
+import { useTotalCount } from '@/hooks/useResume'
+import Shimmer from '@/components/Shimmer'
 
 export const Route = createFileRoute('/dashboard')({
   component: () => (
@@ -15,8 +17,14 @@ export const Route = createFileRoute('/dashboard')({
 
 function DashboardPage() {
   const navigate = useNavigate()
-  const { data } = useGetProfile()
+  const { data: profileData, isLoading: isLoadingProfile } = useGetProfile()
   
+  // Get userId from profile
+  const userId = profileData?.payload?.user?._id || profileData?.payload?.user?.id
+  
+  // Fetch total count
+  const { data: countData, isLoading: isLoadingCount } = useTotalCount(userId)
+
   useEffect(() => {
     if (!getAuthToken()) {
       navigate({ to: '/auth/login' })
@@ -24,14 +32,66 @@ function DashboardPage() {
   }, [navigate])
 
   // Get user name
-  const userName = data?.payload?.user?.name || 'User'
+  const userName = profileData?.payload?.user?.name || 'User'
   const firstName = userName.split(' ')[0]
 
-  // replace later with TanStack Query / API
+  // Get stats from API
   const stats = {
-    totalResumes: 0,
+    totalResumes: countData?.totalResumes || 0,
     bestScore: null,
     savedJobs: 0,
+  }
+
+  // Show shimmer while loading
+  const isLoading = isLoadingProfile || isLoadingCount
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
+        {/* Header */}
+        <UserHeader />
+
+        {/* Main */}
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {/* Welcome + Actions */}
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <Shimmer className="h-8 w-64 rounded-md mb-2" />
+              <Shimmer className="h-4 w-80 rounded-md" />
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <Shimmer className="h-10 w-40 rounded-lg" />
+              <Shimmer className="h-10 w-40 rounded-lg" />
+              <Shimmer className="h-10 w-32 rounded-lg" />
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <Shimmer className="h-24 rounded-xl" />
+            <Shimmer className="h-24 rounded-xl" />
+            <Shimmer className="h-24 rounded-xl" />
+          </div>
+
+          {/* Activity */}
+          <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+            <header className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-6 py-4">
+              <Shimmer className="h-6 w-40 rounded-md" />
+            </header>
+
+            <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center">
+              <Shimmer className="h-20 w-20 rounded-full" />
+              <div className="space-y-2">
+                <Shimmer className="h-5 w-48 mx-auto rounded-md" />
+                <Shimmer className="h-4 w-64 mx-auto rounded-md" />
+              </div>
+              <Shimmer className="h-11 w-40 rounded-lg" />
+            </div>
+          </section>
+        </main>
+      </div>
+    )
   }
 
   return (
@@ -63,7 +123,7 @@ function DashboardPage() {
 
             <ActionButton
               icon="analytics"
-              onClick={() => navigate({ to: '/parsedResume' })}
+              // onClick={() => navigate({ to: '/parsedResume/$resumeId' })}
             >
               Analyze Resume
             </ActionButton>

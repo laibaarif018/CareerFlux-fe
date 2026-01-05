@@ -1,10 +1,14 @@
+// src/components/Header.tsx
 import { Link, useLocation } from '@tanstack/react-router'
+import { getAuthToken } from '@/utils/auth'
 
 export default function Header() {
   const location = useLocation()
+  const token = getAuthToken()
+  const isLoggedIn = Boolean(token)
 
   const isHome = location.pathname === '/'
-  const isDashboard = location.pathname.startsWith('/dashboard')
+  const isDashboardPage = location.pathname.startsWith('/dashboard')
 
   return (
     <header className="sticky top-0 z-50 w-full bg-slate-50 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -13,7 +17,7 @@ export default function Header() {
         <Link
           to="/"
           className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-        > 
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             xmlnsXlink="http://www.w3.org/1999/xlink"
@@ -30,26 +34,25 @@ export default function Header() {
         </Link>
 
         {/* Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <nav className="flex gap-6">
-            <a
-              href="/#features"
-              className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="/#how-it-works"
-              className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
-            >
-              How it Works
-            </a>
-          </nav>
-        </div>
+        <nav className="hidden md:flex items-center gap-6">
+          <a
+            href="/#features"
+            className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
+          >
+            Features
+          </a>
+          <a
+            href="/#how-it-works"
+            className="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium text-sm transition-colors"
+          >
+            How it Works
+          </a>
+        </nav>
 
         {/* Auth / Dashboard Button */}
         <div className="flex items-center gap-3">
-          {isHome && (
+          {/* Home page buttons */}
+          {isHome && !isLoggedIn && (
             <Link
               to="/auth/login"
               className="hidden sm:inline-flex h-9 px-4 items-center justify-center rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white text-sm font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
@@ -57,10 +60,21 @@ export default function Header() {
               Sign In
             </Link>
           )}
-          {isDashboard && (
+
+          {isHome && isLoggedIn && (
             <Link
               to="/dashboard"
-              className="hidden sm:inline-flex h-9 px-4 items-center justify-center rounded-lg bg-blue-600 dark:bg-blue-500 text-white text-sm font-bold hover:bg-blue-700 dark:hover:bg-blue-400 transition-colors"
+              className="hidden sm:inline-flex h-9 px-4 items-center justify-center rounded-lg bg-teal-500 dark:bg-teal-700 text-white text-sm font-bold hover:bg-teal-600 dark:hover:bg-teal-600 transition-colors"
+            >
+              Dashboard
+            </Link>
+          )}
+
+          {/* Dashboard page button */}
+          {isDashboardPage && (
+            <Link
+              to="/dashboard"
+              className="hidden sm:inline-flex h-9 px-4 items-center justify-center rounded-lg bg-teal-700 dark:bg-teal-700 text-white text-sm font-bold hover:bg-teal-600 dark:hover:bg-teal-600 transition-colors"
             >
               Dashboard
             </Link>

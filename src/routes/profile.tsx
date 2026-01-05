@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { ProtectedRoute } from '@/components/PRoutes'
 import { useGetProfile, useProfile } from '@/hooks/useUser';
+import Shimmer from '@/components/Shimmer';
 
 export const Route = createFileRoute('/profile')({
   component: () => (
@@ -159,7 +160,7 @@ export default function Profile() {
       locations: validateField('locations', preferences.locations),
       salary: validateField('salary', preferences.salary),
     }
-    
+
     setErrors(newErrors)
     setTouched({
       name: true,
@@ -200,11 +201,81 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#0E7C8C]"></div>
-          <p className="mt-4 text-slate-600 dark:text-slate-400">Loading profile...</p>
-        </div>
+      <div
+        className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors"
+        style={{
+          fontFamily:
+            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif",
+        }}
+      >
+        <UserHeader />
+
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Personal Information Shimmer */}
+            <div className="lg:col-span-1">
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm lg:h-full flex flex-col">
+                <Shimmer className="h-7 w-48 mb-6 rounded-md" />
+                <div className="space-y-6">
+                  <div>
+                    <Shimmer className="h-4 w-32 mb-2 rounded-md" />
+                    <Shimmer className="h-12 w-full rounded-lg" />
+                  </div>
+                  <div>
+                    <Shimmer className="h-4 w-24 mb-2 rounded-md" />
+                    <Shimmer className="h-12 w-full rounded-lg" />
+                  </div>
+                  <div>
+                    <Shimmer className="h-4 w-28 mb-2 rounded-md" />
+                    <Shimmer className="h-12 w-full rounded-lg" />
+                  </div>
+                  <div>
+                    <Shimmer className="h-4 w-28 mb-2 rounded-md" />
+                    <Shimmer className="h-12 w-full rounded-lg" />
+                  </div>
+                  <div>
+                    <Shimmer className="h-4 w-36 mb-2 rounded-md" />
+                    <Shimmer className="h-12 w-full rounded-lg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Preferences & Save Button Shimmer */}
+            <div className="lg:col-span-2">
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm lg:h-full flex flex-col">
+                <Shimmer className="h-7 w-40 mb-6 rounded-md" />
+
+                <div className="mb-6">
+                  <Shimmer className="h-4 w-32 mb-2 rounded-md" />
+                  <Shimmer className="h-16 w-full rounded-lg" />
+                </div>
+
+                <div className="mb-6">
+                  <Shimmer className="h-4 w-36 mb-2 rounded-md" />
+                  <Shimmer className="h-16 w-full rounded-lg" />
+                </div>
+
+                <div className="mb-6">
+                  <Shimmer className="h-4 w-40 mb-2 rounded-md" />
+                  <div className="flex items-center gap-4 mt-2">
+                    <Shimmer className="h-2 flex-1 rounded-full" />
+                    <Shimmer className="h-6 w-24 rounded-md" />
+                  </div>
+                </div>
+
+                <div>
+                  <Shimmer className="h-4 w-44 mb-2 rounded-md" />
+                  <Shimmer className="h-16 w-full rounded-lg" />
+                </div>
+
+                <div className="flex justify-end mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
+                  <Shimmer className="h-12 w-24 rounded-lg" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     )
   }

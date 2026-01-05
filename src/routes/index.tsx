@@ -330,7 +330,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm font-normal">
                 <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Resume Checker</Link></li>
                 <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Job Matcher</Link></li>
-                <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Cover Letter Gen</Link></li>
+                {/* <li><Link to="#" className="hover:text-[#3EC3BC] transition-colors">Cover Letter Gen</Link></li> */}
               </ul>
             </div>
 

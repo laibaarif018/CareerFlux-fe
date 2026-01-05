@@ -1,11 +1,5 @@
 import { HttpService } from '@/lib/http'
-
-export interface IApiResponse<T = any> {
-  statusCode: number
-  message: string
-  payload?: T
-  errors?: { [key: string]: string }
-}
+import { IApiResponse } from '@/utils/IApiResponse'
 
 export interface IUser {
   sub: string
@@ -52,7 +46,7 @@ export interface IResetPassword {
 export interface IConnectGoogle {
   email: string
   code: string
-  googleId: string  
+  googleId: string
 }
 
 class AuthService extends HttpService {
@@ -128,7 +122,6 @@ class AuthService extends HttpService {
 
   connectGoogle = (payload: IConnectGoogle): Promise<IApiResponse> =>
     this.post(`${this.prefix}/connect-google`, payload)
-  
 }
 
 // Export singleton instance

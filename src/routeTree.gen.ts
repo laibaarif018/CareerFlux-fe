@@ -13,7 +13,6 @@ import { Route as UploadResumeRouteImport } from './routes/uploadResume'
 import { Route as SkillGapRouteImport } from './routes/skillGap'
 import { Route as ResumeReportRouteImport } from './routes/resumeReport'
 import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ParsedResumeRouteImport } from './routes/parsedResume'
 import { Route as MyResumesRouteImport } from './routes/myResumes'
 import { Route as LearningPlanRouteImport } from './routes/learningPlan'
 import { Route as JobsRouteImport } from './routes/jobs'
@@ -22,6 +21,7 @@ import { Route as JobDetailWithSkillGapRouteImport } from './routes/jobDetailWit
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AccountSettingRouteImport } from './routes/accountSetting'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ParsedResumeResumeIdRouteImport } from './routes/parsedResume/$resumeId'
 import { Route as CompanySupportRouteImport } from './routes/company/support'
 import { Route as CompanySettingsRouteImport } from './routes/company/settings'
 import { Route as CompanyProfileSetupRouteImport } from './routes/company/profileSetup'
@@ -62,11 +62,6 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ParsedResumeRoute = ParsedResumeRouteImport.update({
-  id: '/parsedResume',
-  path: '/parsedResume',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MyResumesRoute = MyResumesRouteImport.update({
   id: '/myResumes',
   path: '/myResumes',
@@ -105,6 +100,11 @@ const AccountSettingRoute = AccountSettingRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParsedResumeResumeIdRoute = ParsedResumeResumeIdRouteImport.update({
+  id: '/parsedResume/$resumeId',
+  path: '/parsedResume/$resumeId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanySupportRoute = CompanySupportRouteImport.update({
@@ -212,7 +212,6 @@ export interface FileRoutesByFullPath {
   '/jobs': typeof JobsRoute
   '/learningPlan': typeof LearningPlanRoute
   '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
   '/profile': typeof ProfileRoute
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
@@ -236,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/company/profileSetup': typeof CompanyProfileSetupRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
+  '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -246,7 +246,6 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsRoute
   '/learningPlan': typeof LearningPlanRoute
   '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
   '/profile': typeof ProfileRoute
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
@@ -270,6 +269,7 @@ export interface FileRoutesByTo {
   '/company/profileSetup': typeof CompanyProfileSetupRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
+  '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -281,7 +281,6 @@ export interface FileRoutesById {
   '/jobs': typeof JobsRoute
   '/learningPlan': typeof LearningPlanRoute
   '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
   '/profile': typeof ProfileRoute
   '/resumeReport': typeof ResumeReportRoute
   '/skillGap': typeof SkillGapRoute
@@ -305,6 +304,7 @@ export interface FileRoutesById {
   '/company/profileSetup': typeof CompanyProfileSetupRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
+  '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -317,7 +317,6 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/learningPlan'
     | '/myResumes'
-    | '/parsedResume'
     | '/profile'
     | '/resumeReport'
     | '/skillGap'
@@ -341,6 +340,7 @@ export interface FileRouteTypes {
     | '/company/profileSetup'
     | '/company/settings'
     | '/company/support'
+    | '/parsedResume/$resumeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -351,7 +351,6 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/learningPlan'
     | '/myResumes'
-    | '/parsedResume'
     | '/profile'
     | '/resumeReport'
     | '/skillGap'
@@ -375,6 +374,7 @@ export interface FileRouteTypes {
     | '/company/profileSetup'
     | '/company/settings'
     | '/company/support'
+    | '/parsedResume/$resumeId'
   id:
     | '__root__'
     | '/'
@@ -385,7 +385,6 @@ export interface FileRouteTypes {
     | '/jobs'
     | '/learningPlan'
     | '/myResumes'
-    | '/parsedResume'
     | '/profile'
     | '/resumeReport'
     | '/skillGap'
@@ -409,6 +408,7 @@ export interface FileRouteTypes {
     | '/company/profileSetup'
     | '/company/settings'
     | '/company/support'
+    | '/parsedResume/$resumeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -420,7 +420,6 @@ export interface RootRouteChildren {
   JobsRoute: typeof JobsRoute
   LearningPlanRoute: typeof LearningPlanRoute
   MyResumesRoute: typeof MyResumesRoute
-  ParsedResumeRoute: typeof ParsedResumeRoute
   ProfileRoute: typeof ProfileRoute
   ResumeReportRoute: typeof ResumeReportRoute
   SkillGapRoute: typeof SkillGapRoute
@@ -444,6 +443,7 @@ export interface RootRouteChildren {
   CompanyProfileSetupRoute: typeof CompanyProfileSetupRoute
   CompanySettingsRoute: typeof CompanySettingsRoute
   CompanySupportRoute: typeof CompanySupportRoute
+  ParsedResumeResumeIdRoute: typeof ParsedResumeResumeIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -474,13 +474,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parsedResume': {
-      id: '/parsedResume'
-      path: '/parsedResume'
-      fullPath: '/parsedResume'
-      preLoaderRoute: typeof ParsedResumeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/myResumes': {
@@ -537,6 +530,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parsedResume/$resumeId': {
+      id: '/parsedResume/$resumeId'
+      path: '/parsedResume/$resumeId'
+      fullPath: '/parsedResume/$resumeId'
+      preLoaderRoute: typeof ParsedResumeResumeIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company/support': {
@@ -684,7 +684,6 @@ const rootRouteChildren: RootRouteChildren = {
   JobsRoute: JobsRoute,
   LearningPlanRoute: LearningPlanRoute,
   MyResumesRoute: MyResumesRoute,
-  ParsedResumeRoute: ParsedResumeRoute,
   ProfileRoute: ProfileRoute,
   ResumeReportRoute: ResumeReportRoute,
   SkillGapRoute: SkillGapRoute,
@@ -708,6 +707,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyProfileSetupRoute: CompanyProfileSetupRoute,
   CompanySettingsRoute: CompanySettingsRoute,
   CompanySupportRoute: CompanySupportRoute,
+  ParsedResumeResumeIdRoute: ParsedResumeResumeIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

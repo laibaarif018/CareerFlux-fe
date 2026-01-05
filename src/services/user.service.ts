@@ -1,12 +1,6 @@
 import { HttpService } from '@/lib/http'
-import { User } from 'lucide-react'
+ import { IApiResponse } from '@/utils/IApiResponse'
 
-export interface IApiResponse<T = any> {
-  statusCode: number
-  message: string
-  payload?: T
-  errors?: { [key: string]: string }
-}
 export interface IProfile {
   name: string
   phoneNumber: string
