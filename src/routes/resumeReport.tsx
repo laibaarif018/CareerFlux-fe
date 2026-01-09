@@ -20,6 +20,8 @@ export const Route = createFileRoute('/resumeReport')({
   component: ResumeReport,
 })
 
+// Update the data extraction section in your ResumeReport component:
+
 export default function ResumeReport() {
   const { resumeId } = useSearch({ from: '/resumeReport' })
   const [hasTriggeredAnalysis, setHasTriggeredAnalysis] = useState(false)
@@ -36,25 +38,31 @@ export default function ResumeReport() {
   useEffect(() => {
     if (!resumeId || hasTriggeredAnalysis) return
 
+    // If analysis already exists (pending, processing, or completed), don't trigger again
     if (analysisStatus === 'pending' || analysisStatus === 'processing' || analysisStatus === 'completed') {
       setHasTriggeredAnalysis(true)
       return
     }
 
-    const triggerAnalysis = async () => {
-      try {
-        await analyzeResumeMutation.mutateAsync(resumeId)
-        setHasTriggeredAnalysis(true)
-      } catch (err: any) {
-        console.error('Failed to trigger analysis:', err)
+    // Only trigger analysis if status is undefined/null (meaning no analysis has been started)
+    if (!analysisStatus) {
+      const triggerAnalysis = async () => {
+        try {
+          await analyzeResumeMutation.mutateAsync(resumeId)
+          setHasTriggeredAnalysis(true)
+        } catch (err: any) {
+          console.error('Failed to trigger analysis:', err)
+        }
       }
-    }
 
-    triggerAnalysis()
+      triggerAnalysis()
+    }
   }, [resumeId, hasTriggeredAnalysis, analysisStatus])
 
   const showShimmer = analysisStatus !== 'completed' || !data?.payload?.analysisResults
-  const analysis = data?.payload?.analysisResults
+  
+  // FIX: Access the nested analysis object
+  const analysisData = data?.payload?.analysisResults?.analysis
 
   if (error) {
     return (
@@ -80,39 +88,149 @@ export default function ResumeReport() {
     )
   }
 
+  const getLoadingMessage = () => {
+    if (!analysisStatus) return 'Initializing analysis...'
+    if (analysisStatus === 'pending') return 'Analysis queued...'
+    if (analysisStatus === 'processing') return 'Analyzing your resume...'
+    return 'Loading...'
+  }
+
   if (showShimmer) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <UserHeader />
-        <ShimmerLoader analysisStatus={analysisStatus} />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                Resume Report
+              </h1>
+              <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
+                {getLoadingMessage()}
+              </p>
+            </div>
+            <div className="h-10 w-40 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse"></div>
+          </div>
+        </div>
+
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <aside className="lg:col-span-4 xl:col-span-3">
+              <div className="flex flex-col gap-6">
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <Shimmer className="h-6 w-32 rounded mb-4" />
+                  <Shimmer className="w-40 h-40 mx-auto rounded-full" />
+                </div>
+                <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <Shimmer key={i} className="h-10 rounded-lg" />
+                  ))}
+                </div>
+              </div>
+            </aside>
+
+            <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shimmer className="w-6 h-6 rounded" />
+                  <ShimmerTitle width="30%" />
+                </div>
+                <ShimmerParagraph lines={3} />
+              </div>
+
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shimmer className="w-6 h-6 rounded" />
+                  <ShimmerTitle width="40%" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="space-y-3">
+                      <Shimmer className="h-6 w-24 rounded" />
+                      {[1, 2, 3].map((j) => (
+                        <div key={j} className="flex gap-2">
+                          <Shimmer className="w-5 h-5 rounded flex-shrink-0" />
+                          <ShimmerText />
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shimmer className="w-6 h-6 rounded" />
+                  <ShimmerTitle width="35%" />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                    <Shimmer key={i} className="h-8 w-20 rounded-full" />
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shimmer className="w-6 h-6 rounded" />
+                  <ShimmerTitle width="50%" />
+                </div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="flex gap-4">
+                      <Shimmer className="w-10 h-10 rounded-lg flex-shrink-0" />
+                      <div className="flex-1 space-y-2">
+                        <Shimmer className="h-5 w-32 rounded" />
+                        <ShimmerParagraph lines={2} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     )
   }
 
-  const overallScore = Math.round(analysis.ats_compatibility_score ?? 0)
+  // FIX: Map the backend structure to match what the UI expects
+  const overallScore = Math.round(analysisData?.ats_compatibility_score ?? 0)
   const scoreLabel = overallScore >= 85 ? 'Excellent' : overallScore >= 70 ? 'Good' : 'Needs Improvement'
   const fileName = 'Resume.pdf'
-  const aiSummary = analysis.ai_summary ?? ''
-  const strengths = analysis.strengths_and_weaknesses?.strengths ?? []
-  const weaknesses = analysis.strengths_and_weaknesses?.weaknesses ?? []
-  const keywords = (analysis.keyword_analysis?.relevant_keywords ?? []).map((k: string) => ({ label: k, found: true }))
-  const grammarErrors = analysis.grammar_and_spelling_check?.errors ?? []
+  const aiSummary = analysisData?.summary ?? ''
+  const strengths = analysisData?.strengths ?? []
+  const weaknesses = analysisData?.weaknesses ?? []
+  
+  // FIX: Map top_keywords from backend
+  const keywords = (analysisData?.keyword_analysis?.top_keywords ?? []).map((k: string) => ({ 
+    label: k, 
+    found: true 
+  }))
+  
+  // FIX: Grammar check is an array in backend, not an object with errors property
+  const grammarErrors = (analysisData?.grammar_and_spelling_check ?? []).map((error: string, idx: number) => ({
+    position: `Error ${idx + 1}`,
+    message: error
+  }))
 
   const formattingSuggestions = [
     {
       icon: 'article',
-      title: 'Content Length',
-      description: `Your resume has ${analysis.formatting_and_content?.content_length ?? 0} words. ${(analysis.formatting_and_content?.content_length ?? 0) < 200 ? 'Consider adding more details to showcase your experience.' : 'Good length for a professional resume.'}`,
+      title: 'Content Score',
+      description: `Content quality score: ${analysisData?.formatting_content?.content_score ?? 0}/100. ${(analysisData?.formatting_content?.content_score ?? 0) >= 80 ? 'Excellent content quality!' : 'Consider improving content depth and clarity.'}`,
     },
     {
       icon: 'palette',
-      title: 'Format',
-      description: `Format style: ${analysis.formatting_and_content?.format ?? 'Standard'}`,
+      title: 'Layout Score',
+      description: `Layout quality: ${analysisData?.formatting_content?.layout_score ?? 0}/100. ${(analysisData?.formatting_content?.layout_score ?? 0) >= 80 ? 'Well-structured layout!' : 'Consider improving document structure.'}`,
     },
     {
       icon: 'view_agenda',
-      title: 'Layout',
-      description: `Layout type: ${analysis.formatting_and_content?.layout ?? 'Standard'}`,
+      title: 'ATS Compatibility',
+      description: `ATS compatibility: ${analysisData?.ats_compatibility_score ?? 0}/100`,
     },
   ]
 
@@ -135,12 +253,6 @@ export default function ResumeReport() {
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               Resume Report
             </h1>
-            {/* <p className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
-              <span className="material-symbols-outlined text-base">
-                description
-              </span>
-              {fileName}
-            </p> */}
           </div>
           <button
             onClick={handleExport}
@@ -216,14 +328,6 @@ export default function ResumeReport() {
             </Section>
 
             <Section id="keyword-analysis" title="Keyword Analysis" icon="sell">
-              {analysis.keyword_analysis?.relevance_score !== undefined && (
-                <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Keyword Relevance Score</span>
-                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{Math.round(analysis.keyword_analysis.relevance_score)}%</span>
-                  </div>
-                </div>
-              )}
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Relevant Keywords Found</h3>
                 <div className="flex flex-wrap gap-2">
@@ -236,6 +340,18 @@ export default function ResumeReport() {
                   )}
                 </div>
               </div>
+              {analysisData?.keyword_analysis?.tag_counts && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Keyword Categories</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(analysisData.keyword_analysis.tag_counts).map(([tag, count]: [string, any]) => (
+                      <span key={tag} className="text-sm font-medium px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                        {tag}: {count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </Section>
 
             <Section id="formatting-content" title="Formatting & Content Suggestions" icon="article">
@@ -266,16 +382,8 @@ export default function ResumeReport() {
                     <div key={idx} className="flex items-start gap-4 p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
                       <span className="material-symbols-outlined text-orange-600 dark:text-orange-400 text-xl mt-0.5">error</span>
                       <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 dark:text-white mb-1">Issue at: "{error.position}"</h3>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{error.message}</p>
-                        {analysis.grammar_and_spelling_check?.suggested_corrections?.[idx] && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-slate-500 dark:text-slate-400">Suggestion:</span>
-                            <code className="px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded text-green-600 dark:text-green-400 font-mono">
-                              {analysis.grammar_and_spelling_check.suggested_corrections[idx]}
-                            </code>
-                          </div>
-                        )}
+                        <h3 className="font-bold text-slate-900 dark:text-white mb-1">{error.position}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{error.message}</p>
                       </div>
                     </div>
                   ))}
@@ -284,7 +392,7 @@ export default function ResumeReport() {
             </Section>
 
             <Section id="skill-gap" title="Skill Gap Analysis" icon="psychology">
-              {(analysis.skill_gap_analysis?.gaps?.length ?? 0) === 0 ? (
+              {(analysisData?.skill_gap_analysis?.gaps?.length ?? 0) === 0 ? (
                 <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                   <span className="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">emoji_events</span>
                   <p className="text-green-700 dark:text-green-300 font-medium">Your skills are well-aligned with industry standards!</p>
@@ -294,39 +402,26 @@ export default function ResumeReport() {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Identified Gaps</h3>
                     <div className="flex flex-wrap gap-2">
-                      {analysis.skill_gap_analysis.gaps.map((gap: string, idx: number) => (
+                      {analysisData.skill_gap_analysis.gaps.map((gap: string, idx: number) => (
                         <span key={idx} className="px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-medium rounded-full">{gap}</span>
                       ))}
                     </div>
                   </div>
-                  {(analysis.skill_gap_analysis?.recommended_courses?.length ?? 0) > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">Recommended Courses</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {analysis.skill_gap_analysis.recommended_courses.map((course: string, idx: number) => (
-                          <span key={idx} className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">{course}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </Section>
 
             <Section id="learning-roadmap" title="Learning Roadmap" icon="map">
-              {(analysis.learning_roadmap?.length ?? 0) === 0 ? (
+              {(analysisData?.learning_roadmap?.length ?? 0) === 0 ? (
                 <p className="text-slate-600 dark:text-slate-400">No learning recommendations at this time.</p>
               ) : (
                 <div className="space-y-4">
-                  {analysis.learning_roadmap.map((item: any, idx: number) => (
+                  {analysisData.learning_roadmap.map((item: string, idx: number) => (
                     <div key={idx} className="flex items-start gap-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold">{idx + 1}</div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-1">{item.course}</h3>
-                        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                          <span className="material-symbols-outlined text-base">schedule</span>
-                          <span>Duration: {item.duration}</span>
-                        </div>
+                        <h3 className="font-bold text-slate-900 dark:text-white text-lg mb-1">{item}</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">Focus area for skill development</p>
                       </div>
                     </div>
                   ))}
