@@ -24,7 +24,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ParsedResumeResumeIdRouteImport } from './routes/parsedResume/$resumeId'
 import { Route as CompanySupportRouteImport } from './routes/company/support'
 import { Route as CompanySettingsRouteImport } from './routes/company/settings'
-import { Route as CompanyProfileSetupRouteImport } from './routes/company/profileSetup'
+import { Route as CompanyProfileRouteImport } from './routes/company/profile'
 import { Route as CompanyJobsRouteImport } from './routes/company/jobs'
 import { Route as CompanyDashboardRouteImport } from './routes/company/dashboard'
 import { Route as CompanyCandidatesRouteImport } from './routes/company/candidates'
@@ -117,9 +117,9 @@ const CompanySettingsRoute = CompanySettingsRouteImport.update({
   path: '/company/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyProfileSetupRoute = CompanyProfileSetupRouteImport.update({
-  id: '/company/profileSetup',
-  path: '/company/profileSetup',
+const CompanyProfileRoute = CompanyProfileRouteImport.update({
+  id: '/company/profile',
+  path: '/company/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyJobsRoute = CompanyJobsRouteImport.update({
@@ -232,7 +232,7 @@ export interface FileRoutesByFullPath {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
   '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
@@ -266,7 +266,7 @@ export interface FileRoutesByTo {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
   '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
@@ -301,7 +301,7 @@ export interface FileRoutesById {
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
   '/company/support': typeof CompanySupportRoute
   '/parsedResume/$resumeId': typeof ParsedResumeResumeIdRoute
@@ -337,7 +337,7 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/dashboard'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
     | '/company/support'
     | '/parsedResume/$resumeId'
@@ -371,7 +371,7 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/dashboard'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
     | '/company/support'
     | '/parsedResume/$resumeId'
@@ -405,7 +405,7 @@ export interface FileRouteTypes {
     | '/company/candidates'
     | '/company/dashboard'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
     | '/company/support'
     | '/parsedResume/$resumeId'
@@ -440,7 +440,7 @@ export interface RootRouteChildren {
   CompanyCandidatesRoute: typeof CompanyCandidatesRoute
   CompanyDashboardRoute: typeof CompanyDashboardRoute
   CompanyJobsRoute: typeof CompanyJobsRoute
-  CompanyProfileSetupRoute: typeof CompanyProfileSetupRoute
+  CompanyProfileRoute: typeof CompanyProfileRoute
   CompanySettingsRoute: typeof CompanySettingsRoute
   CompanySupportRoute: typeof CompanySupportRoute
   ParsedResumeResumeIdRoute: typeof ParsedResumeResumeIdRoute
@@ -553,11 +553,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanySettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/profileSetup': {
-      id: '/company/profileSetup'
-      path: '/company/profileSetup'
-      fullPath: '/company/profileSetup'
-      preLoaderRoute: typeof CompanyProfileSetupRouteImport
+    '/company/profile': {
+      id: '/company/profile'
+      path: '/company/profile'
+      fullPath: '/company/profile'
+      preLoaderRoute: typeof CompanyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company/jobs': {
@@ -704,7 +704,7 @@ const rootRouteChildren: RootRouteChildren = {
   CompanyCandidatesRoute: CompanyCandidatesRoute,
   CompanyDashboardRoute: CompanyDashboardRoute,
   CompanyJobsRoute: CompanyJobsRoute,
-  CompanyProfileSetupRoute: CompanyProfileSetupRoute,
+  CompanyProfileRoute: CompanyProfileRoute,
   CompanySettingsRoute: CompanySettingsRoute,
   CompanySupportRoute: CompanySupportRoute,
   ParsedResumeResumeIdRoute: ParsedResumeResumeIdRoute,

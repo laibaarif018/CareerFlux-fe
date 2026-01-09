@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
-import { useLogin } from '@/hooks/useAuth'
+import { authService } from '@/services/auth.service'
+import { useMutation } from '@tanstack/react-query'
 import { PublicRoute } from '@/components/PRoutes'
 
 export const Route = createFileRoute('/auth/password')({
@@ -14,22 +15,40 @@ export const Route = createFileRoute('/auth/password')({
 
 function PasswordInput() {
   const navigate = useNavigate()
-  const login = useLogin()
   const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
   const email = localStorage.getItem('email') || ''
 
+  const login = useMutation({
+    mutationFn: ({ email, password }: { email: string; password: string }) => {
+      // Temporarily disable the unauthorized redirect for this specific request
+      return authService.login({ email, password })
+    },
+    onSuccess: (data) => {
+      setError(null) // Clear any previous error
+      localStorage.removeItem('email')
+      const role=data.payload;
+      if(role==='jobseeker'){
+      navigate({ to: '/dashboard' })}
+      else
+        navigate({ to: '/company/dashboard' })
+        
+    },
+    onError: (error: any) => {
+      // Check if this is a 401 error (incorrect password)
+      if (error?.statusCode === 401) {
+        setError(error.message || 'Invalid password. Please try again.')
+      } else {
+        setError(error?.message || 'An error occurred. Please try again.')
+      }
+    }
+  })
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    login.mutate(
-      { email, password },
-      {
-        onSuccess: (data) => {
-          localStorage.removeItem('email')
-          navigate({ to: '/dashboard' })
-        },
-      },
-    )
+    setError(null) // Clear any previous error
+    login.mutate({ email, password })
   }
 
   return (
@@ -77,8 +96,8 @@ function PasswordInput() {
               <button
                 type="submit"
                 disabled={login.isPending}
-                className="h-12 w-full rounded-lg bg-[#0E7C8C] text-sm font-bold text-white 
-                           hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-[#0E7C8C]/20 
+                className="h-12 w-full rounded-lg bg-[#0E7C8C] text-sm font-bold text-white
+                           hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-[#0E7C8C]/20
                            disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {login.isPending ? (

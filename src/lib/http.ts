@@ -62,7 +62,8 @@ export class HttpService {
         return response;
       },
       error => {
-        if (error?.response?.status === 401) {
+        // Check if the request has a flag to bypass unauthorized redirect
+        if (error?.response?.status === 401 && !error.config._skipUnauthorizedRedirect) {
           this.handleUnauthorized();
         }
         return Promise.reject(this.normalizeError(error));

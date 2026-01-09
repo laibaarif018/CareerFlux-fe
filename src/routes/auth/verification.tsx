@@ -83,7 +83,7 @@ function VerificationPage() {
       {
         onSuccess: () => {
           localStorage.removeItem('email')
-          navigate({ to: '/profile' })
+          navigate({ to: '/auth/roles' })
         },
       },
     )

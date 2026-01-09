@@ -83,7 +83,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="w-full h-full flex justify-center lg:justify-end relative">
+           <div className="w-full h-full flex justify-center lg:justify-end relative">
   <div className="relative z-10 w-full max-w-md aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
     {/* Background pattern */}
     <div className="absolute inset-0 opacity-[0.4] dark:opacity-[0.1]" style={{backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '20px 20px'}}></div>
@@ -148,8 +148,7 @@ export default function HomePage() {
         </div>
       </div>
       
-      {/* Animated scanning line */}
-      <div className="absolute top-1/3 left-0 w-full h-[2px] bg-[#3EC3BC] shadow-[0_0_12px_2px_rgba(62,195,188,0.5)] z-10 animate-pulse"></div>
+      {/* Animated scanning line - REMOVED from under Experience */}
       
       {/* Analysis highlights overlay */}
       <div className="absolute -bottom-2 -right-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm p-2 rounded-lg shadow-md border border-slate-200 dark:border-slate-700">

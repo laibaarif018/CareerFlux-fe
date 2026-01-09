@@ -1,4 +1,3 @@
-// resume.service.ts
 import { HttpService } from '@/lib/http'
 import { IApiResponse } from '@/utils/IApiResponse'
 

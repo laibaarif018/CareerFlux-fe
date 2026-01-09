@@ -64,7 +64,7 @@ class AuthService extends HttpService {
    * @param credentials User login credentials
    */
   login = (credentials: ILogin): Promise<IApiResponse> =>
-    this.post(`${this.prefix}/login`, credentials)
+    this.post(`${this.prefix}/login`, credentials, undefined, { _skipUnauthorizedRedirect: true })
 
   /**
    * Logout user
