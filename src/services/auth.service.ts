@@ -10,6 +10,9 @@ export interface IUser {
 
 export interface IEmailCheck {
   email: string
+  exists: boolean
+  hasPassword: boolean
+  userId: string
 }
 
 export interface ILogin {
@@ -56,7 +59,7 @@ class AuthService extends HttpService {
    * Check if email exists
    * @param email User email
    */
-  checkEmail = (email: string): Promise<IApiResponse<{ exists: boolean }>> =>
+  checkEmail = (email: string): Promise<IApiResponse<IEmailCheck >> =>
     this.post(`${this.prefix}/check-email`, { email })
 
   /**
@@ -64,7 +67,9 @@ class AuthService extends HttpService {
    * @param credentials User login credentials
    */
   login = (credentials: ILogin): Promise<IApiResponse> =>
-    this.post(`${this.prefix}/login`, credentials, undefined, { _skipUnauthorizedRedirect: true })
+    this.post(`${this.prefix}/login`, credentials, undefined, {
+      _skipUnauthorizedRedirect: true,
+    } as any)
 
   /**
    * Logout user
@@ -122,6 +127,12 @@ class AuthService extends HttpService {
 
   connectGoogle = (payload: IConnectGoogle): Promise<IApiResponse> =>
     this.post(`${this.prefix}/connect-google`, payload)
+
+  changePassword = (credentials: {
+    currentPassword: string
+    newPassword: string
+  }): Promise<IApiResponse> =>
+    this.post(`${this.prefix}/change-password`, credentials)
 }
 
 // Export singleton instance

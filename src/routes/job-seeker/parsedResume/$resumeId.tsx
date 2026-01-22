@@ -1,13 +1,21 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { useResumeStatus, useParsedResumeData, useAnalyzeResume } from '@/hooks/useResume'
+import {
+  useResumeStatus,
+  useParsedResumeData,
+  useAnalyzeResume,
+} from '@/queries/resume.queries'
 import Shimmer, { ShimmerInput } from '@/components/Shimmer'
+import { requireRole } from '@/utils/RouteGuard'
 
-export const Route = createFileRoute(`/parsedResume/$resumeId`)({
-  component: ParsedResumeDetailsPage,
+export const Route = createFileRoute(`/job-seeker/parsedResume/$resumeId`)({
+  beforeLoad: () => {
+     requireRole('jobseeker')
+   },
+   component: ParsedResumeDetails,
 })
 
-export default function ParsedResumeDetailsPage() {
+export default function ParsedResumeDetails() {
   const { resumeId } = Route.useParams()
   const navigate = useNavigate()
 
@@ -29,7 +37,7 @@ export default function ParsedResumeDetailsPage() {
 
   // Poll resume status
   const { data: statusData } = useResumeStatus(resumeId)
-  const parsingStatus = statusData?.parsingStatus
+  const parsingStatus = statusData?.payload.parsingStatus
   console.log('parsing status', parsingStatus)
 
   // Fetch parsed data only when completed
@@ -77,15 +85,15 @@ export default function ParsedResumeDetailsPage() {
     try {
       setIsStartingAnalysis(true)
       console.log('🚀 Starting analysis for resumeId:', resumeId)
-      
+
       // Trigger the analysis API
       await analyzeResumeMutation.mutateAsync(resumeId)
-      
+
       console.log('✅ Analysis started, navigating to report...')
-      
+
       // Navigate to report page
       navigate({
-        to: '/resumeReport',
+        to: '/job-seeker/resumeReport',
         search: {
           resumeId: resumeId,
         },
@@ -189,7 +197,9 @@ export default function ParsedResumeDetailsPage() {
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined">auto_awesome</span>
+                  <span className="material-symbols-outlined">
+                    auto_awesome
+                  </span>
                   Run AI Analysis
                 </>
               )}
@@ -561,7 +571,7 @@ function Section({ title, icon, children }: any) {
 
 function Input({ label, value, onChange, span = false }: any) {
   return (
-    <label className={`flex flex-col gap-2 ${span ? 'md:col-span-2' : ''}`}>
+    <label className={`flex flex-col gap-2 ${span ? `md:col-span-2` : ``}`}>
       <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">
         {label}
       </span>

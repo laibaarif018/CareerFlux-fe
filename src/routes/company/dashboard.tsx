@@ -1,288 +1,252 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import CompanySidebar from '@/components/companysidebar'
+import { useCompanyJobs } from '@/queries/job.queries'
+import { requireRole } from '@/utils/RouteGuard'
+import {
+  ShimmerDashboardStats,
+  ShimmerDashboardTable,
+} from '@/components/Shimmer'
 
 export const Route = createFileRoute('/company/dashboard')({
-  component: CompanyDashboard
+  beforeLoad: () => {
+    requireRole('company')
+  },
+  component: CompanyDashboard,
 })
-
-interface Job {
-  title: string
-  status: 'Active' | 'Paused'
-  applicants: number
-}
-
-interface Applicant {
-  name: string
-  position: string
-  score: number
-  stage: string
-  avatar: string
-}
-
-interface Skill {
-  name: string
-  applicants: number
-  progress: number
-}
 
 export default function CompanyDashboard() {
   const navigate = useNavigate()
+  const { data, isLoading, error } = useCompanyJobs()
 
-  const jobs: Job[] = [
-    { title: 'Senior Product Manager', status: 'Active', applicants: 28 },
-    { title: 'UX/UI Designer', status: 'Active', applicants: 45 },
-    { title: 'Lead Backend Engineer', status: 'Paused', applicants: 112 },
-    { title: 'Data Scientist', status: 'Active', applicants: 67 },
-  ]
-
-  const applicants: Applicant[] = [
-    {
-      name: 'Sarah Johnson',
-      position: 'UX/UI Designer',
-      score: 92,
-      stage: 'New',
-      avatar:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBKByykQeIh5ZSoqD52rl5cxOIAbhWugPfDPvnVc1kP12ZOaJw043XPltGDyrTSN5yu7diYwsX9VMhuAAObaUnozMNFtqlrJR8f6hPAY6XFp2bZWIMl-HZXP5BQRs-xlr4sg2iAJf2Tsh7p4U0VH7eh8-3Ft0pIsdx1Q3WjUN6_LMnPTbMmqByc_bsA2twK50sBXRIJXIKVCBuuTk0ITK7rfkAPBNT6ox3Xo_bOLXi9gRs5dIbca6onXCqoGXNaPXVSILiLGtiGUEI2',
-    },
-    {
-      name: 'Michael Chen',
-      position: 'Data Scientist',
-      score: 89,
-      stage: 'Reviewing',
-      avatar:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuB_pgsuAHBtf0ATLMiyTeq1WCwL0SdZ0tdwSXigXpglRxL5oskgNmwAYQ_7sE_YK-F53PlvrjJfJqJdbzuv5ZnAkC0p6Dqfytx65pnoyh54XYOEiBK-V11BqGbSRoggDpLul0lNU7HowkPBGf8cKpccU7BVHbfK5FfAZHZQnDP_QkseLcqvtJLxDDlOEKKkzncF2caK7MRlnjtqIMx17LYd7UyqdatsJvE6cDHn-15bLg0wCul9YkvLdarR7PDxYdtW1pgFivAlHBCU',
-    },
-    {
-      name: 'Emily Davis',
-      position: 'Product Manager',
-      score: 74,
-      stage: 'New',
-      avatar:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuAy2aXVuiQ5_VCwOd1R2xyp9p60EOc6ZBL5xFwZPEOPSZqeP5ZOWld6WW7PLSUKw4-f72Udwd2OC9yZexzyPP3YnkUlkF6huCISmpqiFhAtKHtSlPxOthhS84YCYK8iPOVP1rqvSwXuamI9XpR3DCOKZ_txWxWHmqH5xlXSpr2UlNuTED4AwPN9Kw0WFPVn-n18UbV6tPeGXODFv8yDLbfzII7FhxRAJDhn-QUyx9ntAvDcNLLXNFMtvBIBkFxj1BLuBXm9xfkITX9e',
-    },
-  ]
-
-  const skills: Skill[] = [
-    { name: 'Product Management', applicants: 25, progress: 90 },
-    { name: 'UX Design', applicants: 21, progress: 80 },
-    { name: 'Python', applicants: 18, progress: 75 },
-    { name: 'SQL', applicants: 15, progress: 60 },
-    { name: 'Agile Methodology', applicants: 12, progress: 50 },
-  ]
+  const jobs = data?.jobs || []
+  const company = data?.company
+  const activeJobs = jobs.filter((job: any) => job.isActive === true)
+  const totalApplicants = jobs.reduce(
+    (acc: number, job: any) => acc + (job.applicants?.length || 0),
+    0,
+  )
 
   return (
-    <div className="flex min-h-screen font-sans bg-slate-50 dark:bg-slate-900 transition-colors">
-      {/* Fixed Sidebar */}
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <CompanySidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 ml-64 p-8 overflow-y-auto">
-        <div className="mx-auto max-w-7xl flex flex-col gap-8">
+      <main className="flex-1 ml-64 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
           {/* Page Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-                Dashboard
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                Welcome back, here's an overview of your recruitment activity.
-              </p>
-            </div>
-            <button className="inline-flex items-center gap-2 px-5 h-11 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20">
-              <span className="material-symbols-outlined text-lg">
-                add_circle
-              </span>
-              <span>Create New Job</span>
-            </button>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+              Dashboard
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Welcome back{company ? `, ${company.name}` : ''}! Here's an
+              overview of your recruitment activity.
+            </p>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">
-                    work
-                  </span>
+          {/* Stats - Loading State */}
+          {isLoading ? (
+            <ShimmerDashboardStats />
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-lg bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-2xl text-teal-600 dark:text-teal-400">
+                      work
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Active Jobs
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {activeJobs.length}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Active Jobs
-                </p>
               </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">
-                12
-              </p>
-            </div>
-            <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-green-600 dark:text-green-400">
-                    person_add
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  New Applicants (7d)
-                </p>
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">
-                34
-              </p>
-            </div>
-            <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-purple-600 dark:text-purple-400">
-                    analytics
-                  </span>
-                </div>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                  Avg. AI Match Score
-                </p>
-              </div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white">
-                88%
-              </p>
-            </div>
-          </div>
 
-          {/* Main Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
-              {/* Active Job Postings */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
-                <h2 className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-lg font-bold text-slate-900 dark:text-white">
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-2xl text-blue-600 dark:text-blue-400">
+                      person_add
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Total Applicants
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {totalApplicants}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-2xl text-purple-600 dark:text-purple-400">
+                      description
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      Total Jobs
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {jobs.length}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Active Job Postings - Loading State */}
+          {isLoading ? (
+            <ShimmerDashboardTable />
+          ) : (
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   Active Job Postings
                 </h2>
+              </div>
+
+              {/* Error State */}
+              {error && (
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mb-4">
+                    <span className="material-symbols-outlined text-3xl text-red-600 dark:text-red-400">
+                      error
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    Error Loading Jobs
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {error instanceof Error
+                      ? error.message
+                      : 'An unexpected error occurred'}
+                  </p>
+                </div>
+              )}
+
+              {/* Empty State */}
+              {!error && activeJobs.length === 0 && (
+                <div className="p-12 text-center">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                    <span className="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-500">
+                      work_off
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    No Active Jobs
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    You don't have any active job postings at the moment.
+                  </p>
+                  <button
+                    onClick={() => navigate({ to: '/company/add-job' })}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      add
+                    </span>
+                    Post a Job
+                  </button>
+                </div>
+              )}
+
+              {/* Jobs Table */}
+              {!error && activeJobs.length > 0 && (
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-slate-50 dark:bg-slate-900/50">
+                    <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                           Job Title
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                          Status
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                          Location
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                          Experience
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                          Type
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                           Applicants
                         </th>
-                        <th className="px-6 py-3"></th>
+                        <th className="px-6 py-4"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                      {jobs.map((job, idx) => (
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                      {activeJobs.map((job: any) => (
                         <tr
-                          key={idx}
-                          className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                          key={job._id}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                         >
-                          <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">
-                            {job.title}
+                          <td className="px-6 py-4">
+                            <div className="font-semibold text-gray-900 dark:text-white">
+                              {job.title}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                              {job.companyName || company?.name || 'N/A'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                            {job.location}
                           </td>
                           <td className="px-6 py-4">
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                                job.status === 'Active'
-                                  ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800'
-                                  : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
-                              }`}
-                            >
-                              {job.status}
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                              {job.experienceLevel}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
-                            {job.applicants}
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                              {job.jobType}
+                            </span>
                           </td>
                           <td className="px-6 py-4">
-                            <button className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-                              View →
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <span className="material-symbols-outlined text-base text-gray-400">
+                                person
+                              </span>
+                              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                                {job.applicants?.length || 0}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() =>
+                                  navigate({
+                                    to: '/company/applicants',
+                                    search: { jobId: job._id },
+                                  })
+                                }
+                                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-base">
+                                  visibility
+                                </span>
+                                View
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </div>
-
-              {/* Recent Applicants */}
-              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
-                <h2 className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 text-lg font-bold text-slate-900 dark:text-white">
-                  Recent Applicants
-                </h2>
-                <div className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {applicants.map((a, idx) => (
-                    <div
-                      key={idx}
-                      className="px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div
-                            className="w-12 h-12 rounded-full bg-center bg-cover flex-shrink-0"
-                            style={{ backgroundImage: `url(${a.avatar})` }}
-                          />
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-                              {a.name}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                              Applied for {a.position}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4 flex-shrink-0">
-                          <span
-                            className={`text-sm font-bold px-2.5 py-1 rounded-full ${
-                              a.score >= 85
-                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                                : a.score >= 70
-                                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                                  : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
-                            }`}
-                          >
-                            {a.score}%
-                          </span>
-                          <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-2.5 py-1 rounded-full">
-                            {a.stage}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
-
-            {/* Right Column - Skills */}
-            <div>
-              <div className="p-6 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
-                <h3 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">
-                  Top Applicant Skills
-                </h3>
-                <div className="space-y-5">
-                  {skills.map((skill, idx) => (
-                    <div key={idx}>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                          {skill.name}
-                        </span>
-                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                          {skill.applicants} applicants
-                        </span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-2 bg-blue-600 dark:bg-blue-500 rounded-full transition-all duration-500"
-                          style={{ width: `${skill.progress}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

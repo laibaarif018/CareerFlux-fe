@@ -1,4 +1,4 @@
-// src/utils/auth.ts
+
 export function getAuthToken() {
   if (typeof document === 'undefined') {
     return null // running on server
@@ -8,25 +8,17 @@ export function getAuthToken() {
   return match ? match[2] : null
 }
 
-// export function getAuthToken(): string | null {
-//   // Handle SSR (server-side rendering)
-//   if (typeof document === 'undefined') {
-//     return null
+
+// export function getUserFromToken() {
+//   const token = getAuthToken();
+//   if (!token) return null;
+
+//   try {
+//     const decoded: any = jwt_decode.jwtDecode(token);
+//     console.log('Decoded JWT:', decoded);
+//     return { id: decoded.sub, role: decoded.role, name: decoded.name, email: decoded.email };
+//   } catch {
+//     return null;
 //   }
-
-//   const match = document.cookie.match(/(^| )access_token=([^;]+)/)
-//   return match ? match[2] : null
 // }
 
-// export function setAuthToken(token: string, days: number = 7): void {
-//   if (typeof document === 'undefined') return
-
-//   const expires = new Date(Date.now() + days * 864e5).toUTCString()
-//   document.cookie = `access_token=${token}; expires=${expires}; path=/; SameSite=Lax`
-// }
-
-// export function removeAuthToken(): void {
-//   if (typeof document === 'undefined') return
-
-//   document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
-// }

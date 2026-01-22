@@ -1,242 +1,578 @@
-import { createFileRoute, Link,useNavigate } from '@tanstack/react-router'
-import { useMemo, useState } from "react";
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useMemo, useState } from 'react'
+import { useCompanyJobs } from '@/queries/job.queries'
+import CompanySidebar from '@/components/companysidebar'
+import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/company/jobs')({
+  beforeLoad: () => {
+    requireRole('company')
+  },
   component: AllJobs,
 })
 
-interface Job {
-  id: string;
-  title: string;
-  status: "Active" | "Paused" | "Closed";
-  applicants: number;
-  location: string;
-  type: string;
-}
-
 export default function AllJobs() {
-  const navigate = useNavigate();
-  // Demo data - remove this and uncomment empty array for new companies
-  const [jobs] = useState<Job[]>([
-    { id: "1", title: "Senior Product Manager", status: "Active", applicants: 28, location: "Remote", type: "Full-time" },
-    { id: "2", title: "UX/UI Designer", status: "Active", applicants: 45, location: "Hybrid", type: "Full-time" },
-    { id: "3", title: "Lead Backend Engineer", status: "Paused", applicants: 112, location: "On-site", type: "Full-time" },
-  ]);
-  // For new companies, use: const [jobs] = useState<Job[]>([]);
+  const navigate = useNavigate()
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  // Fetch jobs from backend
+  const { data, isLoading, error } = useCompanyJobs()
+  const jobs = data?.jobs || []
+  const company = data?.company
 
+  // Filter states
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [locationFilter, setLocationFilter] = useState('')
+  const [experienceLevelFilter, setExperienceLevelFilter] = useState('')
+  const [jobTypeFilter, setJobTypeFilter] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Count active filters
+  const activeFiltersCount = [
+    statusFilter !== 'All' ? statusFilter : null,
+    locationFilter,
+    experienceLevelFilter,
+    jobTypeFilter,
+  ].filter(Boolean).length
+
+  // Filter jobs
   const filteredJobs = useMemo(() => {
-    return jobs.filter((job) => {
-      const matchesSearch = job.title.toLowerCase().includes(search.toLowerCase());
-      const matchesStatus = statusFilter === "All" || job.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [jobs, search, statusFilter]);
+    return jobs.filter((job: any) => {
+      const matchesSearch =
+        job.title.toLowerCase().includes(search.toLowerCase()) ||
+        (job.companyName || company?.name || '')
+          .toLowerCase()
+          .includes(search.toLowerCase())
+
+      const matchesStatus =
+        statusFilter === 'All' ||
+        (statusFilter === 'Active' && job.isActive) ||
+        (statusFilter === 'Closed' && !job.isActive)
+
+      const matchesLocation =
+        !locationFilter ||
+        job.location.toLowerCase().includes(locationFilter.toLowerCase())
+
+      const matchesExperience =
+        !experienceLevelFilter || job.experienceLevel === experienceLevelFilter
+
+      const matchesJobType = !jobTypeFilter || job.jobType === jobTypeFilter
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesLocation &&
+        matchesExperience &&
+        matchesJobType
+      )
+    })
+  }, [
+    jobs,
+    search,
+    statusFilter,
+    locationFilter,
+    experienceLevelFilter,
+    jobTypeFilter,
+    company,
+  ])
+
+  const clearAllFilters = () => {
+    setSearch('')
+    setStatusFilter('All')
+    setLocationFilter('')
+    setExperienceLevelFilter('')
+    setJobTypeFilter('')
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
 
   return (
-    <div className="flex min-h-screen font-sans bg-slate-50 dark:bg-slate-900">
-      {/* Sidebar - Same as dashboard */}
-      <nav className="flex flex-col justify-between w-64 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/50">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">R</div>
-            <div className="flex flex-col">
-              <h1 className="text-sm font-bold text-slate-900 dark:text-white">ResumeAI Inc.</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Hiring Manager</p>
-            </div>
-          </div>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Sidebar */}
+      <CompanySidebar />
 
-          <div className="flex flex-col gap-1">
-            <Link to="/company/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
-              <span className="material-symbols-outlined text-xl">dashboard</span>
-              <p className="text-sm font-medium">Dashboard</p>
-            </Link>
-            <Link to="/company/jobs" className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-              <span className="material-symbols-outlined text-xl">work</span>
-              <p className="text-sm font-medium">Jobs</p>
-            </Link>
-            <Link to="/company/candidates" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
-              <span className="material-symbols-outlined text-xl">group</span>
-              <p className="text-sm font-medium">Candidates</p>
-            </Link>
-            <Link to="/company/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
-              <span className="material-symbols-outlined text-xl">settings</span>
-              <p className="text-sm font-medium">Settings</p>
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          <button className="h-10 px-4 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-colors shadow-sm">Upgrade Plan</button>
-          <div className="flex flex-col gap-1 pt-3 border-t border-slate-200 dark:border-slate-700">
-            <Link to="/company/support" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors">
-              <span className="material-symbols-outlined text-xl">help</span>
-              <p className="text-sm font-medium">Support</p>
-            </Link>
-            <Link to="/auth/login" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors">
-              <span className="material-symbols-outlined text-xl">logout</span>
-              <p className="text-sm font-medium">Log Out</p>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="mx-auto max-w-7xl">
+      {/* Main Content - with left margin to account for fixed sidebar */}
+      <main className="flex-1 ml-64 overflow-y-auto">
+        <div className="max-w-7xl mx-auto p-6 md:p-8 space-y-6">
           {/* Header */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
                 All Job Postings
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
-                View and manage all your job postings.
+              <p className="text-gray-600 dark:text-gray-400">
+                View and manage all your job postings
               </p>
             </div>
 
             <button
-              onClick={() => navigate({ to: '/company/addJob' })}
-              className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20"
+              onClick={() => navigate({ to: '/company/add-job' })}
+              className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
             >
-              <span className="material-symbols-outlined text-lg">add_circle</span>
+              <span className="material-symbols-outlined text-xl">
+                add_circle
+              </span>
               Create New Job
             </button>
           </div>
 
-          {/* Filters */}
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 mb-6 shadow-sm">
-            <div className="p-6 flex flex-wrap gap-4 items-center">
-              <div className="relative flex-1 min-w-[240px]">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500">
-                  search
-                </span>
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search jobs..."
-                  className="w-full h-10 pl-10 pr-4 text-sm rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-                />
-              </div>
+          {/* Search and Filter Section */}
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm overflow-hidden">
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                {/* Search Bar */}
+                <div className="relative flex-1">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+                    search
+                  </span>
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search jobs by title or company..."
+                    className="w-full h-12 pl-12 pr-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                  />
+                </div>
 
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-10 px-4 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-colors"
-              >
-                <option value="All">All Statuses</option>
-                <option value="Active">Active</option>
-                <option value="Paused">Paused</option>
-                <option value="Closed">Closed</option>
-              </select>
-
-              {(search || statusFilter !== "All") && (
+                {/* Filter Toggle Button */}
                 <button
-                  onClick={() => {
-                    setSearch("");
-                    setStatusFilter("All");
-                  }}
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`relative h-12 px-5 rounded-lg border-2 flex items-center justify-center gap-2 font-semibold transition-all ${
+                    showFilters
+                      ? 'bg-teal-600 border-teal-600 text-white shadow-lg shadow-teal-600/20'
+                      : 'bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
                 >
-                  Clear filters
+                  <span className="material-symbols-outlined text-xl">
+                    tune
+                  </span>
+                  <span>Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <span
+                      className={`absolute -top-2 -right-2 min-w-[24px] h-6 px-1.5 rounded-full flex items-center justify-center text-xs font-bold ${
+                        showFilters
+                          ? 'bg-white text-teal-600'
+                          : 'bg-teal-600 text-white'
+                      }`}
+                    >
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </button>
-              )}
+
+                {activeFiltersCount > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="h-12 px-5 font-semibold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Expandable Filters */}
+            {showFilters && (
+              <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-700 pt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Status Filter */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                      Status
+                    </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="w-full h-11 px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                    >
+                      <option value="All">All Statuses</option>
+                      <option value="Active">Active</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                  </div>
+
+                  {/* Location Filter */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Remote, NYC"
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                      className="w-full h-11 px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  {/* Experience Level Filter */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                      Experience Level
+                    </label>
+                    <select
+                      value={experienceLevelFilter}
+                      onChange={(e) => setExperienceLevelFilter(e.target.value)}
+                      className="w-full h-11 px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">All Levels</option>
+                      <option value="Entry">Entry Level</option>
+                      <option value="Mid">Mid Level</option>
+                      <option value="Senior">Senior Level</option>
+                      <option value="Lead">Lead</option>
+                    </select>
+                  </div>
+
+                  {/* Job Type Filter */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                      Job Type
+                    </label>
+                    <select
+                      value={jobTypeFilter}
+                      onChange={(e) => setJobTypeFilter(e.target.value)}
+                      className="w-full h-11 px-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                    >
+                      <option value="">All Types</option>
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Contract">Contract</option>
+                      <option value="Internship">Internship</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Active Filter Tags */}
+                {activeFiltersCount > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    {statusFilter !== 'All' && (
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-lg text-sm font-semibold border border-teal-200 dark:border-teal-800">
+                        Status: {statusFilter}
+                        <button
+                          onClick={() => setStatusFilter('All')}
+                          className="hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-full p-0.5 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            close
+                          </span>
+                        </button>
+                      </span>
+                    )}
+                    {locationFilter && (
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-lg text-sm font-semibold border border-teal-200 dark:border-teal-800">
+                        Location: {locationFilter}
+                        <button
+                          onClick={() => setLocationFilter('')}
+                          className="hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-full p-0.5 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            close
+                          </span>
+                        </button>
+                      </span>
+                    )}
+                    {experienceLevelFilter && (
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-lg text-sm font-semibold border border-teal-200 dark:border-teal-800">
+                        Experience: {experienceLevelFilter}
+                        <button
+                          onClick={() => setExperienceLevelFilter('')}
+                          className="hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-full p-0.5 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            close
+                          </span>
+                        </button>
+                      </span>
+                    )}
+                    {jobTypeFilter && (
+                      <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-lg text-sm font-semibold border border-teal-200 dark:border-teal-800">
+                        Type: {jobTypeFilter}
+                        <button
+                          onClick={() => setJobTypeFilter('')}
+                          className="hover:bg-teal-100 dark:hover:bg-teal-900/40 rounded-full p-0.5 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            close
+                          </span>
+                        </button>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Empty State or Table */}
-          {filteredJobs.length === 0 ? (
-            <div className="rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 p-12 text-center">
+          {/* Loading State with Shimmer */}
+          {isLoading && (
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Job Title
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Location
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Experience
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Posted
+                      </th>
+                      <th className="px-6 py-4" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {[...Array(5)].map((_, index) => (
+                      <tr key={index} className="animate-pulse">
+                        <td className="px-6 py-4">
+                          <div className="space-y-2">
+                            <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                            </div>
+                            <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-7 w-16 bg-gray-200 dark:bg-gray-700 rounded-full relative overflow-hidden">
+                            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="h-4 w-28 bg-gray-200 dark:bg-gray-700 rounded relative overflow-hidden">
+                            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="h-9 w-9 bg-gray-200 dark:bg-gray-700 rounded-lg relative overflow-hidden">
+                              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                            </div>
+                            <div className="h-9 w-9 bg-gray-200 dark:bg-gray-700 rounded-lg relative overflow-hidden">
+                              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/90 dark:via-gray-500/60 to-transparent" />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-8 text-center">
               <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-5xl text-slate-400 dark:text-slate-500">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-4xl text-red-600 dark:text-red-400">
+                    error
+                  </span>
+                </div>
+              </div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                Error Loading Jobs
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {error instanceof Error
+                  ? error.message
+                  : 'An unexpected error occurred'}
+              </p>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && !error && filteredJobs.length === 0 && (
+            <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">
                     work_off
                   </span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
-                {search || statusFilter !== "All" ? "No jobs found" : "No jobs yet"}
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {search || activeFiltersCount > 0
+                  ? 'No Jobs Found'
+                  : 'No Jobs Yet'}
               </h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto mb-6">
-                {search || statusFilter !== "All" 
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+                {search || activeFiltersCount > 0
                   ? "Try adjusting your search or filters to find what you're looking for."
-                  : "Create your first job posting to start receiving candidates."}
+                  : 'Create your first job posting to start receiving candidates.'}
               </p>
               <button
-                onClick={() => alert("Open Create Job Modal")}
-                className="inline-flex items-center gap-2 h-11 px-5 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                onClick={() => navigate({ to: '/company/add-job' })}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
               >
-                <span className="material-symbols-outlined text-lg">add_circle</span>
+                <span className="material-symbols-outlined text-xl">
+                  add_circle
+                </span>
                 Create Job
               </button>
             </div>
-          ) : (
-            /* Table */
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden shadow-sm">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 dark:bg-slate-900/50">
-                  <tr className="border-b border-slate-200 dark:border-slate-700">
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Job Title
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Location
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                      Applicants
-                    </th>
-                    <th className="px-6 py-3" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                  {filteredJobs.map((job) => (
-                    <tr
-                      key={job.id}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                    >
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-semibold text-slate-900 dark:text-white">{job.title}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{job.type}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                            job.status === "Active"
-                              ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800"
-                              : job.status === "Paused"
-                              ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                              : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
-                          }`}
-                        >
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                        {job.location}
-                      </td>
-                      <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                        {job.applicants}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">
-                          <span className="material-symbols-outlined">more_vert</span>
-                        </button>
-                      </td>
+          )}
+
+          {/* Jobs Table */}
+          {!isLoading && !error && filteredJobs.length > 0 && (
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Job Title
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Location
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Experience
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Posted
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                        Applicants
+                      </th>
+                      <th className="px-6 py-4" />
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {filteredJobs.map((job: any) => (
+                      <tr
+                        key={job._id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              {job.title}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {job.jobType}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                              job.isActive
+                                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 border-teal-200 dark:border-teal-800'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${job.isActive ? 'bg-teal-500' : 'bg-gray-500'}`}
+                            ></span>
+                            {job.isActive ? 'Active' : 'Closed'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                          {job.location}
+                        </td>
+
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                          {job.experienceLevel}
+                        </td>
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">
+                          {formatDate(job.createdAt)}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <button
+                            onClick={() =>
+                              navigate({
+                                to: '/company/applicants',
+                                search: { jobId: job._id },
+                              })
+                            }
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-900/30 transition-colors font-semibold text-sm border border-teal-200 dark:border-teal-800"
+                          >
+                            <span className="material-symbols-outlined text-base">
+                              group
+                            </span>
+                            <span>{job.applicants?.length || 0}</span>
+                          </button>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="relative group">
+                              <button
+                                onClick={() =>
+                                  navigate({
+                                    to: '/company/jobDetails',
+                                    search: { id: job._id },
+                                  })
+                                }
+                                className="p-2 text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-xl">
+                                  visibility
+                                </span>
+                              </button>
+                              <span className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                                View Details
+                                <span className="absolute top-full right-4 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                              </span>
+                            </div>
+                            <div className="relative group">
+                              <button
+                                onClick={() =>
+                                  navigate({
+                                    to: '/company/editJob',
+                                    search: { id: job._id },
+                                  })
+                                }
+                                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-xl">
+                                  edit
+                                </span>
+                              </button>
+                              <span className="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                                Edit Job
+                                <span className="absolute top-full right-4 -mt-1 border-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       </main>
     </div>
-  );
+  )
 }

@@ -1,6 +1,8 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
-import { useUploadResume } from '@/hooks/useResume'
+import { useUploadResume } from '@/queries/resume.queries'
+import { requireRole } from '@/utils/RouteGuard'
+import { showError,showToast } from '@/utils/swal'
 
 function UploadModalRoute() {
   const [isOpen, setIsOpen] = useState(true)
@@ -14,7 +16,10 @@ function UploadModalRoute() {
   return <UploadModal isOpen={isOpen} onClose={handleClose} />
 }
 
-export const Route = createFileRoute('/uploadResume')({
+export const Route = createFileRoute('/job-seeker/uploadResume')({
+  beforeLoad: () => {
+    requireRole('jobseeker')
+  },
   component: UploadModalRoute,
 })
 
@@ -38,11 +43,7 @@ function UploadModal({
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const selectedFile = e.target.files[0]
-      const validTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      ]
+      const validTypes = ['application/pdf']
       if (validTypes.includes(selectedFile.type)) {
         setFile(selectedFile)
         setProgress(0)
@@ -80,38 +81,50 @@ function UploadModal({
     setIsDragging(false)
   }
 
-  const handleUpload = async () => {
-    if (!file) return
-
-    setIsUploading(true)
-    setProgress(0)
-
-    uploadResumeMutation.mutate(
-      { 
-        file,
-        onProgress: (percent) => {
-          setProgress(percent)
-        },
-      },
-      {
-        onSuccess: (res) => {
-          console.log('response', res)
-          const resumeId = res.resumeId
-          console.log(resumeId)
-
-          navigate({
-            to: '/parsedResume/$resumeId',
-            params: { resumeId },
-          })
-        },
-        onError: (error: any) => {
-          alert(error?.message || 'Upload failed')
-          setIsUploading(false)
-          setProgress(0)
-        },
-      },
-    )
+ const handleUpload = async () => {
+  if (!file) {
+    showToast('Please select a file first', 'warning')
+    return
   }
+
+  setIsUploading(true)
+  setProgress(0)
+
+  uploadResumeMutation.mutate(
+    {
+      file,
+      onProgress: (percent) => {
+        setProgress(percent)
+      },
+    },
+    {
+      onSuccess: (res) => {
+        const resumeId = res.payload.resumeId
+
+        showToast('Resume uploaded successfully', 'success')
+
+        setIsUploading(false)
+        setProgress(0)
+
+        navigate({
+          to: '/job-seeker/parsedResume/$resumeId',
+          params: { resumeId },
+        })
+      },
+      onError: (error: any) => {
+        showError(
+          'Upload Failed',
+          error?.response?.data?.message ||
+            error?.message ||
+            'Resume upload failed. Please try again.',
+        )
+
+        setIsUploading(false)
+        setProgress(0)
+      },
+    },
+  )
+}
 
   const handleRemoveFile = () => {
     setFile(null)

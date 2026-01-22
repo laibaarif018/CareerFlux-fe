@@ -1,224 +1,177 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useRef, useEffect } from "react";
-import CompanySidebar from '@/components/companysidebar';
-import { useCompanyProfile, useUpdateCompanyProfile } from '@/hooks/useCompany'
-import { CompanyProfileData } from '@/services/company.service'
-import { z } from 'zod'
+import { useRef } from 'react'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import CompanySidebar from '@/components/companysidebar'
+import {
+  useCompanyProfile,
+  useUpdateCompanyProfile,
+} from '@/queries/company.queries'
+import { ShimmerProfileForm } from '@/components/Shimmer'
+import React from 'react'
+import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/company/profile')({
+  beforeLoad: () => {
+    requireRole('company')
+  },
   component: CompanyProfileSetup,
 })
+// Yup validation schema
+const companyProfileSchema = yup.object({
+  companyName: yup
+    .string()
+    .required('Company name is required')
+    .min(2, 'Company name must be at least 2 characters'),
+  websiteUrl: yup
+    .string()
+    .required('Website URL is required')
+    .url('Please enter a valid URL'),
+  industry: yup.string().required('Industry is required'),
+  companySize: yup.string().required('Company size is required'),
+  description: yup
+    .string()
+    .required('Company description is required')
+    .min(10, 'Description must be at least 10 characters'),
+  contactName: yup
+    .string()
+    .required('Contact name is required')
+    .min(2, 'Contact name must be at least 2 characters'),
+  contactEmail: yup
+    .string()
+    .required('Contact email is required')
+    .email('Please enter a valid email address'),
+  contactNumber: yup
+    .string()
+    .required('Contact phone is required')
+    .matches(
+      /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+      'Please enter a valid phone number',
+    ),
+  logo: yup
+    .mixed<File>()
+    .nullable()
+    .test('fileSize', 'File size must be less than 5MB', (value) => {
+      if (!value) return true
+      return value.size <= 5 * 1024 * 1024
+    })
+    .test('fileType', 'Please upload a valid image file', (value) => {
+      if (!value) return true
+      return value.type.startsWith('image/')
+    }),
+})
 
-const companyProfileSchema = z.object({
-  companyName: z.string().min(1, "Company name is required").min(2, "Company name must be at least 2 characters"),
-  websiteUrl: z.string().min(1, "Website URL is required").url("Please enter a valid URL"),
-  industry: z.string().min(1, "Industry is required"),
-  companySize: z.string().min(1, "Company size is required"),
-  description: z.string().min(1, "Company description is required").min(10, "Description must be at least 10 characters"),
-  contactName: z.string().min(1, "Contact name is required").min(2, "Contact name must be at least 2 characters"),
-  contactEmail: z.string().min(1, "Contact email is required").email("Please enter a valid email address"),
-  contactNumber: z.string().min(1, "Contact phone is required").regex(/^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/, "Please enter a valid phone number"),
-});
-
-type ValidationErrors = {
-  [K in keyof z.infer<typeof companyProfileSchema>]?: string;
-};
+type CompanyProfileForm = yup.InferType<typeof companyProfileSchema>
 
 export default function CompanyProfileSetup() {
-  const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>("");
-  const [errors, setErrors] = useState<ValidationErrors>({});
-  const [logoError, setLogoError] = useState<string>("");
-  const [form, setForm] = useState({
-    companyName: "",
-    websiteUrl: "",
-    industry: "",
-    companySize: "",
-    description: "",
-    contactName: "",
-    contactEmail: "",
-    contactNumber: "",
-  });
+  const navigate = useNavigate()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { data: profileData, isLoading } = useCompanyProfile();
-  const updateProfileMutation = useUpdateCompanyProfile();
+  const { data: profileData, isLoading } = useCompanyProfile()
+  const updateProfileMutation = useUpdateCompanyProfile()
 
-  useEffect(() => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<CompanyProfileForm>({
+    resolver: yupResolver(companyProfileSchema) as any,
+    defaultValues: {
+      companyName: '',
+      websiteUrl: '',
+      industry: '',
+      companySize: '',
+      description: '',
+      contactName: '',
+      contactEmail: '',
+      contactNumber: '',
+      logo: null,
+    },
+  })
+
+  // Watch logo for preview
+  const logoFile = watch('logo')
+  const logoPreview = logoFile
+    ? URL.createObjectURL(logoFile)
+    : profileData?.payload?.logoUrl || ''
+
+  // Load existing profile data
+  React.useEffect(() => {
     if (profileData?.payload) {
-      const profile = profileData.payload;
-      setForm({
-        companyName: profile.companyName || "",
-        websiteUrl: profile.websiteUrl || "",
-        industry: profile.industry || "",
-        companySize: profile.companySize || "",
-        description: profile.description || "",
-        contactName: profile.contactName || "",
-        contactEmail: profile.contactEmail || "",
-        contactNumber: profile.contactNumber || "",
-      });
-      
-      if (profile.logoUrl) {
-        setLogoPreview(profile.logoUrl);
-      }
+      const profile = profileData.payload
+      reset({
+        companyName: profile.companyName || '',
+        websiteUrl: profile.websiteUrl || '',
+        industry: profile.industry || '',
+        companySize: profile.companySize || '',
+        description: profile.description || '',
+        contactName: profile.contactName || '',
+        contactEmail: profile.contactEmail || '',
+        contactNumber: profile.contactNumber || '',
+        logo: null,
+      })
     }
-  }, [profileData]);
+  }, [profileData, reset])
 
-  // Debug: Log logoFile state whenever it changes
-  useEffect(() => {
-    console.log('🔍 Logo file state changed:', {
-      hasFile: !!logoFile,
-      fileName: logoFile?.name,
-      fileSize: logoFile?.size,
-      fileType: logoFile?.type,
-    });
-  }, [logoFile]);
-
-  function updateField(key: string, value: string) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-    if (errors[key as keyof ValidationErrors]) {
-      setErrors((prev) => ({ ...prev, [key]: undefined }));
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setValue('logo', file, { shouldValidate: true })
     }
   }
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('📁 File input changed');
-    const file = e.target.files?.[0];
-    
-    if (!file) {
-      console.log('❌ No file selected');
-      return;
-    }
-
-    console.log('📄 File selected:', {
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      lastModified: new Date(file.lastModified).toISOString(),
-    });
-
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      console.log('❌ File too large:', file.size);
-      setLogoError('File size must be less than 5MB');
-      setLogoFile(null);
-      return;
-    }
-    
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      console.log('❌ Invalid file type:', file.type);
-      setLogoError('Please upload a valid image file');
-      setLogoFile(null);
-      return;
-    }
-    
-    console.log('✅ File validation passed');
-    setLogoError("");
-    setLogoFile(file); // Store the actual File object
-    
-    // Create preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      console.log('🖼️ Preview created');
-      setLogoPreview(reader.result as string);
-    };
-    reader.onerror = () => {
-      console.error('❌ Failed to create preview');
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSave = async () => {
-    console.log('💾 Save button clicked');
-    console.log('📋 Current form data:', form);
-    console.log('🖼️ Current logo file:', logoFile ? {
-      name: logoFile.name,
-      size: logoFile.size,
-      type: logoFile.type,
-    } : 'No file');
-
-    // Validate form using Zod
-    const result = companyProfileSchema.safeParse(form);
-    
-    if (!result.success) {
-      console.log('❌ Form validation failed:', result.error.issues);
-      const formattedErrors: ValidationErrors = {};
-      result.error.issues.forEach((error) => {
-        const field = error.path[0] as keyof ValidationErrors;
-        formattedErrors[field] = error.message;
-      });
-      setErrors(formattedErrors);
-      
-      const firstErrorField = Object.keys(formattedErrors)[0];
-      document.getElementById(firstErrorField)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
-
-    console.log('✅ Form validation passed');
-    setErrors({});
-
-    const profileData: CompanyProfileData = {
-      companyName: form.companyName,
-      websiteUrl: form.websiteUrl,
-      industry: form.industry,
-      companySize: form.companySize,
-      description: form.description,
-      contactName: form.contactName,
-      contactEmail: form.contactEmail,
-      contactNumber: form.contactNumber,
-    };
-
-    console.log('📤 Preparing to send:', {
-      profileData,
-      hasLogoFile: !!logoFile,
-      logoFileName: logoFile?.name,
-    });
-
+  const onSubmit = async (data: CompanyProfileForm) => {
     try {
-      const mutationData = {
+      const { logo, ...profileData } = data
+
+      await updateProfileMutation.mutateAsync({
         data: profileData,
-        logoFile: logoFile || undefined,
-      };
+        logoFile: logo || undefined,
+      })
 
-      console.log('🚀 Calling mutation with:', {
-        hasData: !!mutationData.data,
-        hasLogoFile: !!mutationData.logoFile,
-        logoFileDetails: mutationData.logoFile ? {
-          name: mutationData.logoFile.name,
-          size: mutationData.logoFile.size,
-          type: mutationData.logoFile.type,
-        } : null,
-      });
-
-      const result = await updateProfileMutation.mutateAsync(mutationData);
-      
-      console.log('✅ Profile updated successfully:', result);
-      navigate({ to: '/company/dashboard' });
+      alert('Profile updated successfully!')
+      navigate({ to: '/company/dashboard' })
     } catch (error) {
-      console.error('❌ Error updating profile:', error);
+      console.error('Error updating profile:', error)
+      alert('Failed to update profile. Please try again.')
     }
-  };
+  }
+
+  const handleReset = () => {
+    if (profileData?.payload) {
+      reset({
+        companyName: profileData.payload.companyName || '',
+        websiteUrl: profileData.payload.websiteUrl || '',
+        industry: profileData.payload.industry || '',
+        companySize: profileData.payload.companySize || '',
+        description: profileData.payload.description || '',
+        contactName: profileData.payload.contactName || '',
+        contactEmail: profileData.payload.contactEmail || '',
+        contactNumber: profileData.payload.contactNumber || '',
+        logo: null,
+      })
+    }
+  }
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
         <CompanySidebar />
-        <main className="flex-1 ml-64 flex justify-center items-center px-4 py-8">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-slate-600 dark:text-slate-400">Loading profile...</p>
-          </div>
+        <main className="flex-1 ml-64 px-4 py-8">
+          <ShimmerProfileForm />
         </main>
       </div>
-    );
+    )
   }
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900 font-sans transition-colors">
       <CompanySidebar />
-      
+
       <main className="flex-1 ml-64 px-4 py-8">
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-6">
           <div className="flex flex-col gap-2">
@@ -226,319 +179,408 @@ export default function CompanyProfileSetup() {
               Company Profile Setup
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Provide your company details to get started. This information will be visible to candidates.
+              Provide your company details to get started. This information will
+              be visible to candidates.
             </p>
           </div>
 
-          <section className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
-              <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">business</span>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                Company Information
-              </h2>
-            </div>
-            <div className="p-6 flex flex-col gap-6">
-              {/* Logo Upload */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                  Company Logo {logoFile && <span className="text-green-600">({logoFile.name})</span>}
-                </label>
-                <div 
-                  onClick={() => {
-                    console.log('📂 Logo upload area clicked');
-                    fileInputRef.current?.click();
-                  }}
-                  className={`border-2 border-dashed rounded-xl px-6 py-10 text-center transition-colors cursor-pointer bg-slate-50 dark:bg-slate-900/50 ${
-                    logoError 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-slate-300 dark:border-slate-600 hover:border-blue-500 dark:hover:border-blue-400'
-                  }`}
-                >
-                  {logoPreview ? (
-                    <div className="flex flex-col items-center gap-3">
-                      <img src={logoPreview} alt="Logo preview" className="w-24 h-24 object-contain rounded-lg" />
-                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Click to change logo
-                      </p>
-                      {logoFile && (
-                        <p className="text-xs text-slate-500">
-                          {(logoFile.size / 1024).toFixed(2)} KB
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex justify-center mb-3">
-                        <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                          <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 text-3xl">upload</span>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Company Information Section */}
+            <section className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 overflow-hidden mb-6">
+              <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0E7C8C] to-[#3EC3BC] flex items-center justify-center shadow-lg shadow-[#0E7C8C]/20">
+                    <span className="material-symbols-outlined text-white text-xl">
+                      business
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                      Company Information
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Basic details about your organization
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 flex flex-col gap-6">
+                {/* Logo Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                    Company Logo{' '}
+                    {logoFile && (
+                      <span className="text-green-600">({logoFile.name})</span>
+                    )}
+                  </label>
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`group relative border-2 border-dashed rounded-2xl px-6 py-12 text-center transition-all cursor-pointer ${
+                      errors.logo
+                        ? 'border-red-500 dark:border-red-400 bg-red-50/50 dark:bg-red-900/10'
+                        : 'border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-900/30 hover:border-[#0E7C8C] dark:hover:border-[#3EC3BC] hover:bg-[#3EC3BC]/5 dark:hover:bg-[#0E7C8C]/10'
+                    }`}
+                  >
+                    {logoPreview ? (
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="relative">
+                          <img
+                            src={logoPreview}
+                            alt="Logo preview"
+                            className="w-28 h-28 object-contain rounded-xl shadow-lg"
+                          />
+                          <div className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <span className="material-symbols-outlined text-white opacity-0 group-hover:opacity-100 transition-opacity text-3xl">
+                              edit
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Click to change logo
+                          </p>
+                          {logoFile && (
+                            <p className="text-xs text-slate-500 mt-1">
+                              {(logoFile.size / 1024).toFixed(2)} KB •{' '}
+                              {logoFile.type.split('/')[1].toUpperCase()}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <p className="text-base font-semibold text-slate-900 dark:text-white mb-1">Upload Company Logo</p>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Drag & drop or click to upload (PNG, JPG up to 5MB)</p>
-                    </>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <div className="mb-4 relative">
+                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#3EC3BC]/20 to-[#0E7C8C]/20 dark:from-[#0E7C8C]/30 dark:to-[#3EC3BC]/30 flex items-center justify-center border border-[#3EC3BC]/30 dark:border-[#0E7C8C]/30 group-hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-[#0E7C8C] dark:text-[#3EC3BC] text-4xl">
+                              cloud_upload
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-base font-bold text-slate-900 dark:text-white mb-1">
+                          Upload Company Logo
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+                          Drag & drop or{' '}
+                          <span className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold">
+                            browse
+                          </span>{' '}
+                          to upload
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
+                          PNG, JPG up to 5MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  {errors.logo && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">
+                        error
+                      </span>
+                      {errors.logo.message}
+                    </p>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Form fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label
+                      htmlFor="companyName"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                      Company Name *
+                    </label>
+                    <input
+                      id="companyName"
+                      type="text"
+                      placeholder="Enter company name"
+                      {...register('companyName')}
+                      className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
+                        errors.companyName
+                          ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
+                          : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
+                      }`}
+                    />
+                    {errors.companyName && (
+                      <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          error
+                        </span>
+                        {errors.companyName.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="websiteUrl"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                      Website URL *
+                    </label>
+                    <input
+                      id="websiteUrl"
+                      type="url"
+                      placeholder="https://example.com"
+                      {...register('websiteUrl')}
+                      className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
+                        errors.websiteUrl
+                          ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
+                          : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
+                      }`}
+                    />
+                    {errors.websiteUrl && (
+                      <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          error
+                        </span>
+                        {errors.websiteUrl.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="industry"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                      Industry *
+                    </label>
+                    <select
+                      id="industry"
+                      {...register('industry')}
+                      className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-colors ${
+                        errors.industry
+                          ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
+                          : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
+                      }`}
+                    >
+                      <option value="">Select Industry</option>
+                      <option value="Technology">Technology</option>
+                      <option value="Healthcare">Healthcare</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Education">Education</option>
+                      <option value="Retail">Retail</option>
+                    </select>
+                    {errors.industry && (
+                      <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          error
+                        </span>
+                        {errors.industry.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="companySize"
+                      className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                    >
+                      Company Size *
+                    </label>
+                    <select
+                      id="companySize"
+                      {...register('companySize')}
+                      className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-colors ${
+                        errors.companySize
+                          ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
+                          : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
+                      }`}
+                    >
+                      <option value="">Select Company Size</option>
+                      <option value="1-10">1–10 employees</option>
+                      <option value="11-50">11–50 employees</option>
+                      <option value="51-200">51–200 employees</option>
+                      <option value="201-500">201–500 employees</option>
+                      <option value="501+">501+ employees</option>
+                    </select>
+                    {errors.companySize && (
+                      <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          error
+                        </span>
+                        {errors.companySize.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                  >
+                    Company Description *
+                  </label>
+                  <textarea
+                    id="description"
+                    placeholder="Tell us about your company, mission, and culture..."
+                    {...register('description')}
+                    rows={4}
+                    className={`w-full rounded-lg border bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors resize-none ${
+                      errors.description
+                        ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
+                        : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
+                    }`}
+                  />
+                  {errors.description && (
+                    <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-base">
+                        error
+                      </span>
+                      {errors.description.message}
+                    </p>
                   )}
                 </div>
-                {logoError && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">error</span>
-                    {logoError}
-                  </p>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="hidden"
-                  onClick={(e) => {
-                    // Reset the input value to allow uploading the same file again
-                    (e.target as HTMLInputElement).value = '';
-                  }}
-                />
               </div>
+            </section>
 
-              {/* Form fields - same as before */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Primary Contact section */}
+            <section className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/50 overflow-hidden mb-6">
+              <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0E7C8C] to-[#3EC3BC] flex items-center justify-center shadow-lg shadow-[#0E7C8C]/20">
+                    <span className="material-symbols-outlined text-white text-xl">
+                      person
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                      Primary Contact
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      Contact information for your company
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Company Name *
+                  <label
+                    htmlFor="contactName"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                  >
+                    Contact Name *
                   </label>
                   <input
-                    id="companyName"
+                    id="contactName"
                     type="text"
-                    placeholder="Enter company name"
-                    value={form.companyName}
-                    onChange={(e) => updateField("companyName", e.target.value)}
+                    placeholder="John Doe"
+                    {...register('contactName')}
                     className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
-                      errors.companyName
+                      errors.contactName
                         ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                        : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
+                        : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
                     }`}
                   />
-                  {errors.companyName && (
+                  {errors.contactName && (
                     <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">error</span>
-                      {errors.companyName}
+                      <span className="material-symbols-outlined text-base">
+                        error
+                      </span>
+                      {errors.contactName.message}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label htmlFor="websiteUrl" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Website URL *
+                  <label
+                    htmlFor="contactNumber"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
+                  >
+                    Contact Phone *
                   </label>
                   <input
-                    id="websiteUrl"
-                    type="url"
-                    placeholder="https://example.com"
-                    value={form.websiteUrl}
-                    onChange={(e) => updateField("websiteUrl", e.target.value)}
+                    id="contactNumber"
+                    type="tel"
+                    placeholder="+1 (555) 000-0000"
+                    {...register('contactNumber')}
                     className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
-                      errors.websiteUrl
+                      errors.contactNumber
                         ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                        : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
+                        : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
                     }`}
                   />
-                  {errors.websiteUrl && (
+                  {errors.contactNumber && (
                     <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">error</span>
-                      {errors.websiteUrl}
+                      <span className="material-symbols-outlined text-base">
+                        error
+                      </span>
+                      {errors.contactNumber.message}
                     </p>
                   )}
                 </div>
-                <div>
-                  <label htmlFor="industry" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Industry *
-                  </label>
-                  <select
-                    id="industry"
-                    value={form.industry}
-                    onChange={(e) => updateField("industry", e.target.value)}
-                    className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-colors ${
-                      errors.industry
-                        ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                        : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
-                    }`}
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="contactEmail"
+                    className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
                   >
-                    <option value="">Select Industry</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Healthcare">Healthcare</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Education">Education</option>
-                    <option value="Retail">Retail</option>
-                  </select>
-                  {errors.industry && (
-                    <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">error</span>
-                      {errors.industry}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor="companySize" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    Company Size *
+                    Contact Email *
                   </label>
-                  <select
-                    id="companySize"
-                    value={form.companySize}
-                    onChange={(e) => updateField("companySize", e.target.value)}
-                    className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-colors ${
-                      errors.companySize
+                  <input
+                    id="contactEmail"
+                    type="email"
+                    placeholder="contact@company.com"
+                    {...register('contactEmail')}
+                    className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
+                      errors.contactEmail
                         ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                        : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
+                        : 'border-slate-300 dark:border-slate-600 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C]'
                     }`}
-                  >
-                    <option value="">Select Company Size</option>
-                    <option value="1-10">1–10 employees</option>
-                    <option value="11-50">11–50 employees</option>
-                    <option value="51-200">51–200 employees</option>
-                    <option value="201-500">201–500 employees</option>
-                    <option value="501+">501+ employees</option>
-                  </select>
-                  {errors.companySize && (
+                  />
+                  {errors.contactEmail && (
                     <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">error</span>
-                      {errors.companySize}
+                      <span className="material-symbols-outlined text-base">
+                        error
+                      </span>
+                      {errors.contactEmail.message}
                     </p>
                   )}
                 </div>
               </div>
+            </section>
 
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Company Description *
-                </label>
-                <textarea
-                  id="description"
-                  placeholder="Tell us about your company, mission, and culture..."
-                  value={form.description}
-                  onChange={(e) => updateField("description", e.target.value)}
-                  rows={4}
-                  className={`w-full rounded-lg border bg-white dark:bg-slate-900 px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors resize-none ${
-                    errors.description
-                      ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                      : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
-                  }`}
-                />
-                {errors.description && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">error</span>
-                    {errors.description}
-                  </p>
+            {/* Actions */}
+            <div className="flex justify-end gap-3 pb-8">
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex items-center justify-center h-11 px-6 rounded-xl border-2 border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all"
+                disabled={updateProfileMutation.isPending}
+              >
+                <span className="material-symbols-outlined text-lg mr-2">
+                  refresh
+                </span>
+                Reset
+              </button>
+              <button
+                type="submit"
+                disabled={updateProfileMutation.isPending}
+                className="inline-flex items-center justify-center gap-2 h-11 px-8 rounded-xl bg-gradient-to-r from-[#0E7C8C] to-[#3EC3BC] text-white font-bold hover:from-[#3EC3BC] hover:to-[#0E7C8C] active:scale-95 transition-all shadow-xl shadow-[#0E7C8C]/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-[#0E7C8C] disabled:hover:to-[#3EC3BC] disabled:active:scale-100"
+              >
+                {updateProfileMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">
+                      check_circle
+                    </span>
+                    Save Changes
+                  </>
                 )}
-              </div>
+              </button>
             </div>
-          </section>
-
-          {/* Primary Contact section - same as before */}
-          <section className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2">
-              <span className="material-symbols-outlined text-blue-600 dark:text-blue-400">person</span>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                Primary Contact
-              </h2>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label htmlFor="contactName" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Contact Name *
-                </label>
-                <input
-                  id="contactName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={form.contactName}
-                  onChange={(e) => updateField("contactName", e.target.value)}
-                  className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
-                    errors.contactName
-                      ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                      : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
-                  }`}
-                />
-                {errors.contactName && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">error</span>
-                    {errors.contactName}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="contactNumber" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Contact Phone *
-                </label>
-                <input
-                  id="contactNumber"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  value={form.contactNumber}
-                  onChange={(e) => updateField("contactNumber", e.target.value)}
-                  className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
-                    errors.contactNumber
-                      ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                      : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
-                  }`}
-                />
-                {errors.contactNumber && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">error</span>
-                    {errors.contactNumber}
-                  </p>
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <label htmlFor="contactEmail" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Contact Email *
-                </label>
-                <input
-                  id="contactEmail"
-                  type="email"
-                  placeholder="contact@company.com"
-                  value={form.contactEmail}
-                  onChange={(e) => updateField("contactEmail", e.target.value)}
-                  className={`w-full h-11 rounded-lg border bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-colors ${
-                    errors.contactEmail
-                      ? 'border-red-500 dark:border-red-400 focus:ring-red-600/20 focus:border-red-600'
-                      : 'border-slate-300 dark:border-slate-600 focus:ring-blue-600/20 focus:border-blue-600'
-                  }`}
-                />
-                {errors.contactEmail && (
-                  <p className="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-base">error</span>
-                    {errors.contactEmail}
-                  </p>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pb-8">
-            <button 
-              onClick={() => navigate({ to: '/auth/roles' })}
-              className="inline-flex items-center justify-center h-11 px-6 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-              disabled={updateProfileMutation.isPending}
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleSave}
-              disabled={updateProfileMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 active:bg-blue-800 transition-colors shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {updateProfileMutation.isPending ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-lg">check</span>
-                  Save Profile
-                </>
-              )}
-            </button>
-          </div>
+          </form>
         </div>
       </main>
     </div>
-  );
+  )
 }

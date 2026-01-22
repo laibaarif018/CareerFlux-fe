@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery,useQueryClient } from '@tanstack/react-query'
 import { resumeService } from '@/services/resume.service'
 
 export function useUploadResume() {
@@ -87,5 +87,35 @@ export function useResumeAnalysis(
     enabled: !!resumeId && isCompleted === true,
     retry: 3,
     staleTime: 10000,
+  })
+}
+export const useSetPrimaryResume = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (resumeId: string) => resumeService.setPrimaryResume(resumeId),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['resumes'] })
+      console.log('Resume set as primary:', data)
+    },
+    onError: (error: any) => {
+      console.error('Failed to set resume as primary:', error)
+    },
+  })
+}
+
+export const useBestResumeScore = () => {
+  return useQuery({
+    queryKey: ['best-score'],
+    queryFn: () => resumeService.getBestResumeScore(),
+  })
+}
+export const useDeleteResume = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (resumeId: string) => resumeService.deleteResume(resumeId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resumes'] })
+    },
   })
 }

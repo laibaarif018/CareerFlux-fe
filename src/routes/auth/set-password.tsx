@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
-import { useSetPassword } from '@/hooks/useAuth'
+import { useSetPassword } from '@/queries/auth.queries'
 import { Eye, EyeOff } from 'lucide-react'
-import { z } from 'zod'
-import {  PublicRoute } from '@/components/PRoutes'
+import * as Yup from 'yup'
+import { PublicRoute } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/auth/set-password')({
   component: () => (
@@ -14,67 +14,68 @@ export const Route = createFileRoute('/auth/set-password')({
   ),
 })
 
-const passwordSchema = z
-  .object({
-    newPassword: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/\d/, 'Password must contain at least one number')
-      .regex(
-        /[!@#$%^&*(),.?":{}|<>]/,
-        'Password must contain at least one special character',
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+const passwordSchema = Yup.object().shape({
+  newPassword: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/\d/, 'Password must contain at least one number')
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('newPassword')], "Passwords don't match")
+    .required('Please confirm your password'),
+})
 
-interface IFormData {
-  newPassword: string
-  confirmPassword: string
-}
+type PasswordFormData = Yup.InferType<typeof passwordSchema>
 
 function SetPassword() {
   const navigate = useNavigate()
   const setPassword = useSetPassword()
-  const [formData, setFormData] = useState<IFormData>({
+  
+  const [formData, setFormData] = useState<PasswordFormData>({
     newPassword: '',
     confirmPassword: '',
   })
+  
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [errors, setErrors] = useState<Partial<Record<keyof PasswordFormData, string>>>({})
 
-  const handleInputChange = (field: keyof IFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }))
-    if (setPassword.isError) setPassword.reset()
-  }
+  const register = (field: keyof PasswordFormData) => ({
+    value: formData[field],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+      if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
+      if (setPassword.isError) setPassword.reset()
+    },
+    onBlur: async () => {
+      try {
+        await passwordSchema.validateAt(field, formData)
+        setErrors((prev) => ({ ...prev, [field]: undefined }))
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          setErrors((prev) => ({ ...prev, [field]: error.message }))
+        }
+      }
+    },
+  })
 
-  const handleBlur = (field: keyof IFormData) => {
-    setTouched((prev) => ({ ...prev, [field]: true }))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setTouched({ newPassword: true, confirmPassword: true })
 
-    const result = passwordSchema.safeParse(formData)
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {}
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof IFormData
-        fieldErrors[field] = issue.message
-      })
-      setErrors(fieldErrors)
-      return
+    try {
+      await passwordSchema.validate(formData, { abortEarly: false })
+      setErrors({})
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const newErrors: Partial<Record<keyof PasswordFormData, string>> = {}
+        error.inner.forEach((err) => {
+          if (err.path) newErrors[err.path as keyof PasswordFormData] = err.message
+        })
+        setErrors(newErrors)
+        return
+      }
     }
-
-    setErrors({})
 
     const userId = localStorage.getItem('userId')
     if (!userId) {
@@ -89,17 +90,9 @@ function SetPassword() {
           localStorage.removeItem('userId')
           navigate({ to: '/auth/roles' })
         },
-        onError: () => {
-          setErrors({
-            newPassword: 'Failed to set password. Please try again.',
-          })
-        },
-      },
+      }
     )
   }
-
-  const getFieldError = (field: keyof IFormData) =>
-    touched[field] && errors[field] ? errors[field] : ''
 
   return (
     <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
@@ -126,13 +119,9 @@ function SetPassword() {
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   placeholder="Enter new password"
-                  value={formData.newPassword}
-                  onChange={(e) =>
-                    handleInputChange('newPassword', e.target.value)
-                  }
-                  onBlur={() => handleBlur('newPassword')}
+                  {...register('newPassword')}
                   className={`w-full h-12 pl-4 pr-12 rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none transition-colors font-normal ${
-                    getFieldError('newPassword')
+                    errors.newPassword
                       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                       : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
                   }`}
@@ -145,9 +134,9 @@ function SetPassword() {
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {getFieldError('newPassword') && (
+              {errors.newPassword && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
-                  {getFieldError('newPassword')}
+                  {errors.newPassword}
                 </p>
               )}
             </div>
@@ -161,13 +150,9 @@ function SetPassword() {
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm new password"
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    handleInputChange('confirmPassword', e.target.value)
-                  }
-                  onBlur={() => handleBlur('confirmPassword')}
+                  {...register('confirmPassword')}
                   className={`w-full h-12 pl-4 pr-12 rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none transition-colors font-normal ${
-                    getFieldError('confirmPassword')
+                    errors.confirmPassword
                       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                       : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
                   }`}
@@ -177,16 +162,12 @@ function SetPassword() {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
-              {getFieldError('confirmPassword') && (
+              {errors.confirmPassword && (
                 <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
-                  {getFieldError('confirmPassword')}
+                  {errors.confirmPassword}
                 </p>
               )}
             </div>

@@ -96,9 +96,29 @@ export function useConnetGoogle() {
 
 export function useCurrentUser() {
   return useQuery({
-    queryKey: ['currentUser'],
+    queryKey: ['c urrentUser'],
     queryFn: () => authService.getCurrentUser(),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
+ 
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: (data: {
+      currentPassword: string;
+      newPassword: string;
+    }) => authService.changePassword(data),
+
+    onSuccess: () => {
+      // toast.success('Password changed successfully');
+    },
+
+    onError: (error: any) => {
+      // toast.error(
+      //   error?.response?.data?.message ||
+      //   'Failed to change password'
+      // );
+    },
+  });
+};

@@ -1,199 +1,189 @@
 import UserHeader from '@/components/UserHeader'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { ProtectedRoute } from '@/components/PRoutes'
-import { useGetProfile, useProfile } from '@/hooks/useUser';
-import Shimmer from '@/components/Shimmer';
+import { useGetProfile, useProfile } from '@/queries/user.queries'
+import Shimmer from '@/components/Shimmer'
+import { requireRole } from '@/utils/RouteGuard'
+import * as Yup from 'yup'
+import { showToast } from '@/utils/swal'
 
-export const Route = createFileRoute('/profile')({
-  component: () => (
-    <ProtectedRoute>
-      <Profile />
-    </ProtectedRoute>
-  ),
+export const Route = createFileRoute('/job-seeker/profile')({
+  beforeLoad: () => {
+    requireRole('jobseeker')
+  },
+  component: Profile,
 })
 
+// Yup validation schema
+const profileSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Full name is required')
+    .min(2, 'Name must be at least 2 characters'),
+  phone: Yup.string()
+    .required('Phone number is required')
+    .matches(/^[0-9+\s-()]+$/, 'Invalid phone number format'),
+  location: Yup.string()
+    .required('Location is required')
+    .min(2, 'Location must be at least 2 characters'),
+  experienceLevel: Yup.string().oneOf(
+    ['fresher', 'junior', 'mid', 'senior'],
+    'Invalid experience level',
+  ),
+  roles: Yup.array()
+    .of(Yup.string())
+    .min(1, 'At least one role is required')
+    .required('At least one role is required'),
+  industries: Yup.array()
+    .of(Yup.string())
+    .min(1, 'At least one industry is required')
+    .required('At least one industry is required'),
+  locations: Yup.array()
+    .of(Yup.string())
+    .min(1, 'At least one work location is required')
+    .required('At least one work location is required'),
+  salary: Yup.number()
+    .min(30000, 'Minimum salary must be at least $30,000')
+    .max(250000, 'Maximum salary cannot exceed $250,000')
+    .required('Please set a minimum salary expectation'),
+})
+
+type ProfileFormData = Yup.InferType<typeof profileSchema>
+
 export default function Profile() {
-  const navigate = useNavigate()
   const { data, isLoading } = useGetProfile()
   const profileMutation = useProfile()
 
-  const [personalInfo, setPersonalInfo] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
-    email: '',
     phone: '',
     location: '',
     experienceLevel: 'mid',
-  })
-
-  const [preferences, setPreferences] = useState({
-    roles: [] as string[],
-    industries: [] as string[],
-    locations: [] as string[],
+    roles: [],
+    industries: [],
+    locations: [],
     salary: 0,
   })
 
-  const [errors, setErrors] = useState({
-    name: '',
-    phone: '',
-    location: '',
-    roles: '',
-    industries: '',
-    locations: '',
-    salary: '',
-  })
-
-  const [touched, setTouched] = useState({
-    name: false,
-    phone: false,
-    location: false,
-    roles: false,
-    industries: false,
-    locations: false,
-    salary: false,
-  })
+  const [email, setEmail] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
 
   /* Populate data from backend */
   useEffect(() => {
-    if (data?.payload?.user) {
+    if (data?.payload?.user && data?.payload?.jobSeeker) {
       const user = data.payload.user
+      const jobSeeker = data.payload.jobSeeker
 
-      setPersonalInfo({
+      setEmail(user.email ?? '')
+      setFormData({
         name: user.name ?? '',
-        email: user.email ?? '',
-        phone: user.phoneNumber ?? '',
-        location: user.location ?? '',
-        experienceLevel: user.experienceLevel ?? 'mid',
-      })
-
-      setPreferences({
-        roles: user.preferredRoles ?? [],
-        industries: user.preferredIndustries ?? [],
-        locations: user.preferredLocations ?? [],
-        salary: user.minimumSalaryExpected ?? 0,
+        phone: jobSeeker.phoneNumber ?? '',
+        location: jobSeeker.location ?? '',
+        experienceLevel: jobSeeker.experienceLevel ?? 'mid',
+        roles: jobSeeker.preferredRoles ?? [],
+        industries: jobSeeker.preferredIndustries ?? [],
+        locations: jobSeeker.preferredLocations ?? [],
+        salary: jobSeeker.minimumSalaryExpected ?? 0,
       })
     }
   }, [data])
 
-  const validateField = (field: string, value: any) => {
-    switch (field) {
-      case 'name':
-        return value.trim() === '' ? 'Full name is required' : ''
-      case 'phone':
-        return value.trim() === '' ? 'Phone number is required' : ''
-      case 'location':
-        return value.trim() === '' ? 'Location is required' : ''
-      case 'roles':
-        return value.length === 0 ? 'At least one role is required' : ''
-      case 'industries':
-        return value.length === 0 ? 'At least one industry is required' : ''
-      case 'locations':
-        return value.length === 0 ? 'At least one work location is required' : ''
-      case 'salary':
-        return value === 0 ? 'Please set a minimum salary expectation' : ''
-      default:
-        return ''
+  // Validate a single field
+  const validateField = async (field: keyof ProfileFormData, value: any) => {
+    try {
+      await profileSchema.validateAt(field, { ...formData, [field]: value })
+      setErrors((prev) => ({ ...prev, [field]: '' }))
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        setErrors((prev) => ({ ...prev, [field]: error.message }))
+      }
     }
   }
 
-  const handlePersonalChange = (field: string, value: string) => {
-    setPersonalInfo((prev) => ({ ...prev, [field]: value }))
-    if (touched[field as keyof typeof touched]) {
-      setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }))
+  // Handle input changes
+  const handleChange = (field: keyof ProfileFormData, value: any) => {
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    if (touched[field]) {
+      validateField(field, value)
     }
   }
 
-  const handleBlur = (field: string) => {
+  // Handle blur events
+  const handleBlur = (field: keyof ProfileFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }))
-    const value = field === 'roles' || field === 'industries' || field === 'locations'
-      ? preferences[field as keyof typeof preferences]
-      : field === 'salary'
-      ? preferences.salary
-      : personalInfo[field as keyof typeof personalInfo]
-    setErrors((prev) => ({ ...prev, [field]: validateField(field, value) }))
+    validateField(field, formData[field])
   }
 
-  const handlePreferenceAdd = (category: string, value: string) => {
-    setPreferences((prev) => {
-      const updated = {
-        ...prev,
-        [category]: Array.isArray(prev[category as keyof typeof prev])
-          ? [...(prev[category as keyof typeof prev] as string[]), value]
-          : prev[category as keyof typeof prev],
-      }
-      if (touched[category as keyof typeof touched]) {
-        setErrors((e) => ({ ...e, [category]: validateField(category, updated[category as keyof typeof updated]) }))
-      }
-      return updated
-    })
-  }
-
-  const handlePreferenceRemove = (category: string, value: string) => {
-    setPreferences((prev) => {
-      const updated = {
-        ...prev,
-        [category]: Array.isArray(prev[category as keyof typeof prev])
-          ? (prev[category as keyof typeof prev] as string[]).filter((v) => v !== value)
-          : prev[category as keyof typeof prev],
-      }
-      if (touched[category as keyof typeof touched]) {
-        setErrors((e) => ({ ...e, [category]: validateField(category, updated[category as keyof typeof updated]) }))
-      }
-      return updated
-    })
-  }
-
-  const handleSalaryChange = (value: number) => {
-    setPreferences({ ...preferences, salary: value })
-    if (touched.salary) {
-      setErrors((prev) => ({ ...prev, salary: validateField('salary', value) }))
+  // Handle array additions
+  const handleArrayAdd = (
+    field: 'roles' | 'industries' | 'locations',
+    value: string,
+  ) => {
+    const updated = [...formData[field], value]
+    setFormData((prev) => ({ ...prev, [field]: updated }))
+    if (touched[field]) {
+      validateField(field, updated)
     }
   }
 
-  const validateAll = () => {
-    const newErrors = {
-      name: validateField('name', personalInfo.name),
-      phone: validateField('phone', personalInfo.phone),
-      location: validateField('location', personalInfo.location),
-      roles: validateField('roles', preferences.roles),
-      industries: validateField('industries', preferences.industries),
-      locations: validateField('locations', preferences.locations),
-      salary: validateField('salary', preferences.salary),
+  // Handle array removals
+  const handleArrayRemove = (
+    field: 'roles' | 'industries' | 'locations',
+    value: string,
+  ) => {
+    const updated = formData[field].filter((v) => v !== value)
+    setFormData((prev) => ({ ...prev, [field]: updated }))
+    if (touched[field]) {
+      validateField(field, updated)
     }
-
-    setErrors(newErrors)
-    setTouched({
-      name: true,
-      phone: true,
-      location: true,
-      roles: true,
-      industries: true,
-      locations: true,
-      salary: true,
-    })
-
-    return !Object.values(newErrors).some((error) => error !== '')
   }
 
-  const handleSave = () => {
-    if (!validateAll()) {
-      return
+  // Validate entire form
+  const validateForm = async (): Promise<boolean> => {
+    try {
+      await profileSchema.validate(formData, { abortEarly: false })
+      setErrors({})
+      return true
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const newErrors: Record<string, string> = {}
+        error.inner.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path] = err.message
+          }
+        })
+        setErrors(newErrors)
+
+        // Mark all fields as touched
+        const allTouched = Object.keys(formData).reduce(
+          (acc, key) => ({ ...acc, [key]: true }),
+          {},
+        )
+        setTouched(allTouched)
+      }
+      return false
     }
+  }
+
+  // Handle save
+  const handleSave = async () => {
+    const isValid = await validateForm()
+    if (!isValid) return
 
     profileMutation.mutate(
       {
-        name: personalInfo.name,
-        phoneNumber: personalInfo.phone,
-        location: personalInfo.location,
-        experienceLevel: personalInfo.experienceLevel,
-        preferredRoles: preferences.roles,
-        preferredIndustries: preferences.industries,
-        preferredLocations: preferences.locations,
-        minimumSalaryExpected: preferences.salary,
+        name: formData.name,
+        phoneNumber: formData.phone,
+        location: formData.location,
+        experienceLevel: formData.experienceLevel as string,
+        preferredRoles: formData.roles as string[],
+        preferredIndustries: formData.industries as string[],
+        preferredLocations: formData.locations as string[],
+        minimumSalaryExpected: formData.salary as number,
       },
       {
         onSuccess: () => {
-          navigate({ to: '/dashboard' })
+          showToast('Profile updated successfully.')
         },
       },
     )
@@ -205,11 +195,10 @@ export default function Profile() {
         className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors"
         style={{
           fontFamily:
-            "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif",
+            '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif"',
         }}
       >
         <UserHeader />
-
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Personal Information Shimmer */}
@@ -217,58 +206,26 @@ export default function Profile() {
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm lg:h-full flex flex-col">
                 <Shimmer className="h-7 w-48 mb-6 rounded-md" />
                 <div className="space-y-6">
-                  <div>
-                    <Shimmer className="h-4 w-32 mb-2 rounded-md" />
-                    <Shimmer className="h-12 w-full rounded-lg" />
-                  </div>
-                  <div>
-                    <Shimmer className="h-4 w-24 mb-2 rounded-md" />
-                    <Shimmer className="h-12 w-full rounded-lg" />
-                  </div>
-                  <div>
-                    <Shimmer className="h-4 w-28 mb-2 rounded-md" />
-                    <Shimmer className="h-12 w-full rounded-lg" />
-                  </div>
-                  <div>
-                    <Shimmer className="h-4 w-28 mb-2 rounded-md" />
-                    <Shimmer className="h-12 w-full rounded-lg" />
-                  </div>
-                  <div>
-                    <Shimmer className="h-4 w-36 mb-2 rounded-md" />
-                    <Shimmer className="h-12 w-full rounded-lg" />
-                  </div>
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i}>
+                      <Shimmer className="h-4 w-32 mb-2 rounded-md" />
+                      <Shimmer className="h-12 w-full rounded-lg" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Preferences & Save Button Shimmer */}
+            {/* Preferences Shimmer */}
             <div className="lg:col-span-2">
               <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm lg:h-full flex flex-col">
                 <Shimmer className="h-7 w-40 mb-6 rounded-md" />
-
-                <div className="mb-6">
-                  <Shimmer className="h-4 w-32 mb-2 rounded-md" />
-                  <Shimmer className="h-16 w-full rounded-lg" />
-                </div>
-
-                <div className="mb-6">
-                  <Shimmer className="h-4 w-36 mb-2 rounded-md" />
-                  <Shimmer className="h-16 w-full rounded-lg" />
-                </div>
-
-                <div className="mb-6">
-                  <Shimmer className="h-4 w-40 mb-2 rounded-md" />
-                  <div className="flex items-center gap-4 mt-2">
-                    <Shimmer className="h-2 flex-1 rounded-full" />
-                    <Shimmer className="h-6 w-24 rounded-md" />
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="mb-6">
+                    <Shimmer className="h-4 w-32 mb-2 rounded-md" />
+                    <Shimmer className="h-16 w-full rounded-lg" />
                   </div>
-                </div>
-
-                <div>
-                  <Shimmer className="h-4 w-44 mb-2 rounded-md" />
-                  <Shimmer className="h-16 w-full rounded-lg" />
-                </div>
-
+                ))}
                 <div className="flex justify-end mt-auto pt-6 border-t border-slate-200 dark:border-slate-700">
                   <Shimmer className="h-12 w-24 rounded-lg" />
                 </div>
@@ -285,7 +242,7 @@ export default function Profile() {
       className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors"
       style={{
         fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif",
+          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif"',
       }}
     >
       <UserHeader />
@@ -302,6 +259,7 @@ export default function Profile() {
                 Personal Information
               </h3>
               <div className="space-y-6">
+                {/* Name */}
                 <label className="flex flex-col">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
                     Full Name <span className="text-red-500">*</span>
@@ -313,12 +271,14 @@ export default function Profile() {
                           ? 'border-red-500 dark:border-red-500'
                           : 'border-slate-300 dark:border-slate-600'
                       } bg-white dark:bg-slate-900 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 pr-10 text-base font-normal transition-colors`}
-                      value={personalInfo.name}
-                      onChange={(e) => handlePersonalChange('name', e.target.value)}
+                      value={formData.name}
+                      onChange={(e) => handleChange('name', e.target.value)}
                       onBlur={() => handleBlur('name')}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500 pointer-events-none">
-                      <span className="material-symbols-outlined text-xl">edit</span>
+                      <span className="material-symbols-outlined text-xl">
+                        edit
+                      </span>
                     </div>
                   </div>
                   {errors.name && touched.name && (
@@ -326,6 +286,7 @@ export default function Profile() {
                   )}
                 </label>
 
+                {/* Email (Read-only) */}
                 <label className="flex flex-col">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
                     Email
@@ -333,16 +294,19 @@ export default function Profile() {
                   <div className="relative flex w-full flex-1 items-stretch">
                     <input
                       className="flex w-full min-w-0 flex-1 rounded-lg text-slate-900 dark:text-white focus:outline-none border border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-900/50 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 pr-10 text-base font-normal transition-colors cursor-not-allowed"
-                      value={personalInfo.email}
+                      value={email}
                       readOnly
                       disabled
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500 pointer-events-none">
-                      <span className="material-symbols-outlined text-xl">lock</span>
+                      <span className="material-symbols-outlined text-xl">
+                        lock
+                      </span>
                     </div>
                   </div>
                 </label>
 
+                {/* Phone */}
                 <label className="flex flex-col">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
                     Phone <span className="text-red-500">*</span>
@@ -354,12 +318,14 @@ export default function Profile() {
                           ? 'border-red-500 dark:border-red-500'
                           : 'border-slate-300 dark:border-slate-600'
                       } bg-white dark:bg-slate-900 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 pr-10 text-base font-normal transition-colors`}
-                      value={personalInfo.phone}
-                      onChange={(e) => handlePersonalChange('phone', e.target.value)}
+                      value={formData.phone}
+                      onChange={(e) => handleChange('phone', e.target.value)}
                       onBlur={() => handleBlur('phone')}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500 pointer-events-none">
-                      <span className="material-symbols-outlined text-xl">edit</span>
+                      <span className="material-symbols-outlined text-xl">
+                        edit
+                      </span>
                     </div>
                   </div>
                   {errors.phone && touched.phone && (
@@ -367,6 +333,7 @@ export default function Profile() {
                   )}
                 </label>
 
+                {/* Location */}
                 <label className="flex flex-col">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
                     Location <span className="text-red-500">*</span>
@@ -378,27 +345,34 @@ export default function Profile() {
                           ? 'border-red-500 dark:border-red-500'
                           : 'border-slate-300 dark:border-slate-600'
                       } bg-white dark:bg-slate-900 h-12 placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 pr-10 text-base font-normal transition-colors`}
-                      value={personalInfo.location}
-                      onChange={(e) => handlePersonalChange('location', e.target.value)}
+                      value={formData.location}
+                      onChange={(e) => handleChange('location', e.target.value)}
                       onBlur={() => handleBlur('location')}
                     />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 dark:text-slate-500 pointer-events-none">
-                      <span className="material-symbols-outlined text-xl">edit</span>
+                      <span className="material-symbols-outlined text-xl">
+                        edit
+                      </span>
                     </div>
                   </div>
                   {errors.location && touched.location && (
-                    <p className="text-red-500 text-xs mt-1">{errors.location}</p>
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.location}
+                    </p>
                   )}
                 </label>
 
+                {/* Experience Level */}
                 <label className="flex flex-col">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
                     Experience Level
                   </p>
                   <div className="relative">
                     <select
-                      value={personalInfo.experienceLevel}
-                      onChange={(e) => handlePersonalChange('experienceLevel', e.target.value)}
+                      value={formData.experienceLevel}
+                      onChange={(e) =>
+                        handleChange('experienceLevel', e.target.value)
+                      }
                       className="flex w-full rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#0E7C8C]/20 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 h-12 px-4 pr-10 text-base font-normal transition-colors appearance-none cursor-pointer"
                     >
                       <option value="fresher">Fresher</option>
@@ -407,7 +381,9 @@ export default function Profile() {
                       <option value="senior">Senior</option>
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500 dark:text-slate-400">
-                      <span className="material-symbols-outlined text-xl">unfold_more</span>
+                      <span className="material-symbols-outlined text-xl">
+                        unfold_more
+                      </span>
                     </div>
                   </div>
                 </label>
@@ -438,18 +414,20 @@ export default function Profile() {
                   } rounded-lg bg-slate-50 dark:bg-slate-900 min-h-[48px]`}
                   onBlur={() => handleBlur('roles')}
                 >
-                  {preferences.roles.map((role) => (
+                  {formData.roles.map((role) => (
                     <span
                       key={role}
                       className="flex items-center gap-1.5 bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/30 text-[#0E7C8C] dark:text-[#3EC3BC] font-medium text-sm px-3 py-1.5 rounded-full"
                     >
                       {role}
                       <button
-                        onClick={() => handlePreferenceRemove('roles', role)}
+                        onClick={() => handleArrayRemove('roles', role as any)}
                         className="hover:bg-[#3EC3BC]/30 dark:hover:bg-[#0E7C8C]/50 rounded-full p-0.5 transition-colors"
                         aria-label={`Remove ${role}`}
                       >
-                        <span className="material-symbols-outlined text-base">close</span>
+                        <span className="material-symbols-outlined text-base">
+                          close
+                        </span>
                       </button>
                     </span>
                   ))}
@@ -459,7 +437,7 @@ export default function Profile() {
                     type="text"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                        handlePreferenceAdd('roles', e.currentTarget.value.trim())
+                        handleArrayAdd('roles', e.currentTarget.value.trim())
                         e.currentTarget.value = ''
                       }
                     }}
@@ -483,18 +461,22 @@ export default function Profile() {
                   } rounded-lg bg-slate-50 dark:bg-slate-900 min-h-[48px]`}
                   onBlur={() => handleBlur('industries')}
                 >
-                  {preferences.industries.map((ind) => (
+                  {formData.industries.map((ind) => (
                     <span
                       key={ind}
                       className="flex items-center gap-1.5 bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/30 text-[#0E7C8C] dark:text-[#3EC3BC] font-medium text-sm px-3 py-1.5 rounded-full"
                     >
                       {ind}
                       <button
-                        onClick={() => handlePreferenceRemove('industries', ind)}
+                        onClick={() =>
+                          handleArrayRemove('industries', ind as any)
+                        }
                         className="hover:bg-[#3EC3BC]/30 dark:hover:bg-[#0E7C8C]/50 rounded-full p-0.5 transition-colors"
                         aria-label={`Remove ${ind}`}
                       >
-                        <span className="material-symbols-outlined text-base">close</span>
+                        <span className="material-symbols-outlined text-base">
+                          close
+                        </span>
                       </button>
                     </span>
                   ))}
@@ -504,14 +486,19 @@ export default function Profile() {
                     type="text"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                        handlePreferenceAdd('industries', e.currentTarget.value.trim())
+                        handleArrayAdd(
+                          'industries',
+                          e.currentTarget.value.trim(),
+                        )
                         e.currentTarget.value = ''
                       }
                     }}
                   />
                 </div>
                 {errors.industries && touched.industries && (
-                  <p className="text-red-500 text-xs mt-1">{errors.industries}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.industries}
+                  </p>
                 )}
               </div>
 
@@ -521,7 +508,8 @@ export default function Profile() {
                   className="text-sm font-medium text-slate-700 dark:text-slate-300"
                   htmlFor="salary"
                 >
-                  Minimum Salary Expectation <span className="text-red-500">*</span>
+                  Minimum Salary Expectation{' '}
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-4 mt-2">
                   <input
@@ -530,8 +518,10 @@ export default function Profile() {
                     min={30000}
                     max={250000}
                     step={1000}
-                    value={preferences.salary}
-                    onChange={(e) => handleSalaryChange(Number(e.target.value))}
+                    value={formData.salary}
+                    onChange={(e) =>
+                      handleChange('salary', Number(e.target.value))
+                    }
                     onBlur={() => handleBlur('salary')}
                     className={`w-full h-2 rounded-lg appearance-none cursor-pointer accent-[#0E7C8C] ${
                       errors.salary && touched.salary
@@ -540,7 +530,7 @@ export default function Profile() {
                     }`}
                   />
                   <span className="font-semibold text-slate-800 dark:text-slate-200 text-lg whitespace-nowrap min-w-[100px] text-right">
-                    ${preferences.salary.toLocaleString()}
+                    ${formData.salary.toLocaleString()}
                   </span>
                 </div>
                 {errors.salary && touched.salary && (
@@ -551,7 +541,8 @@ export default function Profile() {
               {/* Locations */}
               <div>
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300 pb-2">
-                  Preferred Work Locations <span className="text-red-500">*</span>
+                  Preferred Work Locations{' '}
+                  <span className="text-red-500">*</span>
                 </p>
                 <div
                   className={`flex flex-wrap gap-2 p-3 border ${
@@ -561,18 +552,22 @@ export default function Profile() {
                   } rounded-lg bg-slate-50 dark:bg-slate-900 min-h-[48px]`}
                   onBlur={() => handleBlur('locations')}
                 >
-                  {preferences.locations.map((loc) => (
+                  {formData.locations.map((loc) => (
                     <span
                       key={loc}
                       className="flex items-center gap-1.5 bg-[#3EC3BC]/20 dark:bg-[#0E7C8C]/30 text-[#0E7C8C] dark:text-[#3EC3BC] font-medium text-sm px-3 py-1.5 rounded-full"
                     >
                       {loc}
                       <button
-                        onClick={() => handlePreferenceRemove('locations', loc)}
+                        onClick={() =>
+                          handleArrayRemove('locations', loc as any)
+                        }
                         className="hover:bg-[#3EC3BC]/30 dark:hover:bg-[#0E7C8C]/50 rounded-full p-0.5 transition-colors"
                         aria-label={`Remove ${loc}`}
                       >
-                        <span className="material-symbols-outlined text-base">close</span>
+                        <span className="material-symbols-outlined text-base">
+                          close
+                        </span>
                       </button>
                     </span>
                   ))}
@@ -582,14 +577,19 @@ export default function Profile() {
                     type="text"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                        handlePreferenceAdd('locations', e.currentTarget.value.trim())
+                        handleArrayAdd(
+                          'locations',
+                          e.currentTarget.value.trim(),
+                        )
                         e.currentTarget.value = ''
                       }
                     }}
                   />
                 </div>
                 {errors.locations && touched.locations && (
-                  <p className="text-red-500 text-xs mt-1">{errors.locations}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.locations}
+                  </p>
                 )}
               </div>
 

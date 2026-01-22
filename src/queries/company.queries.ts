@@ -1,10 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { companyService, CompanyProfileData } from '@/services/company.service'
 
-
 export const COMPANY_PROFILE_KEY = ['company-profile']
-
-// Hook to get company profile
 export function useCompanyProfile() {
   return useQuery({
     queryKey: COMPANY_PROFILE_KEY,
@@ -13,8 +10,7 @@ export function useCompanyProfile() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
-// Hook to update company profile
-export function useUpdateCompanyProfile() {
+export const useUpdateCompanyProfile = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
@@ -25,18 +21,12 @@ export function useUpdateCompanyProfile() {
       data: CompanyProfileData
       logoFile?: File
     }) => companyService.updateProfile(data, logoFile),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: COMPANY_PROFILE_KEY })
-    
-    },
-    onError: (error: any) => {
-      const message =
-        error.response?.data?.message || 'Failed to update company profile'
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company-profile'] })
     },
   })
 }
 
-// Hook to delete company profile (optional)
 export function useDeleteCompanyProfile() {
   const queryClient = useQueryClient()
 
@@ -44,12 +34,12 @@ export function useDeleteCompanyProfile() {
     mutationFn: () => companyService.deleteProfile(),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: COMPANY_PROFILE_KEY })
-    //   toast.success(response.message || 'Company profile deleted successfully')
+      //   toast.success(response.message || 'Company profile deleted successfully')
     },
     onError: (error: any) => {
       const message =
         error.response?.data?.message || 'Failed to delete company profile'
-    //   toast.error(message)
+      //   toast.error(message)
     },
   })
 }

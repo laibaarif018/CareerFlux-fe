@@ -1,4 +1,3 @@
-// src/utils/HttpService.ts
 import axios, {
   type AxiosInstance,
   type AxiosRequestConfig,
@@ -38,9 +37,9 @@ export class HttpService {
     this.axiosInstance = axios.create({
       baseURL: Config,
       timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      // headers: {
+      //   'Content-Type': 'application/json',
+      // },
       withCredentials: true, // CRITICAL: Send cookies with every request
     });
 
@@ -183,18 +182,17 @@ export class HttpService {
    * @param headers Additional headers
    */
   protected async put<T = any>(
-    url: string,
-    body?: any,
-    params?: any,
-    headers?: Record<string, string>
-  ): Promise<T> {
-    const response = await this.axiosInstance.put(url, body, {
-      params,
-      headers,
-      cancelToken: this.cancelTokenSource.token,
-    });
-    return response.data;
-  }
+  url: string,
+  body?: any,
+  config?: AxiosRequestConfig
+): Promise<T> {
+  const response = await this.axiosInstance.put(url, body, {
+    cancelToken: this.cancelTokenSource.token,
+    ...config,
+  });
+  return response.data;
+}
+
 
   /**
    * PATCH request

@@ -1,14 +1,16 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
-import { useRole } from '@/hooks/useAuth'
-import { ProtectedRoute } from '@/components/PRoutes'
+import { useRole } from '@/queries/auth.queries'
+ import { PublicRoute } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/auth/roles')({
   component: () => (
-    <ProtectedRoute>
-      <SelectRole />
-    </ProtectedRoute>
+   <PublicRoute>
+     <SelectRole />
+   </PublicRoute>
+    
+
   ),
 })
 
@@ -33,9 +35,9 @@ function SelectRole() {
       onSuccess: () => {
         // Navigate based on selected role
         if (selectedRole === 'jobseeker') {
-          navigate({ to: '/profile' })
+          navigate({ to: '/job-seeker/profile' })
         } else if (selectedRole === 'company') {
-          navigate({ to: '/company/profileSetup' })
+          navigate({ to: '/company/profile' })
         }
       },
     })

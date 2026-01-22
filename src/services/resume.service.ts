@@ -37,24 +37,31 @@ export class ResumeService extends HttpService {
     return this.get(`${this.prefix}/${resumeId}/status`)
   }
 
-  
   getParsedResumeData(resumeId: string): Promise<IApiResponse> {
     return this.get(`${this.prefix}/${resumeId}/parsed`)
   }
 
-  getTotalCount(userId:string):Promise<IApiResponse>{
+  getTotalCount(userId: string): Promise<IApiResponse> {
     return this.get(`${this.prefix}/total/${userId}`)
   }
 
- 
   analyzeResume(resumeId: string): Promise<IApiResponse> {
-    return this.post(`${this.prefix}/${resumeId}/analyze`,{})
+    return this.post(`${this.prefix}/${resumeId}/analyze`, {})
   }
-   getAnalysisStatus(resumeId: string): Promise<IApiResponse> {
+  getAnalysisStatus(resumeId: string): Promise<IApiResponse> {
     return this.get(`${this.prefix}/${resumeId}/analysis-status`)
   }
   getAnalysisResults(resumeId: string): Promise<IApiResponse> {
     return this.get(`${this.prefix}/${resumeId}/analysis`)
+  }
+  setPrimaryResume = async (resumeId: string) => {
+    return this.put(`${this.prefix}/${resumeId}/set-primary`, {})
+  }
+  getBestResumeScore(): Promise<IApiResponse> {
+    return this.get(`${this.prefix}/best-score`)
+  }
+  deleteResume(resumeId: string): Promise<IApiResponse> {
+    return this.delete(`${this.prefix}/${resumeId}`)
   }
 }
 

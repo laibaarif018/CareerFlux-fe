@@ -3,7 +3,9 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import { authService } from '@/services/auth.service'
 import { useMutation } from '@tanstack/react-query'
-import { PublicRoute } from '@/components/PRoutes'
+import { PublicRoute } from '@/utils/RouteGuard'
+import storageService from '@/utils/localstorage'
+import { Eye, EyeOff } from 'lucide-react'
 
 export const Route = createFileRoute('/auth/password')({
   component: () => (
@@ -14,40 +16,41 @@ export const Route = createFileRoute('/auth/password')({
 })
 
 function PasswordInput() {
-  const navigate = useNavigate()
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const email = localStorage.getItem('email') || ''
 
   const login = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) => {
-      // Temporarily disable the unauthorized redirect for this specific request
       return authService.login({ email, password })
     },
     onSuccess: (data) => {
-      setError(null) // Clear any previous error
+      setError(null)
       localStorage.removeItem('email')
-      const role=data.payload;
-      if(role==='jobseeker'){
-      navigate({ to: '/dashboard' })}
-      else
-        navigate({ to: '/company/dashboard' })
-        
+      const role = data.payload.role
+      storageService.setItem('userRole', role)
+      setTimeout(() => {
+        if (role === 'jobseeker') {
+          window.location.href = '/job-seeker/dashboard'
+        } else {
+          window.location.href = '/company/dashboard'
+        }
+      }, 200)
     },
     onError: (error: any) => {
-      // Check if this is a 401 error (incorrect password)
       if (error?.statusCode === 401) {
         setError(error.message || 'Invalid password. Please try again.')
       } else {
         setError(error?.message || 'An error occurred. Please try again.')
       }
-    }
+    },
   })
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null) // Clear any previous error
+    setError(null)
     login.mutate({ email, password })
   }
 
@@ -72,13 +75,22 @@ function PasswordInput() {
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Password
                 </span>
-                <input
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 px-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#3EC3BC]/30 transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-12 w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#3EC3BC]/30 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </label>
 
               {login.isError && (
