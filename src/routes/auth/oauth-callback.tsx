@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { PublicRoute } from '@/components/PRoutes'
+import { PublicRoute } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/auth/oauth-callback')({
   component: () => (

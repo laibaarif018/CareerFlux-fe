@@ -1,11 +1,5 @@
 import { HttpService } from '@/lib/http'
-
-export interface IApiResponse<T = any> {
-  statusCode: number
-  message: string
-  payload?: T
-  errors?: { [key: string]: string }
-}
+import { IApiResponse } from '@/utils/IApiResponse'
 
 export interface IUser {
   sub: string
@@ -16,6 +10,9 @@ export interface IUser {
 
 export interface IEmailCheck {
   email: string
+  exists: boolean
+  hasPassword: boolean
+  userId: string
 }
 
 export interface ILogin {
@@ -52,7 +49,7 @@ export interface IResetPassword {
 export interface IConnectGoogle {
   email: string
   code: string
-  googleId: string  
+  googleId: string
 }
 
 class AuthService extends HttpService {
@@ -62,7 +59,7 @@ class AuthService extends HttpService {
    * Check if email exists
    * @param email User email
    */
-  checkEmail = (email: string): Promise<IApiResponse<{ exists: boolean }>> =>
+  checkEmail = (email: string): Promise<IApiResponse<IEmailCheck >> =>
     this.post(`${this.prefix}/check-email`, { email })
 
   /**
@@ -70,7 +67,9 @@ class AuthService extends HttpService {
    * @param credentials User login credentials
    */
   login = (credentials: ILogin): Promise<IApiResponse> =>
-    this.post(`${this.prefix}/login`, credentials)
+    this.post(`${this.prefix}/login`, credentials, undefined, {
+      _skipUnauthorizedRedirect: true,
+    } as any)
 
   /**
    * Logout user
@@ -128,7 +127,12 @@ class AuthService extends HttpService {
 
   connectGoogle = (payload: IConnectGoogle): Promise<IApiResponse> =>
     this.post(`${this.prefix}/connect-google`, payload)
-  
+
+  changePassword = (credentials: {
+    currentPassword: string
+    newPassword: string
+  }): Promise<IApiResponse> =>
+    this.post(`${this.prefix}/change-password`, credentials)
 }
 
 // Export singleton instance

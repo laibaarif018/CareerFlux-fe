@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { Eye, EyeOff, Check, Circle } from 'lucide-react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import Header from '@/components/Header'
-import { useResetPassword } from '@/hooks/useAuth'
-import { PublicRoute } from '@/components/PRoutes'
+import { useResetPassword } from '@/queries/auth.queries'
+import { PublicRoute } from '@/utils/RouteGuard'
+import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/reset-password')({
   validateSearch: (search: Record<string, unknown>) => ({
     token: (search.token as string) || '',
     email: (search.email as string) || '',
   }),
-
   component: () => (
     <PublicRoute>
       <ResetPassword />
@@ -18,15 +18,37 @@ export const Route = createFileRoute('/auth/reset-password')({
   ),
 })
 
+const resetPasswordSchema = Yup.object().shape({
+  code: Yup.string()
+    .length(6, 'Code must be 6 digits')
+    .matches(/^\d+$/, 'Code must contain only numbers')
+    .required('Verification code is required'),
+  newPassword: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/\d/, 'Password must contain at least one number')
+    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('newPassword')], "Passwords don't match")
+    .required('Please confirm your password'),
+})
+
+type ResetPasswordFormData = Yup.InferType<typeof resetPasswordSchema>
+
 function ResetPassword() {
   const navigate = useNavigate()
   const { email: searchEmail } = useSearch({ from: '/auth/reset-password' })
   const [email, setEmail] = useState('')
   const [code, setCode] = useState(['', '', '', '', '', ''])
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [formData, setFormData] = useState<ResetPasswordFormData>({
+    code: '',
+    newPassword: '',
+    confirmPassword: '',
+  })
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [errors, setErrors] = useState<Partial<Record<keyof ResetPasswordFormData, string>>>({})
   const resetPassword = useResetPassword()
 
   useEffect(() => {
@@ -45,11 +67,12 @@ function ResetPassword() {
     const newCode = [...code]
     newCode[index] = value
     setCode(newCode)
-
-    // Clear API errors when user types
-    if (resetPassword.isError) {
-      resetPassword.reset()
-    }
+    
+    const codeString = [...newCode].join('')
+    setFormData((prev) => ({ ...prev, code: codeString }))
+    
+    if (errors.code) setErrors((prev) => ({ ...prev, code: undefined }))
+    if (resetPassword.isError) resetPassword.reset()
 
     // Auto-focus next input
     if (value && index < 5) {
@@ -58,63 +81,70 @@ function ResetPassword() {
     }
   }
 
-  const handleKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace' && !code[index] && index > 0) {
       const prevInput = document.getElementById(`code-${index - 1}`)
       if (prevInput) (prevInput as HTMLInputElement).focus()
     }
   }
 
-  const handlePasswordChange = (
-    field: 'newPassword' | 'confirmPassword',
-    value: string,
-  ) => {
-    if (field === 'newPassword') {
-      setNewPassword(value)
-    } else {
-      setConfirmPassword(value)
-    }
+  const register = (field: 'newPassword' | 'confirmPassword') => ({
+    value: formData[field],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+      if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
+      if (resetPassword.isError) resetPassword.reset()
+    },
+    onBlur: async () => {
+      try {
+        await resetPasswordSchema.validateAt(field, formData)
+        setErrors((prev) => ({ ...prev, [field]: undefined }))
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          setErrors((prev) => ({ ...prev, [field]: error.message }))
+        }
+      }
+    },
+  })
 
-    // Clear API errors when user types
-    if (resetPassword.isError) {
-      resetPassword.reset()
-    }
-  }
-
-  const hasMinLength = newPassword.length >= 8
-  const hasNumber = /\d/.test(newPassword)
-  const hasUppercase = /[A-Z]/.test(newPassword)
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword)
-
-  const allRequirementsMet =
-    hasMinLength && hasNumber && hasUppercase && hasSpecialChar
-  const passwordsMatch =
-    newPassword === confirmPassword && confirmPassword.length > 0
+  const hasMinLength = formData.newPassword.length >= 8
+  const hasNumber = /\d/.test(formData.newPassword)
+  const hasUppercase = /[A-Z]/.test(formData.newPassword)
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword)
+  const allRequirementsMet = hasMinLength && hasNumber && hasUppercase && hasSpecialChar
+  const passwordsMatch = formData.newPassword === formData.confirmPassword && formData.confirmPassword.length > 0
   const codeComplete = code.every((digit) => digit !== '')
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!allRequirementsMet) return
-    if (!passwordsMatch) return
-    if (!codeComplete) return
+    try {
+      await resetPasswordSchema.validate(formData, { abortEarly: false })
+      setErrors({})
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const newErrors: Partial<Record<keyof ResetPasswordFormData, string>> = {}
+        error.inner.forEach((err) => {
+          if (err.path) newErrors[err.path as keyof ResetPasswordFormData] = err.message
+        })
+        setErrors(newErrors)
+        return
+      }
+    }
 
     resetPassword.mutate(
       {
         email,
-        code: code.join(''),
-        newPassword,
-        confirmPassword,
+        code: formData.code,
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword,
       },
       {
         onSuccess: () => {
-          localStorage.removeItem('email') // Clean up
+          localStorage.removeItem('email')
           navigate({ to: '/auth/login' })
         },
-      },
+      }
     )
   }
 
@@ -144,7 +174,7 @@ function ResetPassword() {
               <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">
                 Verification Code
               </label>
-              <div className="flex gap-2 justify-center mb-6">
+              <div className="flex gap-2 justify-center mb-2">
                 {code.map((digit, index) => (
                   <input
                     key={index}
@@ -155,10 +185,19 @@ function ResetPassword() {
                     value={digit}
                     onChange={(e) => handleCodeChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-12 h-14 text-center text-xl font-semibold border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none transition-all"
+                    className={`w-12 h-14 text-center text-xl font-semibold border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none transition-all ${
+                      errors.code
+                        ? 'border-red-500 focus:border-red-500'
+                        : 'border-slate-200 dark:border-slate-700 focus:border-[#0E7C8C]'
+                    }`}
                   />
                 ))}
               </div>
+              {errors.code && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1 text-center font-normal">
+                  {errors.code}
+                </p>
+              )}
             </div>
 
             {/* New Password */}
@@ -170,11 +209,12 @@ function ResetPassword() {
                 <input
                   type={showNewPassword ? 'text' : 'password'}
                   placeholder="Enter your new password"
-                  value={newPassword}
-                  onChange={(e) =>
-                    handlePasswordChange('newPassword', e.target.value)
-                  }
-                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C] outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal"
+                  {...register('newPassword')}
+                  className={`w-full pl-4 pr-12 py-3 border bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal ${
+                    errors.newPassword
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-slate-300 dark:border-slate-700 focus:border-[#0E7C8C]'
+                  }`}
                 />
                 <button
                   type="button"
@@ -184,6 +224,11 @@ function ResetPassword() {
                   {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {errors.newPassword && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
+                  {errors.newPassword}
+                </p>
+              )}
             </div>
 
             {/* Confirm Password */}
@@ -195,33 +240,31 @@ function ResetPassword() {
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="Confirm your new password"
-                  value={confirmPassword}
-                  onChange={(e) =>
-                    handlePasswordChange('confirmPassword', e.target.value)
-                  }
-                  className="w-full pl-4 pr-12 py-3 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 focus:border-[#0E7C8C] outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal"
+                  {...register('confirmPassword')}
+                  className={`w-full pl-4 pr-12 py-3 border bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal ${
+                    errors.confirmPassword
+                      ? 'border-red-500 focus:border-red-500'
+                      : 'border-slate-300 dark:border-slate-700 focus:border-[#0E7C8C]'
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
 
               {/* Password Match Indicator */}
-              {confirmPassword && (
-                <p
-                  className={`text-xs mt-2 font-medium ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}
-                >
-                  {passwordsMatch
-                    ? '✓ Passwords match'
-                    : '✗ Passwords do not match'}
+              {formData.confirmPassword && (
+                <p className={`text-xs mt-2 font-medium ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                </p>
+              )}
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
+                  {errors.confirmPassword}
                 </p>
               )}
             </div>
@@ -234,13 +277,7 @@ function ResetPassword() {
                 ) : (
                   <Circle size={16} className="text-slate-300" />
                 )}
-                <span
-                  className={`font-normal ${
-                    hasMinLength
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
+                <span className={`font-normal ${hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   8+ characters
                 </span>
               </div>
@@ -250,13 +287,7 @@ function ResetPassword() {
                 ) : (
                   <Circle size={16} className="text-slate-300" />
                 )}
-                <span
-                  className={`font-normal ${
-                    hasUppercase
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
+                <span className={`font-normal ${hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   1 uppercase letter
                 </span>
               </div>
@@ -266,13 +297,7 @@ function ResetPassword() {
                 ) : (
                   <Circle size={16} className="text-slate-300" />
                 )}
-                <span
-                  className={`font-normal ${
-                    hasNumber
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
+                <span className={`font-normal ${hasNumber ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   1 number
                 </span>
               </div>
@@ -282,13 +307,7 @@ function ResetPassword() {
                 ) : (
                   <Circle size={16} className="text-slate-300" />
                 )}
-                <span
-                  className={`font-normal ${
-                    hasSpecialChar
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-slate-500 dark:text-slate-400'
-                  }`}
-                >
+                <span className={`font-normal ${hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
                   1 special character
                 </span>
               </div>
@@ -310,12 +329,7 @@ function ResetPassword() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={
-                resetPassword.isPending ||
-                !allRequirementsMet ||
-                !passwordsMatch ||
-                !codeComplete
-              }
+              disabled={resetPassword.isPending || !allRequirementsMet || !passwordsMatch || !codeComplete}
               className="w-full py-3 bg-[#0E7C8C] text-white font-semibold rounded-lg hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors shadow-lg shadow-[#0E7C8C]/20 mb-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {resetPassword.isPending ? (

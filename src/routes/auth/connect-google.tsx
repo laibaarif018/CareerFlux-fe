@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PublicRoute } from '@/components/PRoutes'
+import { PublicRoute } from '@/utils/RouteGuard'
 import { useEffect, useState } from 'react'
-import { useConnetGoogle } from '@/hooks/useAuth'
+import { useConnetGoogle } from '@/queries/auth.queries'
 
 export const Route = createFileRoute('/auth/connect-google')({
   component: () => (
@@ -71,7 +71,7 @@ function ConnectGoogle() {
         onSuccess: () => {
           localStorage.removeItem('googleLinkEmail')
           localStorage.removeItem('googleLinkId')
-          navigate({ to: '/dashboard' })
+          navigate({ to: '/job-seeker/dashboard' })
         },
       },
     )

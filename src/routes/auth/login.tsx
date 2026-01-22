@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute,  useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
-import { useCheckEmail } from '@/hooks/useAuth'
+import { useCheckEmail } from '@/queries/auth.queries'
 import { z } from 'zod'
-import { PublicRoute } from '@/components/PRoutes'
+import { PublicRoute } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/auth/login')({
   component: () => (
@@ -69,7 +69,7 @@ function EmailInput() {
 
         if (exists && hasPassword === false) {
           // Email exists but password not set (Google signup case)
-          localStorage.setItem('userId', userId)
+          localStorage.setItem('userId', userId as any)
           navigate({ to: '/auth/set-password' })
         } else if (exists && hasPassword === true) {
           // Normal login flow

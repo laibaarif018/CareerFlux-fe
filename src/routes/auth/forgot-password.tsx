@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
-import { useForgotPassword } from '@/hooks/useAuth'
-import { PublicRoute } from '@/components/PRoutes'
-import { z } from 'zod'
+import { useForgotPassword } from '@/queries/auth.queries'
+import { PublicRoute } from '@/utils/RouteGuard'
+import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/forgot-password')({
   component: () => (
@@ -13,57 +13,60 @@ export const Route = createFileRoute('/auth/forgot-password')({
   ),
 })
 
-const emailSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+const emailSchema = Yup.object().shape({
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('Email address is required'),
 })
+
+type EmailFormData = Yup.InferType<typeof emailSchema>
 
 function ForgotPassword() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
+  const [formData, setFormData] = useState<EmailFormData>({ email: '' })
   const [error, setError] = useState('')
-  const [touched, setTouched] = useState(false)
   const forgotPassword = useForgotPassword()
 
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value)
-
-    // Clear errors when user types
-    if (error) {
-      setError('')
-    }
-    if (forgotPassword.isError) {
-      forgotPassword.reset()
-    }
-  }
+  const register = (field: keyof EmailFormData) => ({
+    value: formData[field],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+      if (error) setError('')
+      if (forgotPassword.isError) forgotPassword.reset()
+    },
+    onBlur: async () => {
+      try {
+        await emailSchema.validateAt(field, formData)
+        setError('')
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          setError(err.message)
+        }
+      }
+    },
+  })
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
-    setTouched(true)
 
-    // Check if email is empty
-    if (!email.trim()) {
-      setError('Email address is required')
-      return
+    try {
+      await emailSchema.validate(formData, { abortEarly: false })
+      setError('')
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        setError(err.errors[0])
+        return
+      }
     }
-
-    // Validate email format
-    const result = emailSchema.safeParse({ email })
-
-    if (!result.success) {
-      setError('Please enter a valid email address')
-      return
-    }
-
-    setError('')
 
     forgotPassword.mutate(
-      { email },
+      { email: formData.email },
       {
         onSuccess: () => {
-          localStorage.setItem('email', email)
-          navigate({ to: '/auth/reset-password', search: { email, token: '' } })
+          localStorage.setItem('email', formData.email)
+          navigate({ to: '/auth/reset-password', search: { email: formData.email, token: '' } })
         },
-      },
+      }
     )
   }
 
@@ -111,9 +114,7 @@ function ForgotPassword() {
                   id="email-address"
                   type="email"
                   placeholder="john.doe@example.com"
-                  value={email}
-                  onChange={handleEmailChange}
-                  onBlur={() => setTouched(true)}
+                  {...register('email')}
                   className={`w-full h-12 pl-12 pr-4 text-sm rounded-lg border bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none transition-colors font-normal ${
                     hasError
                       ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
@@ -121,17 +122,21 @@ function ForgotPassword() {
                   }`}
                 />
               </div>
+              {error && (
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
+                  {error}
+                </p>
+              )}
             </div>
 
             {/* Error Message */}
-            {touched && (error || forgotPassword.isError) && (
+            {forgotPassword.isError && (
               <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
                 <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
                   error
                 </span>
                 <p className="text-sm text-red-600 dark:text-red-400 font-normal">
-                  {error ||
-                    (forgotPassword.error as any)?.response?.data?.message ||
+                  {(forgotPassword.error as any)?.response?.data?.message ||
                     'Failed to send verification code. Please try again.'}
                 </p>
               </div>
@@ -184,6 +189,3 @@ function ForgotPassword() {
     </div>
   )
 }
-
-
-

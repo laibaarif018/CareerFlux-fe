@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
-import { useSignup } from '@/hooks/useAuth'
-import { z } from 'zod'
+import { useSignup } from '@/queries/auth.queries'
+import * as Yup from 'yup'
 import { Eye, EyeOff } from 'lucide-react'
-import { PublicRoute } from '@/components/PRoutes'
+import { PublicRoute } from '@/utils/RouteGuard'
+
 export const Route = createFileRoute('/auth/signup')({
   component: () => (
     <PublicRoute>
@@ -13,36 +14,45 @@ export const Route = createFileRoute('/auth/signup')({
   ),
 })
 
-const signupSchema = z
-  .object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Please enter a valid email address'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/\d/, 'Password must contain at least one number')
-      .regex(
-        /[!@#$%^&*(),.?":{}|<>]/,
-        'Password must contain at least one special character',
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  })
+// Yup validation schema
+const signupSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Name must be at least 2 characters')
+    .required('Name is required'),
+  email: Yup.string()
+    .email('Please enter a valid email address')
+    .required('Email is required'),
+  password: Yup.string()
+    .min(8, 'Password must be at least 8 characters')
+    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .matches(/\d/, 'Password must contain at least one number')
+    .matches(
+      /[!@#$%^&*(),.?":{}|<>]/,
+      'Password must contain at least one special character'
+    )
+    .required('Password is required'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], "Passwords don't match")
+    .required('Please confirm your password'),
+  agreedToTerms: Yup.boolean()
+    .oneOf([true], 'You must agree to the Terms & Privacy Policy')
+    .required('You must agree to the Terms & Privacy Policy'),
+})
+
+type SignupFormData = Yup.InferType<typeof signupSchema>
 
 function SignUpPage() {
   const navigate = useNavigate()
   const signup = useSignup()
-  const [formData, setFormData] = useState({
+  
+  const [formData, setFormData] = useState<SignupFormData>({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     agreedToTerms: false,
   })
+  
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [showPassword, setShowPassword] = useState(false)
@@ -55,53 +65,74 @@ function SignUpPage() {
     }
   }, [])
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  // Validate a single field
+  const validateField = async (field: keyof SignupFormData, value: any) => {
+    try {
+      await signupSchema.validateAt(field, { ...formData, [field]: value })
+      setErrors((prev) => ({ ...prev, [field]: '' }))
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        setErrors((prev) => ({ ...prev, [field]: error.message }))
+      }
+    }
+  }
+
+  const handleInputChange = (field: keyof SignupFormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
 
+    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }))
     }
+    
+    // Validate on change if field was touched
+    if (touched[field]) {
+      validateField(field, value)
+    }
+    
     if (signup.isError) {
       signup.reset()
     }
   }
 
-  const handleBlur = (field: string) => {
+  const handleBlur = (field: keyof SignupFormData) => {
     setTouched((prev) => ({ ...prev, [field]: true }))
+    validateField(field, formData[field])
   }
 
-  const handleCreateAccount = (e: React.FormEvent) => {
+  const validateForm = async (): Promise<boolean> => {
+    try {
+      await signupSchema.validate(formData, { abortEarly: false })
+      setErrors({})
+      return true
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const newErrors: Record<string, string> = {}
+        error.inner.forEach((err) => {
+          if (err.path) {
+            newErrors[err.path] = err.message
+          }
+        })
+        setErrors(newErrors)
+        
+        // Mark all fields as touched
+        setTouched({
+          name: true,
+          email: true,
+          password: true,
+          confirmPassword: true,
+          agreedToTerms: true,
+        })
+      }
+      return false
+    }
+  }
+
+  const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    setTouched({
-      name: true,
-      email: true,
-      password: true,
-      confirmPassword: true,
-      agreedToTerms: true,
-    })
-
-    if (!formData.agreedToTerms) {
-      setErrors((prev) => ({
-        ...prev,
-        agreedToTerms: 'You must agree to the Terms & Privacy Policy',
-      }))
-      return
-    }
-
-    const result = signupSchema.safeParse(formData)
-
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {}
-      result.error.issues.forEach((issue) => {
-        const field = issue.path[0] as string
-        fieldErrors[field] = issue.message
-      })
-      setErrors(fieldErrors)
-      return
-    }
-
-    setErrors({})
+    const isValid = await validateForm()
+    if (!isValid) return
 
     signup.mutate(
       {
@@ -117,7 +148,7 @@ function SignUpPage() {
             search: { email: formData.email },
           })
         },
-      },
+      }
     )
   }
 
@@ -358,14 +389,14 @@ function SignUpPage() {
                       onChange={(e) =>
                         handleInputChange('agreedToTerms', e.target.checked)
                       }
-                      className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 
-text-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20"
+                      onBlur={() => handleBlur('agreedToTerms')}
+                      className="mt-1 h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20"
                     />
                     <span>I agree to the Terms & Privacy Policy</span>
                   </label>
-                  {touched.agreedToTerms && errors.agreedToTerms && (
+                  {getFieldError('agreedToTerms') && (
                     <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                      {errors.agreedToTerms}
+                      {getFieldError('agreedToTerms')}
                     </p>
                   )}
                 </div>
@@ -385,15 +416,15 @@ text-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20"
                 <button
                   type="submit"
                   disabled={signup.isPending}
-                  className="w-full h-11 rounded-lg bg-[#0E7C8C] text-white font-bold hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-[#0E7C8C]/25"
+                  className="w-full h-11 rounded-lg bg-[#0E7C8C] text-white font-bold hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-[#0E7C8C]/25 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {signup.isPending ? (
-                    <>
+                    <span className="flex items-center justify-center gap-2">
                       <span className="material-symbols-outlined animate-spin text-lg">
                         progress_activity
                       </span>
                       Creating...
-                    </>
+                    </span>
                   ) : (
                     'Create Account'
                   )}

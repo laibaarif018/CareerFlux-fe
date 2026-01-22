@@ -9,28 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UploadResumeRouteImport } from './routes/uploadResume'
-import { Route as SkillGapRouteImport } from './routes/skillGap'
-import { Route as ResumeReportRouteImport } from './routes/resumeReport'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as ParsedResumeRouteImport } from './routes/parsedResume'
-import { Route as MyResumesRouteImport } from './routes/myResumes'
-import { Route as LearningPlanRouteImport } from './routes/learningPlan'
-import { Route as JobsRouteImport } from './routes/jobs'
-import { Route as JobDetailsRouteImport } from './routes/jobDetails'
-import { Route as JobDetailWithSkillGapRouteImport } from './routes/jobDetailWithSkillGap'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AccountSettingRouteImport } from './routes/accountSetting'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CompanySupportRouteImport } from './routes/company/support'
+import { Route as JobSeekerUploadResumeRouteImport } from './routes/job-seeker/uploadResume'
+import { Route as JobSeekerResumeReportRouteImport } from './routes/job-seeker/resumeReport'
+import { Route as JobSeekerProfileRouteImport } from './routes/job-seeker/profile'
+import { Route as JobSeekerMyResumesRouteImport } from './routes/job-seeker/myResumes'
+import { Route as JobSeekerJobsRouteImport } from './routes/job-seeker/jobs'
+import { Route as JobSeekerJobDetailsRouteImport } from './routes/job-seeker/job-details'
+import { Route as JobSeekerDashboardRouteImport } from './routes/job-seeker/dashboard'
+import { Route as JobSeekerAccountSettingsRouteImport } from './routes/job-seeker/account-settings'
 import { Route as CompanySettingsRouteImport } from './routes/company/settings'
-import { Route as CompanyProfileSetupRouteImport } from './routes/company/profileSetup'
+import { Route as CompanyProfileRouteImport } from './routes/company/profile'
 import { Route as CompanyJobsRouteImport } from './routes/company/jobs'
+import { Route as CompanyJobDetailsRouteImport } from './routes/company/jobDetails'
+import { Route as CompanyEditJobRouteImport } from './routes/company/editJob'
 import { Route as CompanyDashboardRouteImport } from './routes/company/dashboard'
 import { Route as CompanyCandidatesRouteImport } from './routes/company/candidates'
-import { Route as CompanyCandidateDetailRouteImport } from './routes/company/candidateDetail'
-import { Route as CompanyCadidateMatchRouteImport } from './routes/company/cadidateMatch'
-import { Route as CompanyAddJobRouteImport } from './routes/company/addJob'
+import { Route as CompanyApplicantsRouteImport } from './routes/company/applicants'
+import { Route as CompanyApplicantDetailRouteImport } from './routes/company/applicant-detail'
+import { Route as CompanyAddJobRouteImport } from './routes/company/add-job'
 import { Route as AuthVerificationRouteImport } from './routes/auth/verification'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSetPasswordRouteImport } from './routes/auth/set-password'
@@ -41,90 +38,77 @@ import { Route as AuthOauthCallbackRouteImport } from './routes/auth/oauth-callb
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthConnectGoogleRouteImport } from './routes/auth/connect-google'
+import { Route as JobSeekerParsedResumeResumeIdRouteImport } from './routes/job-seeker/parsedResume/$resumeId'
 
-const UploadResumeRoute = UploadResumeRouteImport.update({
-  id: '/uploadResume',
-  path: '/uploadResume',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SkillGapRoute = SkillGapRouteImport.update({
-  id: '/skillGap',
-  path: '/skillGap',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResumeReportRoute = ResumeReportRouteImport.update({
-  id: '/resumeReport',
-  path: '/resumeReport',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParsedResumeRoute = ParsedResumeRouteImport.update({
-  id: '/parsedResume',
-  path: '/parsedResume',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MyResumesRoute = MyResumesRouteImport.update({
-  id: '/myResumes',
-  path: '/myResumes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearningPlanRoute = LearningPlanRouteImport.update({
-  id: '/learningPlan',
-  path: '/learningPlan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JobsRoute = JobsRouteImport.update({
-  id: '/jobs',
-  path: '/jobs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JobDetailsRoute = JobDetailsRouteImport.update({
-  id: '/jobDetails',
-  path: '/jobDetails',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JobDetailWithSkillGapRoute = JobDetailWithSkillGapRouteImport.update({
-  id: '/jobDetailWithSkillGap',
-  path: '/jobDetailWithSkillGap',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AccountSettingRoute = AccountSettingRouteImport.update({
-  id: '/accountSetting',
-  path: '/accountSetting',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanySupportRoute = CompanySupportRouteImport.update({
-  id: '/company/support',
-  path: '/company/support',
+const JobSeekerUploadResumeRoute = JobSeekerUploadResumeRouteImport.update({
+  id: '/job-seeker/uploadResume',
+  path: '/job-seeker/uploadResume',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JobSeekerResumeReportRoute = JobSeekerResumeReportRouteImport.update({
+  id: '/job-seeker/resumeReport',
+  path: '/job-seeker/resumeReport',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerProfileRoute = JobSeekerProfileRouteImport.update({
+  id: '/job-seeker/profile',
+  path: '/job-seeker/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerMyResumesRoute = JobSeekerMyResumesRouteImport.update({
+  id: '/job-seeker/myResumes',
+  path: '/job-seeker/myResumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerJobsRoute = JobSeekerJobsRouteImport.update({
+  id: '/job-seeker/jobs',
+  path: '/job-seeker/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerJobDetailsRoute = JobSeekerJobDetailsRouteImport.update({
+  id: '/job-seeker/job-details',
+  path: '/job-seeker/job-details',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerDashboardRoute = JobSeekerDashboardRouteImport.update({
+  id: '/job-seeker/dashboard',
+  path: '/job-seeker/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerAccountSettingsRoute =
+  JobSeekerAccountSettingsRouteImport.update({
+    id: '/job-seeker/account-settings',
+    path: '/job-seeker/account-settings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CompanySettingsRoute = CompanySettingsRouteImport.update({
   id: '/company/settings',
   path: '/company/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyProfileSetupRoute = CompanyProfileSetupRouteImport.update({
-  id: '/company/profileSetup',
-  path: '/company/profileSetup',
+const CompanyProfileRoute = CompanyProfileRouteImport.update({
+  id: '/company/profile',
+  path: '/company/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyJobsRoute = CompanyJobsRouteImport.update({
   id: '/company/jobs',
   path: '/company/jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyJobDetailsRoute = CompanyJobDetailsRouteImport.update({
+  id: '/company/jobDetails',
+  path: '/company/jobDetails',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyEditJobRoute = CompanyEditJobRouteImport.update({
+  id: '/company/editJob',
+  path: '/company/editJob',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyDashboardRoute = CompanyDashboardRouteImport.update({
@@ -137,19 +121,19 @@ const CompanyCandidatesRoute = CompanyCandidatesRouteImport.update({
   path: '/company/candidates',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyCandidateDetailRoute = CompanyCandidateDetailRouteImport.update({
-  id: '/company/candidateDetail',
-  path: '/company/candidateDetail',
+const CompanyApplicantsRoute = CompanyApplicantsRouteImport.update({
+  id: '/company/applicants',
+  path: '/company/applicants',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompanyCadidateMatchRoute = CompanyCadidateMatchRouteImport.update({
-  id: '/company/cadidateMatch',
-  path: '/company/cadidateMatch',
+const CompanyApplicantDetailRoute = CompanyApplicantDetailRouteImport.update({
+  id: '/company/applicant-detail',
+  path: '/company/applicant-detail',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompanyAddJobRoute = CompanyAddJobRouteImport.update({
-  id: '/company/addJob',
-  path: '/company/addJob',
+  id: '/company/add-job',
+  path: '/company/add-job',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthVerificationRoute = AuthVerificationRouteImport.update({
@@ -202,21 +186,15 @@ const AuthConnectGoogleRoute = AuthConnectGoogleRouteImport.update({
   path: '/auth/connect-google',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JobSeekerParsedResumeResumeIdRoute =
+  JobSeekerParsedResumeResumeIdRouteImport.update({
+    id: '/job-seeker/parsedResume/$resumeId',
+    path: '/job-seeker/parsedResume/$resumeId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/accountSetting': typeof AccountSettingRoute
-  '/dashboard': typeof DashboardRoute
-  '/jobDetailWithSkillGap': typeof JobDetailWithSkillGapRoute
-  '/jobDetails': typeof JobDetailsRoute
-  '/jobs': typeof JobsRoute
-  '/learningPlan': typeof LearningPlanRoute
-  '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
-  '/profile': typeof ProfileRoute
-  '/resumeReport': typeof ResumeReportRoute
-  '/skillGap': typeof SkillGapRoute
-  '/uploadResume': typeof UploadResumeRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -227,30 +205,28 @@ export interface FileRoutesByFullPath {
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
-  '/company/addJob': typeof CompanyAddJobRoute
-  '/company/cadidateMatch': typeof CompanyCadidateMatchRoute
-  '/company/candidateDetail': typeof CompanyCandidateDetailRoute
+  '/company/add-job': typeof CompanyAddJobRoute
+  '/company/applicant-detail': typeof CompanyApplicantDetailRoute
+  '/company/applicants': typeof CompanyApplicantsRoute
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
+  '/company/editJob': typeof CompanyEditJobRoute
+  '/company/jobDetails': typeof CompanyJobDetailsRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
-  '/company/support': typeof CompanySupportRoute
+  '/job-seeker/account-settings': typeof JobSeekerAccountSettingsRoute
+  '/job-seeker/dashboard': typeof JobSeekerDashboardRoute
+  '/job-seeker/job-details': typeof JobSeekerJobDetailsRoute
+  '/job-seeker/jobs': typeof JobSeekerJobsRoute
+  '/job-seeker/myResumes': typeof JobSeekerMyResumesRoute
+  '/job-seeker/profile': typeof JobSeekerProfileRoute
+  '/job-seeker/resumeReport': typeof JobSeekerResumeReportRoute
+  '/job-seeker/uploadResume': typeof JobSeekerUploadResumeRoute
+  '/job-seeker/parsedResume/$resumeId': typeof JobSeekerParsedResumeResumeIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/accountSetting': typeof AccountSettingRoute
-  '/dashboard': typeof DashboardRoute
-  '/jobDetailWithSkillGap': typeof JobDetailWithSkillGapRoute
-  '/jobDetails': typeof JobDetailsRoute
-  '/jobs': typeof JobsRoute
-  '/learningPlan': typeof LearningPlanRoute
-  '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
-  '/profile': typeof ProfileRoute
-  '/resumeReport': typeof ResumeReportRoute
-  '/skillGap': typeof SkillGapRoute
-  '/uploadResume': typeof UploadResumeRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -261,31 +237,29 @@ export interface FileRoutesByTo {
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
-  '/company/addJob': typeof CompanyAddJobRoute
-  '/company/cadidateMatch': typeof CompanyCadidateMatchRoute
-  '/company/candidateDetail': typeof CompanyCandidateDetailRoute
+  '/company/add-job': typeof CompanyAddJobRoute
+  '/company/applicant-detail': typeof CompanyApplicantDetailRoute
+  '/company/applicants': typeof CompanyApplicantsRoute
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
+  '/company/editJob': typeof CompanyEditJobRoute
+  '/company/jobDetails': typeof CompanyJobDetailsRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
-  '/company/support': typeof CompanySupportRoute
+  '/job-seeker/account-settings': typeof JobSeekerAccountSettingsRoute
+  '/job-seeker/dashboard': typeof JobSeekerDashboardRoute
+  '/job-seeker/job-details': typeof JobSeekerJobDetailsRoute
+  '/job-seeker/jobs': typeof JobSeekerJobsRoute
+  '/job-seeker/myResumes': typeof JobSeekerMyResumesRoute
+  '/job-seeker/profile': typeof JobSeekerProfileRoute
+  '/job-seeker/resumeReport': typeof JobSeekerResumeReportRoute
+  '/job-seeker/uploadResume': typeof JobSeekerUploadResumeRoute
+  '/job-seeker/parsedResume/$resumeId': typeof JobSeekerParsedResumeResumeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/accountSetting': typeof AccountSettingRoute
-  '/dashboard': typeof DashboardRoute
-  '/jobDetailWithSkillGap': typeof JobDetailWithSkillGapRoute
-  '/jobDetails': typeof JobDetailsRoute
-  '/jobs': typeof JobsRoute
-  '/learningPlan': typeof LearningPlanRoute
-  '/myResumes': typeof MyResumesRoute
-  '/parsedResume': typeof ParsedResumeRoute
-  '/profile': typeof ProfileRoute
-  '/resumeReport': typeof ResumeReportRoute
-  '/skillGap': typeof SkillGapRoute
-  '/uploadResume': typeof UploadResumeRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -296,32 +270,30 @@ export interface FileRoutesById {
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
-  '/company/addJob': typeof CompanyAddJobRoute
-  '/company/cadidateMatch': typeof CompanyCadidateMatchRoute
-  '/company/candidateDetail': typeof CompanyCandidateDetailRoute
+  '/company/add-job': typeof CompanyAddJobRoute
+  '/company/applicant-detail': typeof CompanyApplicantDetailRoute
+  '/company/applicants': typeof CompanyApplicantsRoute
   '/company/candidates': typeof CompanyCandidatesRoute
   '/company/dashboard': typeof CompanyDashboardRoute
+  '/company/editJob': typeof CompanyEditJobRoute
+  '/company/jobDetails': typeof CompanyJobDetailsRoute
   '/company/jobs': typeof CompanyJobsRoute
-  '/company/profileSetup': typeof CompanyProfileSetupRoute
+  '/company/profile': typeof CompanyProfileRoute
   '/company/settings': typeof CompanySettingsRoute
-  '/company/support': typeof CompanySupportRoute
+  '/job-seeker/account-settings': typeof JobSeekerAccountSettingsRoute
+  '/job-seeker/dashboard': typeof JobSeekerDashboardRoute
+  '/job-seeker/job-details': typeof JobSeekerJobDetailsRoute
+  '/job-seeker/jobs': typeof JobSeekerJobsRoute
+  '/job-seeker/myResumes': typeof JobSeekerMyResumesRoute
+  '/job-seeker/profile': typeof JobSeekerProfileRoute
+  '/job-seeker/resumeReport': typeof JobSeekerResumeReportRoute
+  '/job-seeker/uploadResume': typeof JobSeekerUploadResumeRoute
+  '/job-seeker/parsedResume/$resumeId': typeof JobSeekerParsedResumeResumeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/accountSetting'
-    | '/dashboard'
-    | '/jobDetailWithSkillGap'
-    | '/jobDetails'
-    | '/jobs'
-    | '/learningPlan'
-    | '/myResumes'
-    | '/parsedResume'
-    | '/profile'
-    | '/resumeReport'
-    | '/skillGap'
-    | '/uploadResume'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -332,30 +304,28 @@ export interface FileRouteTypes {
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
-    | '/company/addJob'
-    | '/company/cadidateMatch'
-    | '/company/candidateDetail'
+    | '/company/add-job'
+    | '/company/applicant-detail'
+    | '/company/applicants'
     | '/company/candidates'
     | '/company/dashboard'
+    | '/company/editJob'
+    | '/company/jobDetails'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
-    | '/company/support'
+    | '/job-seeker/account-settings'
+    | '/job-seeker/dashboard'
+    | '/job-seeker/job-details'
+    | '/job-seeker/jobs'
+    | '/job-seeker/myResumes'
+    | '/job-seeker/profile'
+    | '/job-seeker/resumeReport'
+    | '/job-seeker/uploadResume'
+    | '/job-seeker/parsedResume/$resumeId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/accountSetting'
-    | '/dashboard'
-    | '/jobDetailWithSkillGap'
-    | '/jobDetails'
-    | '/jobs'
-    | '/learningPlan'
-    | '/myResumes'
-    | '/parsedResume'
-    | '/profile'
-    | '/resumeReport'
-    | '/skillGap'
-    | '/uploadResume'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -366,30 +336,28 @@ export interface FileRouteTypes {
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
-    | '/company/addJob'
-    | '/company/cadidateMatch'
-    | '/company/candidateDetail'
+    | '/company/add-job'
+    | '/company/applicant-detail'
+    | '/company/applicants'
     | '/company/candidates'
     | '/company/dashboard'
+    | '/company/editJob'
+    | '/company/jobDetails'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
-    | '/company/support'
+    | '/job-seeker/account-settings'
+    | '/job-seeker/dashboard'
+    | '/job-seeker/job-details'
+    | '/job-seeker/jobs'
+    | '/job-seeker/myResumes'
+    | '/job-seeker/profile'
+    | '/job-seeker/resumeReport'
+    | '/job-seeker/uploadResume'
+    | '/job-seeker/parsedResume/$resumeId'
   id:
     | '__root__'
     | '/'
-    | '/accountSetting'
-    | '/dashboard'
-    | '/jobDetailWithSkillGap'
-    | '/jobDetails'
-    | '/jobs'
-    | '/learningPlan'
-    | '/myResumes'
-    | '/parsedResume'
-    | '/profile'
-    | '/resumeReport'
-    | '/skillGap'
-    | '/uploadResume'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -400,31 +368,29 @@ export interface FileRouteTypes {
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
-    | '/company/addJob'
-    | '/company/cadidateMatch'
-    | '/company/candidateDetail'
+    | '/company/add-job'
+    | '/company/applicant-detail'
+    | '/company/applicants'
     | '/company/candidates'
     | '/company/dashboard'
+    | '/company/editJob'
+    | '/company/jobDetails'
     | '/company/jobs'
-    | '/company/profileSetup'
+    | '/company/profile'
     | '/company/settings'
-    | '/company/support'
+    | '/job-seeker/account-settings'
+    | '/job-seeker/dashboard'
+    | '/job-seeker/job-details'
+    | '/job-seeker/jobs'
+    | '/job-seeker/myResumes'
+    | '/job-seeker/profile'
+    | '/job-seeker/resumeReport'
+    | '/job-seeker/uploadResume'
+    | '/job-seeker/parsedResume/$resumeId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountSettingRoute: typeof AccountSettingRoute
-  DashboardRoute: typeof DashboardRoute
-  JobDetailWithSkillGapRoute: typeof JobDetailWithSkillGapRoute
-  JobDetailsRoute: typeof JobDetailsRoute
-  JobsRoute: typeof JobsRoute
-  LearningPlanRoute: typeof LearningPlanRoute
-  MyResumesRoute: typeof MyResumesRoute
-  ParsedResumeRoute: typeof ParsedResumeRoute
-  ProfileRoute: typeof ProfileRoute
-  ResumeReportRoute: typeof ResumeReportRoute
-  SkillGapRoute: typeof SkillGapRoute
-  UploadResumeRoute: typeof UploadResumeRoute
   AuthConnectGoogleRoute: typeof AuthConnectGoogleRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
@@ -436,102 +402,28 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerificationRoute: typeof AuthVerificationRoute
   CompanyAddJobRoute: typeof CompanyAddJobRoute
-  CompanyCadidateMatchRoute: typeof CompanyCadidateMatchRoute
-  CompanyCandidateDetailRoute: typeof CompanyCandidateDetailRoute
+  CompanyApplicantDetailRoute: typeof CompanyApplicantDetailRoute
+  CompanyApplicantsRoute: typeof CompanyApplicantsRoute
   CompanyCandidatesRoute: typeof CompanyCandidatesRoute
   CompanyDashboardRoute: typeof CompanyDashboardRoute
+  CompanyEditJobRoute: typeof CompanyEditJobRoute
+  CompanyJobDetailsRoute: typeof CompanyJobDetailsRoute
   CompanyJobsRoute: typeof CompanyJobsRoute
-  CompanyProfileSetupRoute: typeof CompanyProfileSetupRoute
+  CompanyProfileRoute: typeof CompanyProfileRoute
   CompanySettingsRoute: typeof CompanySettingsRoute
-  CompanySupportRoute: typeof CompanySupportRoute
+  JobSeekerAccountSettingsRoute: typeof JobSeekerAccountSettingsRoute
+  JobSeekerDashboardRoute: typeof JobSeekerDashboardRoute
+  JobSeekerJobDetailsRoute: typeof JobSeekerJobDetailsRoute
+  JobSeekerJobsRoute: typeof JobSeekerJobsRoute
+  JobSeekerMyResumesRoute: typeof JobSeekerMyResumesRoute
+  JobSeekerProfileRoute: typeof JobSeekerProfileRoute
+  JobSeekerResumeReportRoute: typeof JobSeekerResumeReportRoute
+  JobSeekerUploadResumeRoute: typeof JobSeekerUploadResumeRoute
+  JobSeekerParsedResumeResumeIdRoute: typeof JobSeekerParsedResumeResumeIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/uploadResume': {
-      id: '/uploadResume'
-      path: '/uploadResume'
-      fullPath: '/uploadResume'
-      preLoaderRoute: typeof UploadResumeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/skillGap': {
-      id: '/skillGap'
-      path: '/skillGap'
-      fullPath: '/skillGap'
-      preLoaderRoute: typeof SkillGapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/resumeReport': {
-      id: '/resumeReport'
-      path: '/resumeReport'
-      fullPath: '/resumeReport'
-      preLoaderRoute: typeof ResumeReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parsedResume': {
-      id: '/parsedResume'
-      path: '/parsedResume'
-      fullPath: '/parsedResume'
-      preLoaderRoute: typeof ParsedResumeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/myResumes': {
-      id: '/myResumes'
-      path: '/myResumes'
-      fullPath: '/myResumes'
-      preLoaderRoute: typeof MyResumesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learningPlan': {
-      id: '/learningPlan'
-      path: '/learningPlan'
-      fullPath: '/learningPlan'
-      preLoaderRoute: typeof LearningPlanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jobs': {
-      id: '/jobs'
-      path: '/jobs'
-      fullPath: '/jobs'
-      preLoaderRoute: typeof JobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jobDetails': {
-      id: '/jobDetails'
-      path: '/jobDetails'
-      fullPath: '/jobDetails'
-      preLoaderRoute: typeof JobDetailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/jobDetailWithSkillGap': {
-      id: '/jobDetailWithSkillGap'
-      path: '/jobDetailWithSkillGap'
-      fullPath: '/jobDetailWithSkillGap'
-      preLoaderRoute: typeof JobDetailWithSkillGapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/accountSetting': {
-      id: '/accountSetting'
-      path: '/accountSetting'
-      fullPath: '/accountSetting'
-      preLoaderRoute: typeof AccountSettingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -539,11 +431,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/support': {
-      id: '/company/support'
-      path: '/company/support'
-      fullPath: '/company/support'
-      preLoaderRoute: typeof CompanySupportRouteImport
+    '/job-seeker/uploadResume': {
+      id: '/job-seeker/uploadResume'
+      path: '/job-seeker/uploadResume'
+      fullPath: '/job-seeker/uploadResume'
+      preLoaderRoute: typeof JobSeekerUploadResumeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/resumeReport': {
+      id: '/job-seeker/resumeReport'
+      path: '/job-seeker/resumeReport'
+      fullPath: '/job-seeker/resumeReport'
+      preLoaderRoute: typeof JobSeekerResumeReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/profile': {
+      id: '/job-seeker/profile'
+      path: '/job-seeker/profile'
+      fullPath: '/job-seeker/profile'
+      preLoaderRoute: typeof JobSeekerProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/myResumes': {
+      id: '/job-seeker/myResumes'
+      path: '/job-seeker/myResumes'
+      fullPath: '/job-seeker/myResumes'
+      preLoaderRoute: typeof JobSeekerMyResumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/jobs': {
+      id: '/job-seeker/jobs'
+      path: '/job-seeker/jobs'
+      fullPath: '/job-seeker/jobs'
+      preLoaderRoute: typeof JobSeekerJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/job-details': {
+      id: '/job-seeker/job-details'
+      path: '/job-seeker/job-details'
+      fullPath: '/job-seeker/job-details'
+      preLoaderRoute: typeof JobSeekerJobDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/dashboard': {
+      id: '/job-seeker/dashboard'
+      path: '/job-seeker/dashboard'
+      fullPath: '/job-seeker/dashboard'
+      preLoaderRoute: typeof JobSeekerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/account-settings': {
+      id: '/job-seeker/account-settings'
+      path: '/job-seeker/account-settings'
+      fullPath: '/job-seeker/account-settings'
+      preLoaderRoute: typeof JobSeekerAccountSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company/settings': {
@@ -553,11 +494,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanySettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/profileSetup': {
-      id: '/company/profileSetup'
-      path: '/company/profileSetup'
-      fullPath: '/company/profileSetup'
-      preLoaderRoute: typeof CompanyProfileSetupRouteImport
+    '/company/profile': {
+      id: '/company/profile'
+      path: '/company/profile'
+      fullPath: '/company/profile'
+      preLoaderRoute: typeof CompanyProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company/jobs': {
@@ -565,6 +506,20 @@ declare module '@tanstack/react-router' {
       path: '/company/jobs'
       fullPath: '/company/jobs'
       preLoaderRoute: typeof CompanyJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company/jobDetails': {
+      id: '/company/jobDetails'
+      path: '/company/jobDetails'
+      fullPath: '/company/jobDetails'
+      preLoaderRoute: typeof CompanyJobDetailsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company/editJob': {
+      id: '/company/editJob'
+      path: '/company/editJob'
+      fullPath: '/company/editJob'
+      preLoaderRoute: typeof CompanyEditJobRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/company/dashboard': {
@@ -581,24 +536,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompanyCandidatesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/candidateDetail': {
-      id: '/company/candidateDetail'
-      path: '/company/candidateDetail'
-      fullPath: '/company/candidateDetail'
-      preLoaderRoute: typeof CompanyCandidateDetailRouteImport
+    '/company/applicants': {
+      id: '/company/applicants'
+      path: '/company/applicants'
+      fullPath: '/company/applicants'
+      preLoaderRoute: typeof CompanyApplicantsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/cadidateMatch': {
-      id: '/company/cadidateMatch'
-      path: '/company/cadidateMatch'
-      fullPath: '/company/cadidateMatch'
-      preLoaderRoute: typeof CompanyCadidateMatchRouteImport
+    '/company/applicant-detail': {
+      id: '/company/applicant-detail'
+      path: '/company/applicant-detail'
+      fullPath: '/company/applicant-detail'
+      preLoaderRoute: typeof CompanyApplicantDetailRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/company/addJob': {
-      id: '/company/addJob'
-      path: '/company/addJob'
-      fullPath: '/company/addJob'
+    '/company/add-job': {
+      id: '/company/add-job'
+      path: '/company/add-job'
+      fullPath: '/company/add-job'
       preLoaderRoute: typeof CompanyAddJobRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -672,23 +627,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthConnectGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/job-seeker/parsedResume/$resumeId': {
+      id: '/job-seeker/parsedResume/$resumeId'
+      path: '/job-seeker/parsedResume/$resumeId'
+      fullPath: '/job-seeker/parsedResume/$resumeId'
+      preLoaderRoute: typeof JobSeekerParsedResumeResumeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccountSettingRoute: AccountSettingRoute,
-  DashboardRoute: DashboardRoute,
-  JobDetailWithSkillGapRoute: JobDetailWithSkillGapRoute,
-  JobDetailsRoute: JobDetailsRoute,
-  JobsRoute: JobsRoute,
-  LearningPlanRoute: LearningPlanRoute,
-  MyResumesRoute: MyResumesRoute,
-  ParsedResumeRoute: ParsedResumeRoute,
-  ProfileRoute: ProfileRoute,
-  ResumeReportRoute: ResumeReportRoute,
-  SkillGapRoute: SkillGapRoute,
-  UploadResumeRoute: UploadResumeRoute,
   AuthConnectGoogleRoute: AuthConnectGoogleRoute,
   AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
@@ -700,14 +650,24 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   AuthVerificationRoute: AuthVerificationRoute,
   CompanyAddJobRoute: CompanyAddJobRoute,
-  CompanyCadidateMatchRoute: CompanyCadidateMatchRoute,
-  CompanyCandidateDetailRoute: CompanyCandidateDetailRoute,
+  CompanyApplicantDetailRoute: CompanyApplicantDetailRoute,
+  CompanyApplicantsRoute: CompanyApplicantsRoute,
   CompanyCandidatesRoute: CompanyCandidatesRoute,
   CompanyDashboardRoute: CompanyDashboardRoute,
+  CompanyEditJobRoute: CompanyEditJobRoute,
+  CompanyJobDetailsRoute: CompanyJobDetailsRoute,
   CompanyJobsRoute: CompanyJobsRoute,
-  CompanyProfileSetupRoute: CompanyProfileSetupRoute,
+  CompanyProfileRoute: CompanyProfileRoute,
   CompanySettingsRoute: CompanySettingsRoute,
-  CompanySupportRoute: CompanySupportRoute,
+  JobSeekerAccountSettingsRoute: JobSeekerAccountSettingsRoute,
+  JobSeekerDashboardRoute: JobSeekerDashboardRoute,
+  JobSeekerJobDetailsRoute: JobSeekerJobDetailsRoute,
+  JobSeekerJobsRoute: JobSeekerJobsRoute,
+  JobSeekerMyResumesRoute: JobSeekerMyResumesRoute,
+  JobSeekerProfileRoute: JobSeekerProfileRoute,
+  JobSeekerResumeReportRoute: JobSeekerResumeReportRoute,
+  JobSeekerUploadResumeRoute: JobSeekerUploadResumeRoute,
+  JobSeekerParsedResumeResumeIdRoute: JobSeekerParsedResumeResumeIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
