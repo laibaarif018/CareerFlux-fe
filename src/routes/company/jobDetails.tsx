@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useJob, useDeleteJob, useToggleJobStatus } from '@/queries/job.queries'
 import { z } from 'zod'
 import CompanySidebar from '@/components/companysidebar'
-import { requireRole } from '@/utils/RouteGuard'
+
 import { showConfirm, showError, showToast, showSuccess } from '@/utils/swal'
 
 const jobSearchSchema = z.object({
@@ -10,9 +10,6 @@ const jobSearchSchema = z.object({
 })
 
 export const Route = createFileRoute('/company/jobDetails')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: JobDetails,
 
   validateSearch: jobSearchSchema,

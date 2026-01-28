@@ -3,7 +3,6 @@ import { Eye, EyeOff, Check, Circle } from 'lucide-react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import Header from '@/components/Header'
 import { useResetPassword } from '@/queries/auth.queries'
-import { PublicRoute } from '@/utils/RouteGuard'
 import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/reset-password')({
@@ -11,11 +10,7 @@ export const Route = createFileRoute('/auth/reset-password')({
     token: (search.token as string) || '',
     email: (search.email as string) || '',
   }),
-  component: () => (
-    <PublicRoute>
-      <ResetPassword />
-    </PublicRoute>
-  ),
+  component: ResetPassword
 })
 
 const resetPasswordSchema = Yup.object().shape({

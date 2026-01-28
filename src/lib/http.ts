@@ -3,35 +3,36 @@ import axios, {
   type AxiosRequestConfig,
   type CancelTokenSource,
   type AxiosResponse,
-} from 'axios';
+} from 'axios'
 
-const Config = (import.meta as any).env.VITE_API_BASE_URL;
+const Config = (import.meta as any).env.VITE_API_BASE_URL
 
 export class ApiError extends Error {
-  public statusCode: number;
-  public errors?: { [key: string]: string };
-  public code?: string;
+  public statusCode: number
+  public errors?: { [key: string]: string }
+  public code?: string
 
   constructor(
     message: string,
     statusCode: number,
     errors?: { [key: string]: string },
-    code?: string
+    code?: string,
   ) {
-    super(message);
-    this.name = 'ApiError';
-    this.statusCode = statusCode;
-    this.errors = errors;
-    this.code = code;
+    super(message)
+    this.name = 'ApiError'
+    this.statusCode = statusCode
+    this.errors = errors
+    this.code = code
   }
 }
 
 export class HttpService {
-  private axiosInstance: AxiosInstance;
-  private cancelTokenSource: CancelTokenSource;
+  private axiosInstance: AxiosInstance
+  private cancelTokenSource: CancelTokenSource
+  private isLoggingOut = false
 
   constructor() {
-    this.cancelTokenSource = axios.CancelToken.source();
+    this.cancelTokenSource = axios.CancelToken.source()
 
     // Create axios instance with default config
     this.axiosInstance = axios.create({
@@ -41,47 +42,62 @@ export class HttpService {
       //   'Content-Type': 'application/json',
       // },
       withCredentials: true, // CRITICAL: Send cookies with every request
-    });
+    })
 
-    this.setupInterceptors();
+    this.setupInterceptors()
   }
 
   private setupInterceptors(): void {
     // Request interceptor (no need to manually add token - cookies are sent automatically)
     this.axiosInstance.interceptors.request.use(
-      config => {
-        return config;
+      (config) => {
+        return config
       },
-      error => Promise.reject(error)
-    );
+      (error) => Promise.reject(error),
+    )
 
     // Response interceptor for error handling
     this.axiosInstance.interceptors.response.use(
-      (response: AxiosResponse) => {
-        return response;
-      },
-      error => {
-        // Check if the request has a flag to bypass unauthorized redirect
-        if (error?.response?.status === 401 && !error.config._skipUnauthorizedRedirect) {
-          this.handleUnauthorized();
+      (response: AxiosResponse) => response,
+      (error) => {
+        if (
+          error?.response?.status === 401 &&
+          !error.config?._skipUnauthorizedRedirect
+        ) {
+          this.handleUnauthorized()
         }
-        return Promise.reject(this.normalizeError(error));
-      }
-    );
+
+        return Promise.reject(this.normalizeError(error))
+      },
+    )
   }
 
   private handleUnauthorized(): void {
-    // Clear any local storage if needed
-    localStorage.clear();
-    // Dispatch custom event for auth state management
-    window.dispatchEvent(new CustomEvent('auth:unauthorized'));
-    // Redirect to login
-    window.location.href = '/auth/login';
+    if (this.isLoggingOut) return
+    this.isLoggingOut = true
+
+    // clear only auth-related data (NOT everything)
+    localStorage.removeItem('userRole')
+    localStorage.removeItem('googleLinkEmail')
+    localStorage.removeItem('googleLinkId')
+
+    // optional: best-effort backend logout
+    this.axiosInstance
+      .post(
+        '/auth/logout',
+        {},
+        {
+          _skipUnauthorizedRedirect: true,
+        } as any,
+      )
+      .finally(() => {
+        window.location.href = '/auth/login'
+      })
   }
 
   private normalizeError(error: any): ApiError {
     if (axios.isCancel(error)) {
-      return new ApiError('Request cancelled', 0, undefined, 'CANCELLED');
+      return new ApiError('Request cancelled', 0, undefined, 'CANCELLED')
     }
 
     if (!error.response) {
@@ -90,11 +106,11 @@ export class HttpService {
         'Network error - please check your connection',
         0,
         undefined,
-        'NETWORK_ERROR'
-      );
+        'NETWORK_ERROR',
+      )
     }
 
-    const { status, data } = error.response;
+    const { status, data } = error.response
 
     // Handle your API error response structure
     if (data && typeof data === 'object') {
@@ -102,8 +118,8 @@ export class HttpService {
         data.message || `HTTP ${status}`,
         data.statusCode || status,
         data.errors,
-        'API_ERROR'
-      );
+        'API_ERROR',
+      )
     }
 
     // Fallback for unexpected response formats
@@ -111,15 +127,15 @@ export class HttpService {
       error.message || `HTTP ${status}`,
       status,
       undefined,
-      'UNKNOWN_ERROR'
-    );
+      'UNKNOWN_ERROR',
+    )
   }
 
   /**
    * Update cancel token for new requests
    */
   private updateCancelToken(): void {
-    this.cancelTokenSource = axios.CancelToken.source();
+    this.cancelTokenSource = axios.CancelToken.source()
   }
 
   /**
@@ -127,8 +143,8 @@ export class HttpService {
    * @param reason Cancellation reason
    */
   public cancel(reason: string = 'Request cancelled'): void {
-    this.cancelTokenSource.cancel(reason);
-    this.updateCancelToken();
+    this.cancelTokenSource.cancel(reason)
+    this.updateCancelToken()
   }
 
   /**
@@ -142,15 +158,15 @@ export class HttpService {
     url: string,
     params?: any,
     headers?: Record<string, string>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<T> {
     const response = await this.axiosInstance.get(url, {
       params,
       headers,
       cancelToken: this.cancelTokenSource.token,
       ...config,
-    });
-    return response.data;
+    })
+    return response.data
   }
 
   /**
@@ -164,14 +180,14 @@ export class HttpService {
     url: string,
     body: any,
     headers?: Record<string, string>,
-    config?: AxiosRequestConfig
+    config?: AxiosRequestConfig,
   ): Promise<T> {
     const response = await this.axiosInstance.post(url, body, {
       headers,
       cancelToken: this.cancelTokenSource.token,
       ...config,
-    });
-    return response.data;
+    })
+    return response.data
   }
 
   /**
@@ -182,17 +198,16 @@ export class HttpService {
    * @param headers Additional headers
    */
   protected async put<T = any>(
-  url: string,
-  body?: any,
-  config?: AxiosRequestConfig
-): Promise<T> {
-  const response = await this.axiosInstance.put(url, body, {
-    cancelToken: this.cancelTokenSource.token,
-    ...config,
-  });
-  return response.data;
-}
-
+    url: string,
+    body?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<T> {
+    const response = await this.axiosInstance.put(url, body, {
+      cancelToken: this.cancelTokenSource.token,
+      ...config,
+    })
+    return response.data
+  }
 
   /**
    * PATCH request
@@ -205,14 +220,14 @@ export class HttpService {
     url: string,
     body?: any,
     params?: any,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
   ): Promise<T> {
     const response = await this.axiosInstance.patch(url, body, {
       params,
       headers,
       cancelToken: this.cancelTokenSource.token,
-    });
-    return response.data;
+    })
+    return response.data
   }
 
   /**
@@ -226,15 +241,15 @@ export class HttpService {
     url: string,
     params?: any,
     data?: any,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
   ): Promise<T> {
     const response = await this.axiosInstance.delete(url, {
       params,
       data,
       headers,
       cancelToken: this.cancelTokenSource.token,
-    });
-    return response.data;
+    })
+    return response.data
   }
 
   /**
@@ -248,7 +263,7 @@ export class HttpService {
     url: string,
     formData: FormData,
     onUploadProgress?: (progressEvent: any) => void,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
   ): Promise<T> {
     const response = await this.axiosInstance.post(url, formData, {
       headers: {
@@ -257,8 +272,8 @@ export class HttpService {
       },
       onUploadProgress,
       cancelToken: this.cancelTokenSource.token,
-    });
-    return response.data;
+    })
+    return response.data
   }
 
   /**
@@ -270,23 +285,23 @@ export class HttpService {
   protected async download(
     url: string,
     params?: any,
-    filename?: string
+    filename?: string,
   ): Promise<void> {
     const response = await this.axiosInstance.get(url, {
       params,
       responseType: 'blob',
       cancelToken: this.cancelTokenSource.token,
-    });
+    })
 
     // Create download link
-    const blob = new Blob([response.data]);
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = filename || 'download';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(downloadUrl);
+    const blob = new Blob([response.data])
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = filename || 'download'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(downloadUrl)
   }
 }

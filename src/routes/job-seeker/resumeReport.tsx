@@ -12,15 +12,11 @@ import Shimmer, {
   ShimmerParagraph,
   ShimmerButton,
 } from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
-
 export const Route = createFileRoute('/job-seeker/resumeReport')({
   validateSearch: (search: { resumeId?: string }) => ({
     resumeId: search.resumeId,
   }),
-  beforeLoad: () => {
-      requireRole('jobseeker')
-    },
+
     component: ResumeReport,
  })
  

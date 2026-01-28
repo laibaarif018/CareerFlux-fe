@@ -4,14 +4,9 @@ import Header from '@/components/Header'
 import { useSignup } from '@/queries/auth.queries'
 import * as Yup from 'yup'
 import { Eye, EyeOff } from 'lucide-react'
-import { PublicRoute } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/auth/signup')({
-  component: () => (
-    <PublicRoute>
-      <SignUpPage />
-    </PublicRoute>
-  ),
+  component: SignUp
 })
 
 // Yup validation schema
@@ -41,7 +36,7 @@ const signupSchema = Yup.object().shape({
 
 type SignupFormData = Yup.InferType<typeof signupSchema>
 
-function SignUpPage() {
+function SignUp() {
   const navigate = useNavigate()
   const signup = useSignup()
   

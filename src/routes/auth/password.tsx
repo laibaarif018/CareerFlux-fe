@@ -3,16 +3,11 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import { authService } from '@/services/auth.service'
 import { useMutation } from '@tanstack/react-query'
-import { PublicRoute } from '@/utils/RouteGuard'
 import storageService from '@/utils/localstorage'
 import { Eye, EyeOff } from 'lucide-react'
 
 export const Route = createFileRoute('/auth/password')({
-  component: () => (
-    <PublicRoute>
-      <PasswordInput />
-    </PublicRoute>
-  ),
+  component: PasswordInput
 })
 
 function PasswordInput() {

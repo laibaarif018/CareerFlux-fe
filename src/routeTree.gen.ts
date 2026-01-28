@@ -9,6 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RolesRouteImport } from './routes/roles'
+import { Route as JobSeekerRouteImport } from './routes/job-seeker'
+import { Route as CompanyRouteImport } from './routes/company'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JobSeekerUploadResumeRouteImport } from './routes/job-seeker/uploadResume'
 import { Route as JobSeekerResumeReportRouteImport } from './routes/job-seeker/resumeReport'
@@ -31,7 +35,6 @@ import { Route as CompanyAddJobRouteImport } from './routes/company/add-job'
 import { Route as AuthVerificationRouteImport } from './routes/auth/verification'
 import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSetPasswordRouteImport } from './routes/auth/set-password'
-import { Route as AuthRolesRouteImport } from './routes/auth/roles'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth/reset-password'
 import { Route as AuthPasswordRouteImport } from './routes/auth/password'
 import { Route as AuthOauthCallbackRouteImport } from './routes/auth/oauth-callback'
@@ -40,168 +43,186 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-pas
 import { Route as AuthConnectGoogleRouteImport } from './routes/auth/connect-google'
 import { Route as JobSeekerParsedResumeResumeIdRouteImport } from './routes/job-seeker/parsedResume/$resumeId'
 
+const RolesRoute = RolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JobSeekerRoute = JobSeekerRouteImport.update({
+  id: '/job-seeker',
+  path: '/job-seeker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyRoute = CompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JobSeekerUploadResumeRoute = JobSeekerUploadResumeRouteImport.update({
-  id: '/job-seeker/uploadResume',
-  path: '/job-seeker/uploadResume',
-  getParentRoute: () => rootRouteImport,
+  id: '/uploadResume',
+  path: '/uploadResume',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerResumeReportRoute = JobSeekerResumeReportRouteImport.update({
-  id: '/job-seeker/resumeReport',
-  path: '/job-seeker/resumeReport',
-  getParentRoute: () => rootRouteImport,
+  id: '/resumeReport',
+  path: '/resumeReport',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerProfileRoute = JobSeekerProfileRouteImport.update({
-  id: '/job-seeker/profile',
-  path: '/job-seeker/profile',
-  getParentRoute: () => rootRouteImport,
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerMyResumesRoute = JobSeekerMyResumesRouteImport.update({
-  id: '/job-seeker/myResumes',
-  path: '/job-seeker/myResumes',
-  getParentRoute: () => rootRouteImport,
+  id: '/myResumes',
+  path: '/myResumes',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerJobsRoute = JobSeekerJobsRouteImport.update({
-  id: '/job-seeker/jobs',
-  path: '/job-seeker/jobs',
-  getParentRoute: () => rootRouteImport,
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerJobDetailsRoute = JobSeekerJobDetailsRouteImport.update({
-  id: '/job-seeker/job-details',
-  path: '/job-seeker/job-details',
-  getParentRoute: () => rootRouteImport,
+  id: '/job-details',
+  path: '/job-details',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerDashboardRoute = JobSeekerDashboardRouteImport.update({
-  id: '/job-seeker/dashboard',
-  path: '/job-seeker/dashboard',
-  getParentRoute: () => rootRouteImport,
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => JobSeekerRoute,
 } as any)
 const JobSeekerAccountSettingsRoute =
   JobSeekerAccountSettingsRouteImport.update({
-    id: '/job-seeker/account-settings',
-    path: '/job-seeker/account-settings',
-    getParentRoute: () => rootRouteImport,
+    id: '/account-settings',
+    path: '/account-settings',
+    getParentRoute: () => JobSeekerRoute,
   } as any)
 const CompanySettingsRoute = CompanySettingsRouteImport.update({
-  id: '/company/settings',
-  path: '/company/settings',
-  getParentRoute: () => rootRouteImport,
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyProfileRoute = CompanyProfileRouteImport.update({
-  id: '/company/profile',
-  path: '/company/profile',
-  getParentRoute: () => rootRouteImport,
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyJobsRoute = CompanyJobsRouteImport.update({
-  id: '/company/jobs',
-  path: '/company/jobs',
-  getParentRoute: () => rootRouteImport,
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyJobDetailsRoute = CompanyJobDetailsRouteImport.update({
-  id: '/company/jobDetails',
-  path: '/company/jobDetails',
-  getParentRoute: () => rootRouteImport,
+  id: '/jobDetails',
+  path: '/jobDetails',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyEditJobRoute = CompanyEditJobRouteImport.update({
-  id: '/company/editJob',
-  path: '/company/editJob',
-  getParentRoute: () => rootRouteImport,
+  id: '/editJob',
+  path: '/editJob',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyDashboardRoute = CompanyDashboardRouteImport.update({
-  id: '/company/dashboard',
-  path: '/company/dashboard',
-  getParentRoute: () => rootRouteImport,
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyCandidatesRoute = CompanyCandidatesRouteImport.update({
-  id: '/company/candidates',
-  path: '/company/candidates',
-  getParentRoute: () => rootRouteImport,
+  id: '/candidates',
+  path: '/candidates',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyApplicantsRoute = CompanyApplicantsRouteImport.update({
-  id: '/company/applicants',
-  path: '/company/applicants',
-  getParentRoute: () => rootRouteImport,
+  id: '/applicants',
+  path: '/applicants',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyApplicantDetailRoute = CompanyApplicantDetailRouteImport.update({
-  id: '/company/applicant-detail',
-  path: '/company/applicant-detail',
-  getParentRoute: () => rootRouteImport,
+  id: '/applicant-detail',
+  path: '/applicant-detail',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const CompanyAddJobRoute = CompanyAddJobRouteImport.update({
-  id: '/company/add-job',
-  path: '/company/add-job',
-  getParentRoute: () => rootRouteImport,
+  id: '/add-job',
+  path: '/add-job',
+  getParentRoute: () => CompanyRoute,
 } as any)
 const AuthVerificationRoute = AuthVerificationRouteImport.update({
-  id: '/auth/verification',
-  path: '/auth/verification',
-  getParentRoute: () => rootRouteImport,
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/auth/signup',
-  path: '/auth/signup',
-  getParentRoute: () => rootRouteImport,
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthSetPasswordRoute = AuthSetPasswordRouteImport.update({
-  id: '/auth/set-password',
-  path: '/auth/set-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRolesRoute = AuthRolesRouteImport.update({
-  id: '/auth/roles',
-  path: '/auth/roles',
-  getParentRoute: () => rootRouteImport,
+  id: '/set-password',
+  path: '/set-password',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/auth/reset-password',
-  path: '/auth/reset-password',
-  getParentRoute: () => rootRouteImport,
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthPasswordRoute = AuthPasswordRouteImport.update({
-  id: '/auth/password',
-  path: '/auth/password',
-  getParentRoute: () => rootRouteImport,
+  id: '/password',
+  path: '/password',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthOauthCallbackRoute = AuthOauthCallbackRouteImport.update({
-  id: '/auth/oauth-callback',
-  path: '/auth/oauth-callback',
-  getParentRoute: () => rootRouteImport,
+  id: '/oauth-callback',
+  path: '/oauth-callback',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/auth/forgot-password',
-  path: '/auth/forgot-password',
-  getParentRoute: () => rootRouteImport,
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AuthConnectGoogleRoute = AuthConnectGoogleRouteImport.update({
-  id: '/auth/connect-google',
-  path: '/auth/connect-google',
-  getParentRoute: () => rootRouteImport,
+  id: '/connect-google',
+  path: '/connect-google',
+  getParentRoute: () => AuthRoute,
 } as any)
 const JobSeekerParsedResumeResumeIdRoute =
   JobSeekerParsedResumeResumeIdRouteImport.update({
-    id: '/job-seeker/parsedResume/$resumeId',
-    path: '/job-seeker/parsedResume/$resumeId',
-    getParentRoute: () => rootRouteImport,
+    id: '/parsedResume/$resumeId',
+    path: '/parsedResume/$resumeId',
+    getParentRoute: () => JobSeekerRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/company': typeof CompanyRouteWithChildren
+  '/job-seeker': typeof JobSeekerRouteWithChildren
+  '/roles': typeof RolesRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/roles': typeof AuthRolesRoute
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
@@ -227,13 +248,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/company': typeof CompanyRouteWithChildren
+  '/job-seeker': typeof JobSeekerRouteWithChildren
+  '/roles': typeof RolesRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/roles': typeof AuthRolesRoute
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
@@ -260,13 +284,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/company': typeof CompanyRouteWithChildren
+  '/job-seeker': typeof JobSeekerRouteWithChildren
+  '/roles': typeof RolesRoute
   '/auth/connect-google': typeof AuthConnectGoogleRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/oauth-callback': typeof AuthOauthCallbackRoute
   '/auth/password': typeof AuthPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/auth/roles': typeof AuthRolesRoute
   '/auth/set-password': typeof AuthSetPasswordRoute
   '/auth/signup': typeof AuthSignupRoute
   '/auth/verification': typeof AuthVerificationRoute
@@ -294,13 +321,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
+    | '/company'
+    | '/job-seeker'
+    | '/roles'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
-    | '/auth/roles'
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
@@ -326,13 +356,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
+    | '/company'
+    | '/job-seeker'
+    | '/roles'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
-    | '/auth/roles'
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
@@ -358,13 +391,16 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
+    | '/company'
+    | '/job-seeker'
+    | '/roles'
     | '/auth/connect-google'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/oauth-callback'
     | '/auth/password'
     | '/auth/reset-password'
-    | '/auth/roles'
     | '/auth/set-password'
     | '/auth/signup'
     | '/auth/verification'
@@ -391,16 +427,275 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  CompanyRoute: typeof CompanyRouteWithChildren
+  JobSeekerRoute: typeof JobSeekerRouteWithChildren
+  RolesRoute: typeof RolesRoute
+}
+
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/roles': {
+      id: '/roles'
+      path: '/roles'
+      fullPath: '/roles'
+      preLoaderRoute: typeof RolesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker': {
+      id: '/job-seeker'
+      path: '/job-seeker'
+      fullPath: '/job-seeker'
+      preLoaderRoute: typeof JobSeekerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company': {
+      id: '/company'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/job-seeker/uploadResume': {
+      id: '/job-seeker/uploadResume'
+      path: '/uploadResume'
+      fullPath: '/job-seeker/uploadResume'
+      preLoaderRoute: typeof JobSeekerUploadResumeRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/resumeReport': {
+      id: '/job-seeker/resumeReport'
+      path: '/resumeReport'
+      fullPath: '/job-seeker/resumeReport'
+      preLoaderRoute: typeof JobSeekerResumeReportRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/profile': {
+      id: '/job-seeker/profile'
+      path: '/profile'
+      fullPath: '/job-seeker/profile'
+      preLoaderRoute: typeof JobSeekerProfileRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/myResumes': {
+      id: '/job-seeker/myResumes'
+      path: '/myResumes'
+      fullPath: '/job-seeker/myResumes'
+      preLoaderRoute: typeof JobSeekerMyResumesRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/jobs': {
+      id: '/job-seeker/jobs'
+      path: '/jobs'
+      fullPath: '/job-seeker/jobs'
+      preLoaderRoute: typeof JobSeekerJobsRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/job-details': {
+      id: '/job-seeker/job-details'
+      path: '/job-details'
+      fullPath: '/job-seeker/job-details'
+      preLoaderRoute: typeof JobSeekerJobDetailsRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/dashboard': {
+      id: '/job-seeker/dashboard'
+      path: '/dashboard'
+      fullPath: '/job-seeker/dashboard'
+      preLoaderRoute: typeof JobSeekerDashboardRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/job-seeker/account-settings': {
+      id: '/job-seeker/account-settings'
+      path: '/account-settings'
+      fullPath: '/job-seeker/account-settings'
+      preLoaderRoute: typeof JobSeekerAccountSettingsRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+    '/company/settings': {
+      id: '/company/settings'
+      path: '/settings'
+      fullPath: '/company/settings'
+      preLoaderRoute: typeof CompanySettingsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/profile': {
+      id: '/company/profile'
+      path: '/profile'
+      fullPath: '/company/profile'
+      preLoaderRoute: typeof CompanyProfileRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/jobs': {
+      id: '/company/jobs'
+      path: '/jobs'
+      fullPath: '/company/jobs'
+      preLoaderRoute: typeof CompanyJobsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/jobDetails': {
+      id: '/company/jobDetails'
+      path: '/jobDetails'
+      fullPath: '/company/jobDetails'
+      preLoaderRoute: typeof CompanyJobDetailsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/editJob': {
+      id: '/company/editJob'
+      path: '/editJob'
+      fullPath: '/company/editJob'
+      preLoaderRoute: typeof CompanyEditJobRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/dashboard': {
+      id: '/company/dashboard'
+      path: '/dashboard'
+      fullPath: '/company/dashboard'
+      preLoaderRoute: typeof CompanyDashboardRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/candidates': {
+      id: '/company/candidates'
+      path: '/candidates'
+      fullPath: '/company/candidates'
+      preLoaderRoute: typeof CompanyCandidatesRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/applicants': {
+      id: '/company/applicants'
+      path: '/applicants'
+      fullPath: '/company/applicants'
+      preLoaderRoute: typeof CompanyApplicantsRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/applicant-detail': {
+      id: '/company/applicant-detail'
+      path: '/applicant-detail'
+      fullPath: '/company/applicant-detail'
+      preLoaderRoute: typeof CompanyApplicantDetailRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/company/add-job': {
+      id: '/company/add-job'
+      path: '/add-job'
+      fullPath: '/company/add-job'
+      preLoaderRoute: typeof CompanyAddJobRouteImport
+      parentRoute: typeof CompanyRoute
+    }
+    '/auth/verification': {
+      id: '/auth/verification'
+      path: '/verification'
+      fullPath: '/auth/verification'
+      preLoaderRoute: typeof AuthVerificationRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/set-password': {
+      id: '/auth/set-password'
+      path: '/set-password'
+      fullPath: '/auth/set-password'
+      preLoaderRoute: typeof AuthSetPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/password': {
+      id: '/auth/password'
+      path: '/password'
+      fullPath: '/auth/password'
+      preLoaderRoute: typeof AuthPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/oauth-callback': {
+      id: '/auth/oauth-callback'
+      path: '/oauth-callback'
+      fullPath: '/auth/oauth-callback'
+      preLoaderRoute: typeof AuthOauthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/connect-google': {
+      id: '/auth/connect-google'
+      path: '/connect-google'
+      fullPath: '/auth/connect-google'
+      preLoaderRoute: typeof AuthConnectGoogleRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/job-seeker/parsedResume/$resumeId': {
+      id: '/job-seeker/parsedResume/$resumeId'
+      path: '/parsedResume/$resumeId'
+      fullPath: '/job-seeker/parsedResume/$resumeId'
+      preLoaderRoute: typeof JobSeekerParsedResumeResumeIdRouteImport
+      parentRoute: typeof JobSeekerRoute
+    }
+  }
+}
+
+interface AuthRouteChildren {
   AuthConnectGoogleRoute: typeof AuthConnectGoogleRoute
   AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthOauthCallbackRoute: typeof AuthOauthCallbackRoute
   AuthPasswordRoute: typeof AuthPasswordRoute
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
-  AuthRolesRoute: typeof AuthRolesRoute
   AuthSetPasswordRoute: typeof AuthSetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
   AuthVerificationRoute: typeof AuthVerificationRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthConnectGoogleRoute: AuthConnectGoogleRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthOauthCallbackRoute: AuthOauthCallbackRoute,
+  AuthPasswordRoute: AuthPasswordRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
+  AuthSetPasswordRoute: AuthSetPasswordRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  AuthVerificationRoute: AuthVerificationRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface CompanyRouteChildren {
   CompanyAddJobRoute: typeof CompanyAddJobRoute
   CompanyApplicantDetailRoute: typeof CompanyApplicantDetailRoute
   CompanyApplicantsRoute: typeof CompanyApplicantsRoute
@@ -411,6 +706,25 @@ export interface RootRouteChildren {
   CompanyJobsRoute: typeof CompanyJobsRoute
   CompanyProfileRoute: typeof CompanyProfileRoute
   CompanySettingsRoute: typeof CompanySettingsRoute
+}
+
+const CompanyRouteChildren: CompanyRouteChildren = {
+  CompanyAddJobRoute: CompanyAddJobRoute,
+  CompanyApplicantDetailRoute: CompanyApplicantDetailRoute,
+  CompanyApplicantsRoute: CompanyApplicantsRoute,
+  CompanyCandidatesRoute: CompanyCandidatesRoute,
+  CompanyDashboardRoute: CompanyDashboardRoute,
+  CompanyEditJobRoute: CompanyEditJobRoute,
+  CompanyJobDetailsRoute: CompanyJobDetailsRoute,
+  CompanyJobsRoute: CompanyJobsRoute,
+  CompanyProfileRoute: CompanyProfileRoute,
+  CompanySettingsRoute: CompanySettingsRoute,
+}
+
+const CompanyRouteWithChildren =
+  CompanyRoute._addFileChildren(CompanyRouteChildren)
+
+interface JobSeekerRouteChildren {
   JobSeekerAccountSettingsRoute: typeof JobSeekerAccountSettingsRoute
   JobSeekerDashboardRoute: typeof JobSeekerDashboardRoute
   JobSeekerJobDetailsRoute: typeof JobSeekerJobDetailsRoute
@@ -422,243 +736,7 @@ export interface RootRouteChildren {
   JobSeekerParsedResumeResumeIdRoute: typeof JobSeekerParsedResumeResumeIdRoute
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/uploadResume': {
-      id: '/job-seeker/uploadResume'
-      path: '/job-seeker/uploadResume'
-      fullPath: '/job-seeker/uploadResume'
-      preLoaderRoute: typeof JobSeekerUploadResumeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/resumeReport': {
-      id: '/job-seeker/resumeReport'
-      path: '/job-seeker/resumeReport'
-      fullPath: '/job-seeker/resumeReport'
-      preLoaderRoute: typeof JobSeekerResumeReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/profile': {
-      id: '/job-seeker/profile'
-      path: '/job-seeker/profile'
-      fullPath: '/job-seeker/profile'
-      preLoaderRoute: typeof JobSeekerProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/myResumes': {
-      id: '/job-seeker/myResumes'
-      path: '/job-seeker/myResumes'
-      fullPath: '/job-seeker/myResumes'
-      preLoaderRoute: typeof JobSeekerMyResumesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/jobs': {
-      id: '/job-seeker/jobs'
-      path: '/job-seeker/jobs'
-      fullPath: '/job-seeker/jobs'
-      preLoaderRoute: typeof JobSeekerJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/job-details': {
-      id: '/job-seeker/job-details'
-      path: '/job-seeker/job-details'
-      fullPath: '/job-seeker/job-details'
-      preLoaderRoute: typeof JobSeekerJobDetailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/dashboard': {
-      id: '/job-seeker/dashboard'
-      path: '/job-seeker/dashboard'
-      fullPath: '/job-seeker/dashboard'
-      preLoaderRoute: typeof JobSeekerDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/account-settings': {
-      id: '/job-seeker/account-settings'
-      path: '/job-seeker/account-settings'
-      fullPath: '/job-seeker/account-settings'
-      preLoaderRoute: typeof JobSeekerAccountSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/settings': {
-      id: '/company/settings'
-      path: '/company/settings'
-      fullPath: '/company/settings'
-      preLoaderRoute: typeof CompanySettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/profile': {
-      id: '/company/profile'
-      path: '/company/profile'
-      fullPath: '/company/profile'
-      preLoaderRoute: typeof CompanyProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/jobs': {
-      id: '/company/jobs'
-      path: '/company/jobs'
-      fullPath: '/company/jobs'
-      preLoaderRoute: typeof CompanyJobsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/jobDetails': {
-      id: '/company/jobDetails'
-      path: '/company/jobDetails'
-      fullPath: '/company/jobDetails'
-      preLoaderRoute: typeof CompanyJobDetailsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/editJob': {
-      id: '/company/editJob'
-      path: '/company/editJob'
-      fullPath: '/company/editJob'
-      preLoaderRoute: typeof CompanyEditJobRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/dashboard': {
-      id: '/company/dashboard'
-      path: '/company/dashboard'
-      fullPath: '/company/dashboard'
-      preLoaderRoute: typeof CompanyDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/candidates': {
-      id: '/company/candidates'
-      path: '/company/candidates'
-      fullPath: '/company/candidates'
-      preLoaderRoute: typeof CompanyCandidatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/applicants': {
-      id: '/company/applicants'
-      path: '/company/applicants'
-      fullPath: '/company/applicants'
-      preLoaderRoute: typeof CompanyApplicantsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/applicant-detail': {
-      id: '/company/applicant-detail'
-      path: '/company/applicant-detail'
-      fullPath: '/company/applicant-detail'
-      preLoaderRoute: typeof CompanyApplicantDetailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/company/add-job': {
-      id: '/company/add-job'
-      path: '/company/add-job'
-      fullPath: '/company/add-job'
-      preLoaderRoute: typeof CompanyAddJobRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/verification': {
-      id: '/auth/verification'
-      path: '/auth/verification'
-      fullPath: '/auth/verification'
-      preLoaderRoute: typeof AuthVerificationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signup': {
-      id: '/auth/signup'
-      path: '/auth/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthSignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/set-password': {
-      id: '/auth/set-password'
-      path: '/auth/set-password'
-      fullPath: '/auth/set-password'
-      preLoaderRoute: typeof AuthSetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/roles': {
-      id: '/auth/roles'
-      path: '/auth/roles'
-      fullPath: '/auth/roles'
-      preLoaderRoute: typeof AuthRolesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/reset-password': {
-      id: '/auth/reset-password'
-      path: '/auth/reset-password'
-      fullPath: '/auth/reset-password'
-      preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/password': {
-      id: '/auth/password'
-      path: '/auth/password'
-      fullPath: '/auth/password'
-      preLoaderRoute: typeof AuthPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/oauth-callback': {
-      id: '/auth/oauth-callback'
-      path: '/auth/oauth-callback'
-      fullPath: '/auth/oauth-callback'
-      preLoaderRoute: typeof AuthOauthCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/auth/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/connect-google': {
-      id: '/auth/connect-google'
-      path: '/auth/connect-google'
-      fullPath: '/auth/connect-google'
-      preLoaderRoute: typeof AuthConnectGoogleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/job-seeker/parsedResume/$resumeId': {
-      id: '/job-seeker/parsedResume/$resumeId'
-      path: '/job-seeker/parsedResume/$resumeId'
-      fullPath: '/job-seeker/parsedResume/$resumeId'
-      preLoaderRoute: typeof JobSeekerParsedResumeResumeIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
-}
-
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuthConnectGoogleRoute: AuthConnectGoogleRoute,
-  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthOauthCallbackRoute: AuthOauthCallbackRoute,
-  AuthPasswordRoute: AuthPasswordRoute,
-  AuthResetPasswordRoute: AuthResetPasswordRoute,
-  AuthRolesRoute: AuthRolesRoute,
-  AuthSetPasswordRoute: AuthSetPasswordRoute,
-  AuthSignupRoute: AuthSignupRoute,
-  AuthVerificationRoute: AuthVerificationRoute,
-  CompanyAddJobRoute: CompanyAddJobRoute,
-  CompanyApplicantDetailRoute: CompanyApplicantDetailRoute,
-  CompanyApplicantsRoute: CompanyApplicantsRoute,
-  CompanyCandidatesRoute: CompanyCandidatesRoute,
-  CompanyDashboardRoute: CompanyDashboardRoute,
-  CompanyEditJobRoute: CompanyEditJobRoute,
-  CompanyJobDetailsRoute: CompanyJobDetailsRoute,
-  CompanyJobsRoute: CompanyJobsRoute,
-  CompanyProfileRoute: CompanyProfileRoute,
-  CompanySettingsRoute: CompanySettingsRoute,
+const JobSeekerRouteChildren: JobSeekerRouteChildren = {
   JobSeekerAccountSettingsRoute: JobSeekerAccountSettingsRoute,
   JobSeekerDashboardRoute: JobSeekerDashboardRoute,
   JobSeekerJobDetailsRoute: JobSeekerJobDetailsRoute,
@@ -668,6 +746,18 @@ const rootRouteChildren: RootRouteChildren = {
   JobSeekerResumeReportRoute: JobSeekerResumeReportRoute,
   JobSeekerUploadResumeRoute: JobSeekerUploadResumeRoute,
   JobSeekerParsedResumeResumeIdRoute: JobSeekerParsedResumeResumeIdRoute,
+}
+
+const JobSeekerRouteWithChildren = JobSeekerRoute._addFileChildren(
+  JobSeekerRouteChildren,
+)
+
+const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  CompanyRoute: CompanyRouteWithChildren,
+  JobSeekerRoute: JobSeekerRouteWithChildren,
+  RolesRoute: RolesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

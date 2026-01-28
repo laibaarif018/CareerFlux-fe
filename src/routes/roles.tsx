@@ -2,15 +2,14 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import { useRole } from '@/queries/auth.queries'
- import { PublicRoute } from '@/utils/RouteGuard'
+import storageService from '@/utils/localstorage'
+import { UnassignedOnlyRoute } from '@/utils/RouteGuard'
 
-export const Route = createFileRoute('/auth/roles')({
+export const Route = createFileRoute('/roles')({
   component: () => (
-   <PublicRoute>
-     <SelectRole />
-   </PublicRoute>
-    
-
+    <UnassignedOnlyRoute>
+      <SelectRole />
+    </UnassignedOnlyRoute>
   ),
 })
 
@@ -33,6 +32,7 @@ function SelectRole() {
 
     role.mutate(selectedRole, {
       onSuccess: () => {
+        storageService.setItem('userRole', selectedRole)
         // Navigate based on selected role
         if (selectedRole === 'jobseeker') {
           navigate({ to: '/job-seeker/profile' })
@@ -44,7 +44,13 @@ function SelectRole() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 overflow-x-hidden transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
+    <div
+      className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 overflow-x-hidden transition-colors"
+      style={{
+        fontFamily:
+          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif",
+      }}
+    >
       <Header />
       <div className="flex h-full grow flex-col">
         <div className="flex flex-1 justify-center items-center px-4 py-12">
@@ -52,7 +58,10 @@ function SelectRole() {
             <div className="rounded-2xl bg-white dark:bg-slate-800 p-8 md:p-10 shadow-xl border border-slate-200 dark:border-slate-700">
               {/* Header */}
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3" style={{ letterSpacing: '-0.01em' }}>
+                <h1
+                  className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3"
+                  style={{ letterSpacing: '-0.01em' }}
+                >
                   What describes you best?
                 </h1>
                 <p className="text-base text-slate-600 dark:text-slate-400 font-normal">

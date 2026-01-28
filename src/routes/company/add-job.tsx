@@ -5,12 +5,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import CompanySidebar from '@/components/companysidebar'
 import { useCreateJob } from '@/queries/job.queries'
-import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/company/add-job')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: AddJob,
 })
 const jobSchema = yup.object({

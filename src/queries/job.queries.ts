@@ -173,7 +173,8 @@ export const useCompanyJobs = () => {
     queryKey: ['company-jobs'],
     queryFn: async () => {
       const res = await jobService.getCompanyJobs()
-      return res // This will have { company: {...}, jobs: [...] }
+      return res 
     },
+     retry: false,
   })
 }

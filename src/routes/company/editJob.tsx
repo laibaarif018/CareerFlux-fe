@@ -3,17 +3,13 @@ import { useState, useEffect } from 'react'
 import { useJob, useUpdateJob } from '@/queries/job.queries'
 import { z } from 'zod'
 import CompanySidebar from '@/components/companysidebar'
-import { requireRole } from '@/utils/RouteGuard'
-import { showSuccess, showError,showConfirm } from '@/utils/swal'
+import { showSuccess, showError, showConfirm } from '@/utils/swal'
 
 const jobSearchSchema = z.object({
   id: z.string(),
 })
 
 export const Route = createFileRoute('/company/editJob')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: EditJob,
 
   validateSearch: jobSearchSchema,
@@ -111,40 +107,40 @@ export default function EditJob() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
+    e.preventDefault()
 
-  const result = await showConfirm({
-    title: 'Update Job Posting?',
-    text: 'Are you sure you want to save these changes?',
-    confirmButtonText: 'Yes, Update',
-    cancelButtonText: 'Cancel',
-  })
-
-  if (!result.isConfirmed) return
-
-  try {
-    await updateJobMutation.mutateAsync({
-      jobId: id,
-      data: {
-        ...formData,
-        minSalary: Number(formData.minSalary),
-        maxSalary: Number(formData.maxSalary),
-      },
+    const result = await showConfirm({
+      title: 'Update Job Posting?',
+      text: 'Are you sure you want to save these changes?',
+      confirmButtonText: 'Yes, Update',
+      cancelButtonText: 'Cancel',
     })
 
-    await showSuccess(
-      'Job Updated',
-      'The job posting has been updated successfully.',
-    )
+    if (!result.isConfirmed) return
 
-    navigate({ to: '/company/jobDetails', search: { id } })
-  } catch (error: any) {
-    showError(
-      'Update Failed',
-      error?.message || 'Unable to update the job posting.',
-    )
+    try {
+      await updateJobMutation.mutateAsync({
+        jobId: id,
+        data: {
+          ...formData,
+          minSalary: Number(formData.minSalary),
+          maxSalary: Number(formData.maxSalary),
+        },
+      })
+
+      await showSuccess(
+        'Job Updated',
+        'The job posting has been updated successfully.',
+      )
+
+      navigate({ to: '/company/jobDetails', search: { id } })
+    } catch (error: any) {
+      showError(
+        'Update Failed',
+        error?.message || 'Unable to update the job posting.',
+      )
+    }
   }
-}
 
   // Loading state with shimmer
   if (isLoading) {

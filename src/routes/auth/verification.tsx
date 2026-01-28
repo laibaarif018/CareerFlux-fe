@@ -2,18 +2,14 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/Header'
 import { useVerify } from '@/queries/auth.queries'
-import { PublicRoute } from '@/utils/RouteGuard'
+
 
 export const Route = createFileRoute('/auth/verification')({
   validateSearch: (search: Record<string, unknown>) => ({
     email: (search.email as string) || '',
   }),
 
-  component: () => (
-    <PublicRoute>
-      <VerificationPage />
-    </PublicRoute>
-  ),
+  component:VerificationPage
 })
 
 function VerificationPage() {
@@ -83,7 +79,7 @@ function VerificationPage() {
       {
         onSuccess: () => {
           localStorage.removeItem('email')
-          navigate({ to: '/auth/roles' })
+          navigate({ to: '/roles' })
         },
       },
     )

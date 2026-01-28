@@ -2,12 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { useCompanyJobs } from '@/queries/job.queries'
 import CompanySidebar from '@/components/companysidebar'
-import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/company/jobs')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: AllJobs,
 })
 
@@ -386,25 +382,39 @@ export default function AllJobs() {
 
           {/* Error State */}
           {error && (
-            <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-8 text-center">
+            <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-4xl text-red-600 dark:text-red-400">
-                    error
+                <div className="w-24 h-24 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-5xl text-gray-400 dark:text-gray-500">
+                    work_off
                   </span>
                 </div>
               </div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                Error Loading Jobs
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                {error instanceof Error &&
+                error.message.toLowerCase().includes('no job')
+                  ? 'No Jobs Uploaded'
+                  : 'Error Loading Jobs'}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {error instanceof Error
-                  ? error.message
-                  : 'An unexpected error occurred'}
+              <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+                {error instanceof Error &&
+                error.message.toLowerCase().includes('no job')
+                  ? "You haven't created any job postings yet. Create your first job posting to start receiving candidates."
+                  : error instanceof Error
+                    ? error.message
+                    : 'An unexpected error occurred while loading your jobs.'}
               </p>
+              <button
+                onClick={() => navigate({ to: '/company/add-job' })}
+                className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-all shadow-lg shadow-teal-600/20"
+              >
+                <span className="material-symbols-outlined text-xl">
+                  add_circle
+                </span>
+                Create Job
+              </button>
             </div>
           )}
-
           {/* Empty State */}
           {!isLoading && !error && filteredJobs.length === 0 && (
             <div className="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 p-12 text-center">

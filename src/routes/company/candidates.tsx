@@ -3,12 +3,8 @@ import { useGetJobSeeker } from '@/queries/user.queries'
 import Shimmer from '@/components/Shimmer'
 import { useState } from 'react'
 import Sidebar from '@/components/companysidebar'
-import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/company/candidates')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: CandidatesPage,
 })
 

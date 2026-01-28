@@ -13,6 +13,7 @@ export interface IEmailCheck {
   exists: boolean
   hasPassword: boolean
   userId: string
+  role:string
 }
 
 export interface ILogin {

@@ -1,5 +1,5 @@
 import UserHeader from '@/components/UserHeader'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
 import { useState, useMemo, useEffect } from 'react'
 import { useMatchedJobs } from '@/queries/job.queries'
 import {
@@ -9,13 +9,9 @@ import {
   useGetProfile,
 } from '@/queries/user.queries'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
 import { showToast, showError } from '@/utils/swal'
 
 export const Route = createFileRoute('/job-seeker/jobs')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
   component: JobListing,
 })
 

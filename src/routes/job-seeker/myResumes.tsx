@@ -6,14 +6,11 @@ import {
   useDeleteResume,
 } from '@/queries/resume.queries'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
 import Swal from 'sweetalert2'
 import { showConfirm, showError, showToast } from '@/utils/swal'
 
 export const Route = createFileRoute('/job-seeker/myResumes')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
+
   component: MyResumes,
 })
 

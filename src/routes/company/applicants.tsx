@@ -2,13 +2,9 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import CompanySidebar from '@/components/companysidebar'
 import { useJobApplicants } from '@/queries/job.queries'
 import { Applicant } from '@/services/job.service'
-import { requireRole } from '@/utils/RouteGuard'
 
 // Define route with search params for jobId
 export const Route = createFileRoute('/company/applicants')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: JobCandidateMatches,
 
   validateSearch: (search: Record<string, unknown>) => {

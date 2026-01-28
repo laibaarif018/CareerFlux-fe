@@ -133,6 +133,7 @@ class LocalStorageService {
       console.warn('localStorage is not available');
       return false;
     }
+    
     try {
       const shouldEncrypt =
         options.encrypt !== undefined

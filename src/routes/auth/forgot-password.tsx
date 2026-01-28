@@ -2,15 +2,10 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import { useForgotPassword } from '@/queries/auth.queries'
-import { PublicRoute } from '@/utils/RouteGuard'
 import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/forgot-password')({
-  component: () => (
-    <PublicRoute>
-      <ForgotPassword />
-    </PublicRoute>
-  ),
+  component:ForgotPassword
 })
 
 const emailSchema = Yup.object().shape({

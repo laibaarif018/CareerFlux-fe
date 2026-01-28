@@ -7,13 +7,10 @@ import { useState } from 'react'
 import { useGetProfile } from '@/queries/user.queries'
 import { useChangePassword } from '@/queries/auth.queries'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
 import { showSuccess, showError } from '@/utils/swal'
 
+
 export const Route = createFileRoute('/job-seeker/account-settings')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
   component: AccountSettings,
 })
 

@@ -4,14 +4,10 @@ import Header from '@/components/Header'
 import { useSetPassword } from '@/queries/auth.queries'
 import { Eye, EyeOff } from 'lucide-react'
 import * as Yup from 'yup'
-import { PublicRoute } from '@/utils/RouteGuard'
+import storageService from '@/utils/localstorage'
 
 export const Route = createFileRoute('/auth/set-password')({
-  component: () => (
-    <PublicRoute>
-      <SetPassword />
-    </PublicRoute>
-  ),
+  component: SetPassword
 })
 
 const passwordSchema = Yup.object().shape({
@@ -31,6 +27,8 @@ type PasswordFormData = Yup.InferType<typeof passwordSchema>
 function SetPassword() {
   const navigate = useNavigate()
   const setPassword = useSetPassword()
+  const role=storageService.getItem<string>('userRole');
+  console.log("role", role)
   
   const [formData, setFormData] = useState<PasswordFormData>({
     newPassword: '',
@@ -88,7 +86,13 @@ function SetPassword() {
       {
         onSuccess: () => {
           localStorage.removeItem('userId')
-          navigate({ to: '/auth/roles' })
+         if(role==='jobseeker')
+          navigate({to:'/job-seeker/dashboard'})
+         else if(role==='company')
+          navigate({to:'/company/dashboard'})
+         else if(role==='unassigned')
+          navigate({ to: '/roles' })
+     
         },
       }
     )

@@ -1,49 +1,55 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { PublicRoute } from '@/utils/RouteGuard'
+import storageService from '@/utils/localstorage'
+import { FullPageLoader } from '@/components/Loader'
 
 export const Route = createFileRoute('/auth/oauth-callback')({
-  component: () => (
-    <PublicRoute>
-      <OAuthCallback />
-    </PublicRoute>
-  ),
+  component: OAuthCallback,
 })
 
 export default function OAuthCallback() {
   const navigate = useNavigate()
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+ useEffect(() => {
+  const params = new URLSearchParams(window.location.search)
 
-    const token = params.get('token')
-    const needsPasswordSetup = params.get('needsPasswordSetup')
-    const verificationRequired = params.get('verificationRequired')
-    const email = params.get('email')
-    const googleId = params.get('googleId')
+  const verificationRequired = params.get('verificationRequired')
+  const email = params.get('email')
+  const googleId = params.get('googleId')
+  const role = params.get('role')
 
-    if (verificationRequired === 'true' && email && googleId) {
-      localStorage.setItem('googleLinkEmail', email)
-      localStorage.setItem('googleLinkId', googleId)
+  if (role) {
+    storageService.setItem('userRole', role)
+  }
 
-      window.history.replaceState({}, document.title, '/auth/oauth/callback')
+  if (verificationRequired === 'true' && email && googleId) {
+    localStorage.setItem('googleLinkEmail', email)
+    localStorage.setItem('googleLinkId', googleId)
 
-      navigate({ to: '/auth/connect-google' })
-      return
-    }
-    if (token) {
-      window.history.replaceState({}, document.title, '/auth/oauth/callback')
+    navigate({ to: '/auth/connect-google' })
+    return
+  }
 
-      if (needsPasswordSetup === 'true') {
-        navigate({ to: '/auth/set-password' })
-      } else {
-        navigate({ to: '/dashboard' })
-      }
-      return
-    }
-    // navigate({ to: '/auth/login' })
-  }, [navigate])
+  // Authenticated via cookie
+  if (role === 'unassigned') {
+    navigate({ to: '/roles' })
+    return
+  }
 
-  return <p>Signing you in...</p>
+  if (role === 'jobseeker') {
+    navigate({ to: '/job-seeker/dashboard' })
+    return
+  }
+
+  if (role === 'company') {
+    navigate({ to: '/company/dashboard' })
+    return
+  }
+
+  navigate({ to: '/auth/login' })
+}, [])
+
+
+  return <p><FullPageLoader/></p>
 }

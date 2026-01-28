@@ -9,16 +9,4 @@ export function getAuthToken() {
 }
 
 
-// export function getUserFromToken() {
-//   const token = getAuthToken();
-//   if (!token) return null;
-
-//   try {
-//     const decoded: any = jwt_decode.jwtDecode(token);
-//     console.log('Decoded JWT:', decoded);
-//     return { id: decoded.sub, role: decoded.role, name: decoded.name, email: decoded.email };
-//   } catch {
-//     return null;
-//   }
-// }
 

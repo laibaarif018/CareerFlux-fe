@@ -7,13 +7,10 @@ import * as yup from 'yup'
 import { useGetProfile } from '@/queries/user.queries'
 import { useChangePassword } from '@/queries/auth.queries'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
+
 import { showSuccess,showError } from '@/utils/swal'
 
 export const Route = createFileRoute('/company/settings')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: AccountSettings,
 })
 

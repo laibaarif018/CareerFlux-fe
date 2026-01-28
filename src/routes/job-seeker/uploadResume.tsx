@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState, useRef } from 'react'
 import { useUploadResume } from '@/queries/resume.queries'
-import { requireRole } from '@/utils/RouteGuard'
+
 import { showError,showToast } from '@/utils/swal'
 
 function UploadModalRoute() {
@@ -17,9 +17,7 @@ function UploadModalRoute() {
 }
 
 export const Route = createFileRoute('/job-seeker/uploadResume')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
+ 
   component: UploadModalRoute,
 })
 

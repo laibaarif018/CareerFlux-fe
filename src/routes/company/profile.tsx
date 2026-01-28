@@ -10,12 +10,9 @@ import {
 } from '@/queries/company.queries'
 import { ShimmerProfileForm } from '@/components/Shimmer'
 import React from 'react'
-import { requireRole } from '@/utils/RouteGuard'
+import { showAlert, showToast } from '@/utils/swal'
 
 export const Route = createFileRoute('/company/profile')({
-  beforeLoad: () => {
-    requireRole('company')
-  },
   component: CompanyProfileSetup,
 })
 // Yup validation schema
@@ -133,11 +130,11 @@ export default function CompanyProfileSetup() {
         logoFile: logo || undefined,
       })
 
-      alert('Profile updated successfully!')
-      navigate({ to: '/company/dashboard' })
+      showToast('Profile updated successfully!')
+       navigate({ to: '/company/dashboard' })
     } catch (error) {
       console.error('Error updating profile:', error)
-      alert('Failed to update profile. Please try again.')
+      showAlert({ title: 'Failed to update profile, Try again' })
     }
   }
 

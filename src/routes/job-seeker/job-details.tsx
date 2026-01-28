@@ -9,7 +9,7 @@ import {
 } from '@/queries/user.queries'
 import { z } from 'zod'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
+
 import { useState } from 'react'
 import { showError, showToast } from '@/utils/swal'
 
@@ -18,9 +18,7 @@ const jobSearchSchema = z.object({
 })
 
 export const Route = createFileRoute('/job-seeker/job-details')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
+
   component: JobDetails,
 
   validateSearch: jobSearchSchema,

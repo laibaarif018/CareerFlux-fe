@@ -1,14 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { PublicRoute } from '@/utils/RouteGuard'
 import { useEffect, useState } from 'react'
 import { useConnetGoogle } from '@/queries/auth.queries'
+import storageService from '@/utils/localstorage'
 
 export const Route = createFileRoute('/auth/connect-google')({
-  component: () => (
-    <PublicRoute>
-      <ConnectGoogle />
-    </PublicRoute>
-  ),
+  component: ConnectGoogle,
 })
 
 function ConnectGoogle() {
@@ -16,14 +12,17 @@ function ConnectGoogle() {
   const connectgoogle = useConnetGoogle()
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const [email, setEmail] = useState<string | null>(null)
+  const [role, setRole] = useState<string | null>(null)
   const [googleId, setGoogleId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
     const storedEmail = localStorage.getItem('googleLinkEmail')
     const storedGoogleId = localStorage.getItem('googleLinkId')
+    const role = storageService.getItem<string>('userRole')
     setEmail(storedEmail)
     setGoogleId(storedGoogleId)
+    setRole(role)
   }, [navigate])
 
   const handleCodeChange = (index: number, value: string) => {
@@ -69,9 +68,15 @@ function ConnectGoogle() {
       { code: otpCode, email, googleId },
       {
         onSuccess: () => {
+            setTimeout(() => {
+        if (role === 'jobseeker') {
+          window.location.href = '/job-seeker/dashboard'
+        } else {
+          window.location.href = '/company/dashboard'
+        }
+      }, 200)
           localStorage.removeItem('googleLinkEmail')
           localStorage.removeItem('googleLinkId')
-          navigate({ to: '/job-seeker/dashboard' })
         },
       },
     )
@@ -93,16 +98,6 @@ function ConnectGoogle() {
           "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif",
       }}
     >
-      {/* Background Gradient Mesh */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden opacity-80 dark:opacity-40">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-[#3EC3BC]/20 dark:bg-[#3EC3BC]/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-0 right-0 w-96 h-96 bg-[#0E7C8C]/20 dark:bg-[#0E7C8C]/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0E7C8C]/20 dark:bg-[#0E7C8C]/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#3EC3BC]/20 dark:bg-[#3EC3BC]/10 rounded-full blur-3xl"></div>
-        </div>
-      </div>
-
       <main className="relative z-10 w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-[#0E7C8C]/10 border border-slate-200 dark:border-slate-700 overflow-hidden">
         {/* Header Section */}
         <div className="pt-12 pb-6 px-8 text-center bg-gradient-to-b from-[#3EC3BC]/10 to-transparent dark:from-[#0E7C8C]/10 dark:to-transparent">

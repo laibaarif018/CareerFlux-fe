@@ -3,14 +3,10 @@ import { useState } from 'react'
 import Header from '@/components/Header'
 import { useCheckEmail } from '@/queries/auth.queries'
 import { z } from 'zod'
-import { PublicRoute } from '@/utils/RouteGuard'
+import storageService from '@/utils/localstorage'
 
 export const Route = createFileRoute('/auth/login')({
-  component: () => (
-    <PublicRoute>
-      <EmailInput />
-    </PublicRoute>
-  ),
+  component: EmailInput
 })
 
 const emailSchema = z.object({
@@ -66,6 +62,8 @@ function EmailInput() {
         const exists = data.payload?.exists
         const hasPassword = data.payload?.hasPassword
         const userId = data.payload?.userId
+        const role=data.payload?.role
+        storageService.setItem('userRole',role)
 
         if (exists && hasPassword === false) {
           // Email exists but password not set (Google signup case)

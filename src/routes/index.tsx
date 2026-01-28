@@ -626,9 +626,9 @@ export default function HomePage() {
               Join 50,000+ job seekers who have optimized their resumes with AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
+              {/* <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
                 View Sample Report
-              </button>
+              </button> */}
             </div>
           </div>
         </section>

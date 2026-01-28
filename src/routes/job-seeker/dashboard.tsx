@@ -7,12 +7,8 @@ import { useTotalCount, useBestResumeScore } from '@/queries/resume.queries'
 import { useSavedJobs } from '@/queries/user.queries'
 import { useActivities } from '@/queries/activity.queries'
 import Shimmer from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute('/job-seeker/dashboard')({
-  beforeLoad: () => {
-    requireRole('jobseeker')
-  },
   component: Dashboard,
 })
 

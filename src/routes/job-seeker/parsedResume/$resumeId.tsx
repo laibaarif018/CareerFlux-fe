@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import {
   useResumeStatus,
@@ -6,16 +6,13 @@ import {
   useAnalyzeResume,
 } from '@/queries/resume.queries'
 import Shimmer, { ShimmerInput } from '@/components/Shimmer'
-import { requireRole } from '@/utils/RouteGuard'
 
 export const Route = createFileRoute(`/job-seeker/parsedResume/$resumeId`)({
-  beforeLoad: () => {
-     requireRole('jobseeker')
-   },
-   component: ParsedResumeDetails,
+  component: ParsedResumeDetails
 })
 
 export default function ParsedResumeDetails() {
+
   const { resumeId } = Route.useParams()
   const navigate = useNavigate()
 
