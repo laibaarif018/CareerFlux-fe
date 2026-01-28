@@ -12,7 +12,8 @@ import Shimmer, {
   ShimmerParagraph,
   ShimmerButton,
 } from '@/components/Shimmer'
-export const Route = createFileRoute('/job-seeker/resumeReport')({
+
+export const Route = createFileRoute('/job-seeker/resume-report')({
   validateSearch: (search: { resumeId?: string }) => ({
     resumeId: search.resumeId,
   }),
@@ -22,7 +23,7 @@ export const Route = createFileRoute('/job-seeker/resumeReport')({
  
 
 export default function ResumeReport() {
-  const { resumeId } = useSearch({ from: '/job-seeker/resumeReport' })
+  const { resumeId } = useSearch({ from: '/job-seeker/resume-report' })
   const navigate = useNavigate()
   console.log('resumeId', resumeId)
   const [hasTriggeredAnalysis, setHasTriggeredAnalysis] = useState(false)
@@ -234,7 +235,7 @@ export default function ResumeReport() {
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => navigate({ to: '/job-seeker/myResumes' })}
+              onClick={() => navigate({ to: '/job-seeker/my-resumes' })}
               className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <span className="material-symbols-outlined text-lg">

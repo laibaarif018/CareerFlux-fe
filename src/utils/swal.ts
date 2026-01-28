@@ -9,7 +9,16 @@ interface AlertOptions {
   cancelButtonText?: string
   showCancelButton?: boolean
 }
-// show alert
+
+/**
+ * Common button colors
+ */
+const CONFIRM_COLOR = '#14b8a6' // teal
+const CANCEL_COLOR = '#6b7280'  // gray
+
+// --------------------
+// Basic alert
+// --------------------
 export const showAlert = ({
   title = 'Alert',
   text,
@@ -23,44 +32,52 @@ export const showAlert = ({
     html,
     icon,
     confirmButtonText,
+    confirmButtonColor: CONFIRM_COLOR,
   })
 }
 
-//Success alert
-
+// --------------------
+// Success alert
+// --------------------
 export const showSuccess = (title = 'Success', text?: string) => {
   return Swal.fire({
     title,
     text,
     icon: 'success',
     confirmButtonText: 'OK',
+    confirmButtonColor: CONFIRM_COLOR,
   })
 }
 
+// --------------------
 // Error alert
-
+// --------------------
 export const showError = (title = 'Error', text?: string) => {
   return Swal.fire({
     title,
     text,
     icon: 'error',
     confirmButtonText: 'OK',
+    confirmButtonColor: CONFIRM_COLOR,
   })
 }
 
-//Warning alert
-
+// --------------------
+// Warning alert
+// --------------------
 export const showWarning = (title = 'Warning', text?: string) => {
   return Swal.fire({
     title,
     text,
     icon: 'warning',
     confirmButtonText: 'OK',
+    confirmButtonColor: CONFIRM_COLOR,
   })
 }
 
-// Confirmation dialog
-
+// --------------------
+// Confirmation dialog (Delete / Confirm)
+// --------------------
 export const showConfirm = ({
   title = 'Are you sure?',
   text = 'You won’t be able to revert this!',
@@ -74,12 +91,18 @@ export const showConfirm = ({
     showCancelButton: true,
     confirmButtonText,
     cancelButtonText,
+    confirmButtonColor: CONFIRM_COLOR,
+    cancelButtonColor: CANCEL_COLOR,
   })
 }
 
+// --------------------
 // Toast notification
-
-export const showToast = (title: string, icon: SweetAlertIcon = 'success') => {
+// --------------------
+export const showToast = (
+  title: string,
+  icon: SweetAlertIcon = 'success'
+) => {
   return Swal.fire({
     toast: true,
     position: 'top-end',
@@ -87,5 +110,6 @@ export const showToast = (title: string, icon: SweetAlertIcon = 'success') => {
     title,
     showConfirmButton: false,
     timer: 3000,
+    // timerProgressBar: true,
   })
 }

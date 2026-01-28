@@ -52,7 +52,10 @@ export interface IConnectGoogle {
   code: string
   googleId: string
 }
-
+export interface IResendCode{
+  email:string,
+  purpose:'verification'| 'forgot_password'
+}
 class AuthService extends HttpService {
   private readonly prefix: string = '/auth'
 
@@ -90,6 +93,13 @@ class AuthService extends HttpService {
    */
   verify = (verifyData: IVerify): Promise<IApiResponse> =>
     this.post(`${this.prefix}/verify`, verifyData)
+
+  /**
+   * Resend verification code
+   * @param email User email
+   */
+  resendVerificationCode = (resendCode:IResendCode): Promise<IApiResponse> =>
+    this.post(`${this.prefix}/resend-code`, resendCode)
 
   /**
    * Forgot password - send reset email

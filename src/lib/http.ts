@@ -73,7 +73,9 @@ export class HttpService {
   }
 
   private handleUnauthorized(): void {
+    // Prevent multiple simultaneous logout attempts
     if (this.isLoggingOut) return
+
     this.isLoggingOut = true
 
     // clear only auth-related data (NOT everything)

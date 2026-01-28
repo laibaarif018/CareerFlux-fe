@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, useRef, useEffect } from 'react'
 import Header from '@/components/Header'
-import { useVerify } from '@/queries/auth.queries'
+import { useVerify, useResendVerificationCode } from '@/queries/auth.queries'
+import { showToast } from '@/utils/swal'
 
 
 export const Route = createFileRoute('/auth/verification')({
@@ -16,9 +17,14 @@ function VerificationPage() {
   const navigate = useNavigate()
   const { email: searchEmail } = Route.useSearch()
   const verify = useVerify()
+  const resendCode = useResendVerificationCode()
 
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+
+  // Rate limiting state
+  const [canResend, setCanResend] = useState(true)
+  const [countdown, setCountdown] = useState(0)
 
   // Get email from search params or localStorage
   const email = searchEmail || localStorage.getItem('email') || ''
@@ -27,6 +33,17 @@ function VerificationPage() {
     // Focus first input on mount
     inputRefs.current[0]?.focus()
   }, [])
+
+  // Countdown effect for resend button
+  useEffect(() => {
+  let timer: NodeJS.Timeout;
+  if (countdown > 0) {
+    timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+  } else {
+    setCanResend(true);
+  }
+  return () => clearTimeout(timer);
+}, [countdown]);
 
   const handleChange = (index: number, value: string) => {
     // Only allow numbers
@@ -86,8 +103,22 @@ function VerificationPage() {
   }
 
   const handleResendCode = () => {
-    // TODO: Implement resend code functionality
-    console.log('Resend code clicked')
+  if (!canResend) return;
+
+  resendCode.mutate(
+    { email, purpose: 'verification' },
+    {
+      onSuccess: () => {
+        setCanResend(false);
+        setCountdown(60); // 60 seconds cooldown
+        showToast('Verification code resent successfully');
+      },
+      onError: (error: any) => {
+        console.error('Failed to resend verification code:', error);
+        showToast(error.response?.data?.message || 'Failed to resend verification code');
+      },
+    }
+  )
   }
 
   const isCodeComplete = code.every((digit) => digit !== '')
@@ -176,11 +207,26 @@ function VerificationPage() {
                 Didn't receive the code?{' '}
                 <button
                   onClick={handleResendCode}
-                  className="text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors"
+                  disabled={!canResend}
+                  className={`text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold transition-colors ${!canResend ? 'opacity-50 cursor-not-allowed' : 'hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C]'}`}
                 >
-                  Resend
+                  {resendCode.isPending ? 'Sending...' :
+                   canResend ? 'Resend' :
+                   `Resend (${countdown}s)`}
                 </button>
               </p>
+
+              {resendCode.isError && (
+                <div className="mt-2 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
+                  <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
+                    error
+                  </span>
+                  <p className="text-sm text-red-600 dark:text-red-400 font-normal">
+                    {(resendCode.error as any)?.message ||
+                      'Failed to resend verification code. Please try again.'}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">

@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Navigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import {
   useResumeStatus,
@@ -7,7 +7,7 @@ import {
 } from '@/queries/resume.queries'
 import Shimmer, { ShimmerInput } from '@/components/Shimmer'
 
-export const Route = createFileRoute(`/job-seeker/parsedResume/$resumeId`)({
+export const Route = createFileRoute(`/job-seeker/parsed-resume/$resumeId`)({
   component: ParsedResumeDetails
 })
 
@@ -90,7 +90,7 @@ export default function ParsedResumeDetails() {
 
       // Navigate to report page
       navigate({
-        to: '/job-seeker/resumeReport',
+        to: '/job-seeker/resume-report',
         search: {
           resumeId: resumeId,
         },

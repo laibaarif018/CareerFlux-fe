@@ -50,7 +50,11 @@ export function ProtectedRoute({
     setRole(currentRole)
 
     if (!token) {
-      navigate({ to: '/auth/login' })
+      // Check if we're already on the login page to avoid double navigation
+      if (window.location.pathname !== '/auth/login') {
+        navigate({ to: '/auth/login' })
+      }
+      setChecking(false);
       return
     }
 
@@ -83,7 +87,10 @@ export function UnassignedOnlyRoute({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) {
-      navigate({ to: '/auth/login' })
+      // Check if we're already on the login page to avoid double navigation
+      if (window.location.pathname !== '/auth/login') {
+        navigate({ to: '/auth/login' })
+      }
       return
     }
 
@@ -98,12 +105,15 @@ export function UnassignedOnlyRoute({ children }: { children: ReactNode }) {
     }
 
     if (role === 'unassigned') {
-      setChecking(false) // ✅ allowed
+      setChecking(false) 
       return
     }
 
     // fallback (corrupt state)
-    navigate({ to: '/auth/login' })
+    // Check if we're already on the login page to avoid double navigation
+    if (window.location.pathname !== '/auth/login') {
+      navigate({ to: '/auth/login' })
+    }
   }, [token, role, navigate])
 
   if (checking) return <FullPageLoader />

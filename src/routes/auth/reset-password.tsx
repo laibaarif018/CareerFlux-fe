@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Eye, EyeOff, Check, Circle } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
 import Header from '@/components/Header'
-import { useResetPassword } from '@/queries/auth.queries'
+import { useResendVerificationCode, useResetPassword } from '@/queries/auth.queries'
+import { useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
 import * as Yup from 'yup'
+import { showToast } from '@/utils/swal'
 
 export const Route = createFileRoute('/auth/reset-password')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -36,15 +39,47 @@ function ResetPassword() {
   const { email: searchEmail } = useSearch({ from: '/auth/reset-password' })
   const [email, setEmail] = useState('')
   const [code, setCode] = useState(['', '', '', '', '', ''])
-  const [formData, setFormData] = useState<ResetPasswordFormData>({
-    code: '',
-    newPassword: '',
-    confirmPassword: '',
-  })
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [errors, setErrors] = useState<Partial<Record<keyof ResetPasswordFormData, string>>>({})
+  const [canResend, setCanResend] = useState(true)
+  const [countdown, setCountdown] = useState(0)
+  
   const resetPassword = useResetPassword()
+  const resendCode = useResendVerificationCode()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    watch,
+    setValue,
+    trigger,
+  } = useForm<ResetPasswordFormData>({
+    resolver: yupResolver(resetPasswordSchema),
+    mode: 'onChange',
+    defaultValues: {
+      code: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  })
+
+  const newPassword = watch('newPassword')
+  const confirmPassword = watch('confirmPassword')
+
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0
+  const codeComplete = code.every((digit) => digit !== '')
+
+  // Countdown effect for resend button
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (countdown > 0) {
+      timer = setTimeout(() => setCountdown(countdown - 1), 1000)
+    } else {
+      setCanResend(true)
+    }
+    return () => clearTimeout(timer)
+  }, [countdown])
 
   useEffect(() => {
     const emailToUse = searchEmail || localStorage.getItem('email') || ''
@@ -63,11 +98,8 @@ function ResetPassword() {
     newCode[index] = value
     setCode(newCode)
     
-    const codeString = [...newCode].join('')
-    setFormData((prev) => ({ ...prev, code: codeString }))
-    
-    if (errors.code) setErrors((prev) => ({ ...prev, code: undefined }))
-    if (resetPassword.isError) resetPassword.reset()
+    const codeString = newCode.join('')
+    setValue('code', codeString, { shouldValidate: true })
 
     // Auto-focus next input
     if (value && index < 5) {
@@ -83,284 +115,249 @@ function ResetPassword() {
     }
   }
 
-  const register = (field: 'newPassword' | 'confirmPassword') => ({
-    value: formData[field],
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
-      if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
-      if (resetPassword.isError) resetPassword.reset()
-    },
-    onBlur: async () => {
-      try {
-        await resetPasswordSchema.validateAt(field, formData)
-        setErrors((prev) => ({ ...prev, [field]: undefined }))
-      } catch (error) {
-        if (error instanceof Yup.ValidationError) {
-          setErrors((prev) => ({ ...prev, [field]: error.message }))
-        }
-      }
-    },
-  })
-
-  const hasMinLength = formData.newPassword.length >= 8
-  const hasNumber = /\d/.test(formData.newPassword)
-  const hasUppercase = /[A-Z]/.test(formData.newPassword)
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword)
-  const allRequirementsMet = hasMinLength && hasNumber && hasUppercase && hasSpecialChar
-  const passwordsMatch = formData.newPassword === formData.confirmPassword && formData.confirmPassword.length > 0
-  const codeComplete = code.every((digit) => digit !== '')
-
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try {
-      await resetPasswordSchema.validate(formData, { abortEarly: false })
-      setErrors({})
-    } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        const newErrors: Partial<Record<keyof ResetPasswordFormData, string>> = {}
-        error.inner.forEach((err) => {
-          if (err.path) newErrors[err.path as keyof ResetPasswordFormData] = err.message
-        })
-        setErrors(newErrors)
-        return
-      }
-    }
-
+  const onSubmit = (data: ResetPasswordFormData) => {
     resetPassword.mutate(
       {
         email,
-        code: formData.code,
-        newPassword: formData.newPassword,
-        confirmPassword: formData.confirmPassword,
+        code: data.code,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmPassword,
       },
       {
         onSuccess: () => {
           localStorage.removeItem('email')
+          showToast('Password reset successfully!', 'success')
           navigate({ to: '/auth/login' })
         },
       }
     )
   }
 
+  const handleResendCode = () => {
+    if (!canResend) return
+  
+    resendCode.mutate(
+      { email, purpose: 'forgot_password' },
+      {
+        onSuccess: () => {
+          setCanResend(false)
+          setCountdown(60)
+          showToast('Verification code resent successfully', 'success')
+        },
+        onError: (error: any) => {
+          showToast(error.response?.data?.message || 'Failed to resend code', 'error')
+        },
+      }
+    )
+  }
+
   return (
-    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 transition-colors" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif" }}>
+    <div className="relative flex min-h-screen w-full flex-col bg-slate-50 dark:bg-slate-900 transition-colors">
       <Header />
 
-      <div className="flex h-full grow flex-col justify-center items-center p-4 py-12">
-        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3" style={{ letterSpacing: '-0.01em' }}>
-              Reset Password
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-normal">
-              A secure code has been sent to{' '}
-              <strong className="text-slate-700 dark:text-slate-300 font-semibold">
-                {email}
-              </strong>
-              . Enter the code and your new password below.
-            </p>
+      <div className="flex flex-1 items-center justify-center p-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                Reset Password
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
+                Enter the code sent to{' '}
+                <span className="font-medium text-slate-900 dark:text-white">
+                  {email}
+                </span>
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              {/* Verification Code */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 text-center">
+                  Verification Code
+                </label>
+                <div className="flex gap-2 justify-center">
+                  {code.map((digit, index) => (
+                    <input
+                      key={index}
+                      id={`code-${index}`}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleCodeChange(index, e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(index, e)}
+                      className={`w-12 h-14 text-center text-xl font-semibold border-2 rounded-lg transition-all outline-none
+                        bg-white dark:bg-slate-900 text-slate-900 dark:text-white
+                        ${errors.code 
+                          ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                          : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
+                        }`}
+                    />
+                  ))}
+                </div>
+                {errors.code && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-2 text-center">
+                    {errors.code.message}
+                  </p>
+                )}
+              </div>
+
+              {/* New Password */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    placeholder="Enter your new password"
+                    {...register('newPassword')}
+                    className={`w-full px-4 py-3 pr-12 border rounded-lg transition-all outline-none
+                      bg-white dark:bg-slate-900 text-slate-900 dark:text-white
+                      placeholder:text-slate-400 dark:placeholder:text-slate-500
+                      ${errors.newPassword 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                        : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    {errors.newPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Confirm Password */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Confirm your new password"
+                    {...register('confirmPassword')}
+                    className={`w-full px-4 py-3 pr-12 border rounded-lg transition-all outline-none
+                      bg-white dark:bg-slate-900 text-slate-900 dark:text-white
+                      placeholder:text-slate-400 dark:placeholder:text-slate-500
+                      ${errors.confirmPassword 
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                        : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
+                      }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+
+                {/* Password Match Indicator */}
+                {confirmPassword && (
+                  <p className={`text-xs mt-2 font-medium ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  </p>
+                )}
+                {errors.confirmPassword && (
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                    {errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+
+              {/* API Error Message */}
+              {resetPassword.isError && (
+                <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-600 dark:text-red-400">
+                    {(resetPassword.error as any)?.response?.data?.message ||
+                      'Failed to reset password. Please try again.'}
+                  </p>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={resetPassword.isPending || !isValid || !codeComplete}
+                className="w-full py-3 bg-[#0E7C8C] text-white font-semibold rounded-lg hover:bg-[#0d6b79] active:bg-[#0c5f6c] transition-all shadow-lg shadow-[#0E7C8C]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0E7C8C] flex items-center justify-center gap-2"
+              >
+                {resetPassword.isPending ? (
+                  <>
+                    <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Resetting Password...
+                  </>
+                ) : (
+                  'Reset Password'
+                )}
+              </button>
+            </form>
+
+            {/* Resend Code */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Didn't receive the code?{' '}
+                <button
+                  type="button"
+                  onClick={handleResendCode}
+                  disabled={!canResend || resendCode.isPending}
+                  className={`font-semibold transition-colors ${
+                    !canResend || resendCode.isPending
+                      ? 'text-slate-400 cursor-not-allowed' 
+                      : 'text-[#0E7C8C] dark:text-[#3EC3BC] hover:text-[#0d6b79] dark:hover:text-[#4dd4cd]'
+                  }`}
+                >
+                  {resendCode.isPending ? 'Sending...' :
+                   canResend ? 'Resend Code' :
+                   `Resend (${countdown}s)`}
+                </button>
+              </p>
+
+              {resendCode.isError && (
+                <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-xs text-red-600 dark:text-red-400">
+                    {(resendCode.error as any)?.response?.data?.message ||
+                      'Failed to resend code. Please try again.'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Sign In Link */}
+            <div className="text-center text-sm border-t border-slate-200 dark:border-slate-700 pt-6 mt-6">
+              <span className="text-slate-600 dark:text-slate-400">
+                Remember your password?{' '}
+              </span>
+              <button
+                type="button"
+                onClick={() => navigate({ to: '/auth/login' })}
+                className="text-[#0E7C8C] dark:text-[#3EC3BC] hover:text-[#0d6b79] dark:hover:text-[#4dd4cd] font-semibold transition-colors"
+              >
+                Sign In
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleResetPassword} noValidate>
-            {/* Verification Code */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">
-                Verification Code
-              </label>
-              <div className="flex gap-2 justify-center mb-2">
-                {code.map((digit, index) => (
-                  <input
-                    key={index}
-                    id={`code-${index}`}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleCodeChange(index, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(index, e)}
-                    className={`w-12 h-14 text-center text-xl font-semibold border-2 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none transition-all ${
-                      errors.code
-                        ? 'border-red-500 focus:border-red-500'
-                        : 'border-slate-200 dark:border-slate-700 focus:border-[#0E7C8C]'
-                    }`}
-                  />
-                ))}
-              </div>
-              {errors.code && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1 text-center font-normal">
-                  {errors.code}
-                </p>
-              )}
-            </div>
-
-            {/* New Password */}
-            <div className="mb-4">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showNewPassword ? 'text' : 'password'}
-                  placeholder="Enter your new password"
-                  {...register('newPassword')}
-                  className={`w-full pl-4 pr-12 py-3 border bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal ${
-                    errors.newPassword
-                      ? 'border-red-500 focus:border-red-500'
-                      : 'border-slate-300 dark:border-slate-700 focus:border-[#0E7C8C]'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
-                >
-                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              {errors.newPassword && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
-                  {errors.newPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Confirm your new password"
-                  {...register('confirmPassword')}
-                  className={`w-full pl-4 pr-12 py-3 border bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-[#0E7C8C]/20 outline-none placeholder-slate-400 dark:placeholder:text-slate-500 font-normal ${
-                    errors.confirmPassword
-                      ? 'border-red-500 focus:border-red-500'
-                      : 'border-slate-300 dark:border-slate-700 focus:border-[#0E7C8C]'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#0E7C8C] dark:hover:text-[#3EC3BC] transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-
-              {/* Password Match Indicator */}
-              {formData.confirmPassword && (
-                <p className={`text-xs mt-2 font-medium ${passwordsMatch ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
-                </p>
-              )}
-              {errors.confirmPassword && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-1 font-normal">
-                  {errors.confirmPassword}
-                </p>
-              )}
-            </div>
-
-            {/* Password Requirements */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-6 text-sm">
-              <div className="flex items-center gap-2">
-                {hasMinLength ? (
-                  <Check size={16} className="text-green-500" />
-                ) : (
-                  <Circle size={16} className="text-slate-300" />
-                )}
-                <span className={`font-normal ${hasMinLength ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  8+ characters
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasUppercase ? (
-                  <Check size={16} className="text-green-500" />
-                ) : (
-                  <Circle size={16} className="text-slate-300" />
-                )}
-                <span className={`font-normal ${hasUppercase ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  1 uppercase letter
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasNumber ? (
-                  <Check size={16} className="text-green-500" />
-                ) : (
-                  <Circle size={16} className="text-slate-300" />
-                )}
-                <span className={`font-normal ${hasNumber ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  1 number
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasSpecialChar ? (
-                  <Check size={16} className="text-green-500" />
-                ) : (
-                  <Circle size={16} className="text-slate-300" />
-                )}
-                <span className={`font-normal ${hasSpecialChar ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                  1 special character
-                </span>
-              </div>
-            </div>
-
-            {/* Error Message */}
-            {resetPassword.isError && (
-              <div className="mb-4 flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3">
-                <span className="material-symbols-outlined text-red-600 dark:text-red-400 text-base mt-0.5">
-                  error
-                </span>
-                <p className="text-sm text-red-600 dark:text-red-400 font-normal">
-                  {(resetPassword.error as any)?.response?.data?.message ||
-                    'Failed to reset password. Please try again.'}
-                </p>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={resetPassword.isPending || !allRequirementsMet || !passwordsMatch || !codeComplete}
-              className="w-full py-3 bg-[#0E7C8C] text-white font-semibold rounded-lg hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors shadow-lg shadow-[#0E7C8C]/20 mb-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {resetPassword.isPending ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-lg">
-                    progress_activity
-                  </span>
-                  Resetting...
-                </>
-              ) : (
-                'Reset Password'
-              )}
-            </button>
-          </form>
-
-          {/* Sign In Link */}
-          <div className="text-center text-sm border-t border-slate-200 dark:border-slate-700 pt-4">
-            <span className="text-slate-500 dark:text-slate-400 font-normal">
-              Remember your password?{' '}
-            </span>
-            <button
-              type="button"
-              onClick={() => navigate({ to: '/auth/login' })}
-              className="text-[#0E7C8C] dark:text-[#3EC3BC] hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] font-semibold transition-colors"
-            >
-              Sign In
-            </button>
+          {/* Security Footer */}
+          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs mt-6">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span>Secure 256-bit SSL Encrypted</span>
           </div>
         </div>
       </div>
-
-      {/* Security Footer */}
-      <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs pb-4 font-normal">
-        <span className="material-symbols-outlined text-sm">verified_user</span>
-        <span>Secure 256-bit SSL Encrypted</span>
-      </div>
     </div>
   )
-}
+} 

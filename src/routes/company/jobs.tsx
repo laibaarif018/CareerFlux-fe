@@ -538,7 +538,7 @@ export default function AllJobs() {
                               <button
                                 onClick={() =>
                                   navigate({
-                                    to: '/company/jobDetails',
+                                    to: '/company/job-details',
                                     search: { id: job._id },
                                   })
                                 }
@@ -557,7 +557,7 @@ export default function AllJobs() {
                               <button
                                 onClick={() =>
                                   navigate({
-                                    to: '/company/editJob',
+                                    to: '/company/edit-job',
                                     search: { id: job._id },
                                   })
                                 }

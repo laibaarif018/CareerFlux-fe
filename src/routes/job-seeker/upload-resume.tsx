@@ -16,7 +16,7 @@ function UploadModalRoute() {
   return <UploadModal isOpen={isOpen} onClose={handleClose} />
 }
 
-export const Route = createFileRoute('/job-seeker/uploadResume')({
+export const Route = createFileRoute('/job-seeker/upload-resume')({
  
   component: UploadModalRoute,
 })
@@ -105,7 +105,7 @@ function UploadModal({
         setProgress(0)
 
         navigate({
-          to: '/job-seeker/parsedResume/$resumeId',
+          to: '/job-seeker/parsed-resume/$resumeId',
           params: { resumeId },
         })
       },

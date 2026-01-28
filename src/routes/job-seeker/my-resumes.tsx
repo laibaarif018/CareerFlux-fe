@@ -9,7 +9,7 @@ import Shimmer from '@/components/Shimmer'
 import Swal from 'sweetalert2'
 import { showConfirm, showError, showToast } from '@/utils/swal'
 
-export const Route = createFileRoute('/job-seeker/myResumes')({
+export const Route = createFileRoute('/job-seeker/my-resumes')({
 
   component: MyResumes,
 })
@@ -108,7 +108,7 @@ export default function MyResumes() {
           </div>
           {resumes.length > 0 && (
             <button
-              onClick={() => navigate({ to: '/job-seeker/uploadResume' })}
+              onClick={() => navigate({ to: '/job-seeker/upload-resume' })}
               className="inline-flex items-center justify-center gap-2 rounded-lg h-11 px-4 bg-[#0E7C8C] text-white text-sm font-bold shadow-lg shadow-[#0E7C8C]/20 hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors"
             >
               <span className="material-symbols-outlined text-lg">
@@ -122,7 +122,7 @@ export default function MyResumes() {
         {/* Resumes Table */}
         {isLoading ? (
           // Shimmer loading state
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+          (<div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-xs uppercase bg-slate-100 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
@@ -185,7 +185,7 @@ export default function MyResumes() {
                 </tbody>
               </table>
             </div>
-          </div>
+          </div>)
         ) : resumes.length > 0 ? (
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
@@ -317,8 +317,8 @@ export default function MyResumes() {
                                 console.log('Full resume object:', resume)
                                 if (resumeId) {
                                   navigate({
-                                    to: '/job-seeker/job-details',
-                                    search: { id: resumeId },
+                                    to: '/job-seeker/resume-report',
+                                    search: { resumeId: resumeId },
                                   })
                                 } else {
                                   console.error('Resume ID is undefined!')
@@ -401,7 +401,7 @@ export default function MyResumes() {
                     analysis.
                   </p>
                   <button
-                    onClick={() => navigate({ to: '/job-seeker/uploadResume' })}
+                    onClick={() => navigate({ to: '/job-seeker/upload-resume' })}
                     className="inline-flex items-center justify-center gap-2 rounded-lg h-11 px-6 bg-[#0E7C8C] text-white text-sm font-bold shadow-lg shadow-[#0E7C8C]/20 hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90 transition-colors"
                   >
                     <span className="material-symbols-outlined text-lg">

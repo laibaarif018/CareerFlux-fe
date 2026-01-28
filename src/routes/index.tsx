@@ -39,14 +39,6 @@ export default function HomePage() {
     }
   }
 
-  const handleAnalyze = () => {
-    if (fileName) {
-      console.log('Analyzing file:', fileName)
-    } else {
-      document.getElementById('resume-upload')?.click()
-    }
-  }
-
   return (
     <div
       className="relative flex flex-col w-full min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors"
@@ -62,6 +54,7 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
         <section className="relative w-full py-12 md:py-20 px-4 md:px-10 bg-slate-50 dark:bg-slate-900">
+    
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col gap-6 text-center lg:text-left">
               <div className="space-y-4">
@@ -338,6 +331,7 @@ export default function HomePage() {
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#3EC3BC]/20 rounded-full blur-3xl -z-0"></div>
             </div>
           </div>
+          
         </section>
 
         {/* Features Section */}
@@ -626,9 +620,9 @@ export default function HomePage() {
               Join 50,000+ job seekers who have optimized their resumes with AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {/* <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
+              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
                 View Sample Report
-              </button> */}
+              </button>
             </div>
           </div>
         </section>

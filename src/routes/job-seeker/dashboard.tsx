@@ -77,7 +77,7 @@ export function Dashboard() {
           onClick: activity.metadata?.resumeId
             ? () =>
                 navigate({
-                  to: '/job-seeker/myResumes',
+                  to: '/job-seeker/my-resumes',
                   search: { id: activity.metadata.resumeId },
                 })
             : undefined,
@@ -178,7 +178,7 @@ export function Dashboard() {
                 <ActionButton
                   icon="upload_file"
                   primary
-                  onClick={() => navigate({ to: '/job-seeker/uploadResume' })}
+                  onClick={() => navigate({ to: '/job-seeker/upload-resume' })}
                 >
                   Upload Resume
                 </ActionButton>
@@ -267,7 +267,7 @@ export function Dashboard() {
                     </p>
                   </div>
                   <button
-                    onClick={() => navigate({ to: '/job-seeker/uploadResume' })}
+                    onClick={() => navigate({ to: '/job-seeker/upload-resume' })}
                     className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-[#0E7C8C] px-5 text-sm font-semibold text-white shadow-lg shadow-[#0E7C8C]/20 transition-colors hover:bg-[#3EC3BC] active:bg-[#0E7C8C]/90"
                   >
                     <span className="material-symbols-outlined text-lg">

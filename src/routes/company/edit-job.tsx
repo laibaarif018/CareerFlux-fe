@@ -9,7 +9,7 @@ const jobSearchSchema = z.object({
   id: z.string(),
 })
 
-export const Route = createFileRoute('/company/editJob')({
+export const Route = createFileRoute('/company/edit-job')({
   component: EditJob,
 
   validateSearch: jobSearchSchema,
@@ -133,7 +133,7 @@ export default function EditJob() {
         'The job posting has been updated successfully.',
       )
 
-      navigate({ to: '/company/jobDetails', search: { id } })
+      navigate({ to: '/company/job-details', search: { id } })
     } catch (error: any) {
       showError(
         'Update Failed',
@@ -288,7 +288,7 @@ export default function EditJob() {
           <div className="mb-8">
             <button
               onClick={() =>
-                navigate({ to: '/company/jobDetails', search: { id } })
+                navigate({ to: '/company/job-details', search: { id } })
               }
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-teal-600 dark:hover:text-teal-400 font-medium mb-4 transition-colors"
             >
@@ -615,7 +615,7 @@ export default function EditJob() {
               <button
                 type="button"
                 onClick={() =>
-                  navigate({ to: '/company/jobDetails', search: { id } })
+                  navigate({ to: '/company/job-details', search: { id } })
                 }
                 className="px-6 py-3 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
               >

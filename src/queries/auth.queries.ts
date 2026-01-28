@@ -8,8 +8,9 @@ import type {
   IResetPassword,
   ISetPassword,
   IConnectGoogle,
+  IResendCode,
 } from '../services/auth.service'
-
+import { showAlert, showToast } from '@/utils/swal'
 
 export function useCheckEmail() {
   return useMutation({
@@ -58,6 +59,13 @@ export function useVerify() {
   })
 }
 
+export function useResendVerificationCode() {
+  return useMutation({
+    mutationFn: (resendCode: IResendCode) =>
+      authService.resendVerificationCode(resendCode),
+  })
+}
+
 export function useForgotPassword() {
   return useMutation({
     mutationFn: (payload: IForgotPassword) =>
@@ -102,23 +110,18 @@ export function useCurrentUser() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
- 
+
 export const useChangePassword = () => {
   return useMutation({
-    mutationFn: (data: {
-      currentPassword: string;
-      newPassword: string;
-    }) => authService.changePassword(data),
+    mutationFn: (data: { currentPassword: string; newPassword: string }) =>
+      authService.changePassword(data),
 
     onSuccess: () => {
-      // toast.success('Password changed successfully');
+      showToast('Password changed successfully')
     },
 
     onError: (error: any) => {
-      // toast.error(
-      //   error?.response?.data?.message ||
-      //   'Failed to change password'
-      // );
+      showAlert(error?.response?.data?.message || 'Failed to change password')
     },
-  });
-};
+  })
+}

@@ -9,7 +9,7 @@ const jobSearchSchema = z.object({
   id: z.string(),
 })
 
-export const Route = createFileRoute('/company/jobDetails')({
+export const Route = createFileRoute('/company/job-details')({
   component: JobDetails,
 
   validateSearch: jobSearchSchema,
@@ -363,7 +363,7 @@ export default function JobDetails() {
                   <button
                     onClick={() =>
                       navigate({
-                        to: '/company/editJob',
+                        to: '/company/edit-job',
                         search: { id: job._id },
                       })
                     }
