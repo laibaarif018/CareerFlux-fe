@@ -30,14 +30,14 @@ export default function Header() {
         >
           <svg
             width="250"
-            height="50"
+            height="45"
             viewBox="0 0 514 142"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
+              fillRule="evenodd"
+              clipRule="evenodd"
               d="M86.73 31.3304L90 3.34038C90.03 3.11038 89.8 2.94038 89.58 3.03038L62.96 14.0704C62.73 14.1704 62.71 14.4804 62.92 14.6004L69.22 18.4304C69.35 18.5204 69.41 18.6904 69.33 18.8204C67.71 21.7304 59.86 30.5404 54.59 35.1704C51.81 37.6204 43.04 43.9604 35.1 49.2804C13.65 63.6304 6.99003 70.7604 4.28003 82.2804C1.92003 92.3304 3.12003 100.9 5.59003 91.6404C8.04003 82.5004 18.24 72.9404 39.3 60.0604C46.83 55.4604 56.07 49.3804 59.84 46.5404C66.27 41.7104 77.96 28.4904 79.94 26.3504C80.05 26.2304 80.24 26.2304 80.36 26.3304L86.25 31.5104C86.43 31.6704 86.72 31.5604 86.75 31.3204L86.73 31.3304Z"
               fill="#30B3AD"
             />
@@ -58,8 +58,8 @@ export default function Header() {
                 y2="90.0655"
                 gradientUnits="userSpaceOnUse"
               >
-                <stop stop-color="#3869C5" />
-                <stop offset="1" stop-color="#41B0B1" />
+                <stop stopColor="#3869C5" />
+                <stop offset="1" stopColor="#41B0B1" />
               </linearGradient>
             </defs>
           </svg>

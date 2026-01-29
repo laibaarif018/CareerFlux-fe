@@ -4,6 +4,7 @@ import Header from '@/components/Header'
 import { useNavigate } from '@tanstack/react-router'
 import { getAuthToken } from '@/utils/auth'
 import storageService from '@/utils/localstorage'
+import SampleReport from '@/components/sampleReport'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -11,6 +12,7 @@ export const Route = createFileRoute('/')({
 
 export default function HomePage() {
   const [fileName, setFileName] = useState<string>('')
+  const [showSampleReport, setShowSampleReport] = useState<boolean>(false)
   const navigate = useNavigate()
 
   const handleResumeClick = () => {
@@ -335,7 +337,7 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 bg-white dark:bg-slate-800">
+        <section id="features" className="py-16 bg-white dark:bg-slate-800 scroll-mt-24">
           <div className="max-w-6xl mx-auto px-4 md:px-10">
             <div className="text-center mb-12">
               <h2
@@ -620,12 +622,49 @@ export default function HomePage() {
               Join 50,000+ job seekers who have optimized their resumes with AI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors">
+              <button
+                onClick={() => setShowSampleReport(true)}
+                className="px-8 py-3 bg-transparent border-2 border-white text-white font-semibold rounded-lg hover:bg-white/10 transition-colors"
+              >
                 View Sample Report
               </button>
             </div>
           </div>
         </section>
+
+        {/* Background Blur Overlay */}
+        {showSampleReport && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-md"
+            onClick={() => setShowSampleReport(false)}
+          ></div>
+        )}
+
+        {/* Sample Report Modal */}
+        {showSampleReport && (
+          <div
+            className="fixed inset-0 z-50 flex items-start justify-center pt-8 p-4"
+            onClick={() => setShowSampleReport(false)}
+          >
+            <div
+              className="relative w-full max-w-6xl max-h-[90vh] overflow-hidden bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 z-10 flex justify-end p-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={() => setShowSampleReport(false)}
+                  className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300"
+                  aria-label="Close"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <div className="overflow-y-auto max-h-[calc(90vh-50px)]">
+                <SampleReport />
+              </div>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Footer */}
