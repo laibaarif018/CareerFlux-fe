@@ -46,7 +46,7 @@ export default function UserHeader() {
     logout.mutate(undefined, {
       onSuccess: () => {
         console.log('Logged out successfully')
-        storageService.removeItem('carrerFlux_userRole')
+        storageService.removeItem('userRole')
         setTimeout(() => {
           navigate({ to: '/auth/login' })
         }, 1000)
