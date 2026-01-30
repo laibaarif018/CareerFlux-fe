@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute} from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import { authService } from '@/services/auth.service'

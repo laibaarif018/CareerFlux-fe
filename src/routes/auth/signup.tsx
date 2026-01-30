@@ -2,44 +2,18 @@ import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import Header from '@/components/Header'
 import { useSignup } from '@/queries/auth.queries'
-import * as Yup from 'yup'
+import { signupSchema, type SignupFormData } from '@/validations/auth/signup'
 import { Eye, EyeOff } from 'lucide-react'
+import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/signup')({
   component: SignUp
 })
 
-// Yup validation schema
-const signupSchema = Yup.object().shape({
-  name: Yup.string()
-    .min(2, 'Name must be at least 2 characters')
-    .required('Name is required'),
-  email: Yup.string()
-    .email('Please enter a valid email address')
-    .required('Email is required'),
-  password: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/\d/, 'Password must contain at least one number')
-    .matches(
-      /[!@#$%^&*(),.?":{}|<>]/,
-      'Password must contain at least one special character'
-    )
-    .required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('password')], "Passwords don't match")
-    .required('Please confirm your password'),
-  agreedToTerms: Yup.boolean()
-    .oneOf([true], 'You must agree to the Terms & Privacy Policy')
-    .required('You must agree to the Terms & Privacy Policy'),
-})
-
-type SignupFormData = Yup.InferType<typeof signupSchema>
-
 function SignUp() {
   const navigate = useNavigate()
   const signup = useSignup()
-  
+
   const [formData, setFormData] = useState<SignupFormData>({
     name: '',
     email: '',
@@ -47,7 +21,7 @@ function SignUp() {
     confirmPassword: '',
     agreedToTerms: false,
   })
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [showPassword, setShowPassword] = useState(false)
@@ -79,12 +53,12 @@ function SignUp() {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }))
     }
-    
+
     // Validate on change if field was touched
     if (touched[field]) {
       validateField(field, value)
     }
-    
+
     if (signup.isError) {
       signup.reset()
     }
@@ -109,7 +83,7 @@ function SignUp() {
           }
         })
         setErrors(newErrors)
-        
+
         // Mark all fields as touched
         setTouched({
           name: true,

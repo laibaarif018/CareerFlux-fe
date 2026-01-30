@@ -1,5 +1,6 @@
 import { HttpService } from '@/lib/http'
 import { IApiResponse } from '@/utils/IApiResponse'
+import { EmailFormData } from '@/validations/auth/forgot-password'
 
 export interface IUser {
   sub: string
@@ -39,7 +40,6 @@ export interface IForgotPassword {
 export interface ISetPassword {
   userId: string
   password: string
-  // confirmPassword: string;
 }
 export interface IResetPassword {
   email: string
@@ -105,7 +105,7 @@ class AuthService extends HttpService {
    * Forgot password - send reset email
    * @param payload User forgot password payload
    */
-  forgotPassword = (payload: IForgotPassword): Promise<IApiResponse> =>
+  forgotPassword = (payload:EmailFormData): Promise<IApiResponse> =>
     this.post(`${this.prefix}/forgot-password`, payload)
 
   /**
@@ -146,5 +146,4 @@ class AuthService extends HttpService {
     this.post(`${this.prefix}/change-password`, credentials)
 }
 
-// Export singleton instance
 export const authService = new AuthService()

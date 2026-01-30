@@ -51,7 +51,13 @@ class LocalStorageService {
     this.prefix = config.prefix || 'app_';
     this.encryptionEnabled = config.encrypt || false;
     this.defaultExpiration = config.expiration;
-    this.encryptionKey = config.encryptionKey || 'default_secret_key';
+    this.encryptionKey = config.encryptionKey || '';
+
+    // Warn if encryption is enabled but no key is provided
+    if (this.encryptionEnabled && !this.encryptionKey) {
+      console.warn('Encryption is enabled but no encryption key provided. Data will not be encrypted.');
+      this.encryptionEnabled = false;
+    }
   }
 
   /**
@@ -60,6 +66,11 @@ class LocalStorageService {
    * @returns Encrypted string
    */
   private encrypt(data: string): string {
+    if (!this.encryptionKey) {
+      console.warn('No encryption key provided, returning unencrypted data');
+      return data;
+    }
+
     try {
       return CryptoJS.AES.encrypt(data, this.encryptionKey).toString();
     } catch (error) {
@@ -74,6 +85,11 @@ class LocalStorageService {
    * @returns Decrypted plain string
    */
   private decrypt(data: string): string {
+    if (!this.encryptionKey) {
+      console.warn('No encryption key provided, returning unencrypted data');
+      return data;
+    }
+
     try {
       const bytes = CryptoJS.AES.decrypt(data, this.encryptionKey);
       return bytes.toString(CryptoJS.enc.Utf8);
@@ -407,7 +423,7 @@ const storageService = new LocalStorageService({
   prefix: 'careerflux_',
   encrypt: true, // For best practice, keep encryption ON for sensitive items
   expiration: 7 * 24 * 60 * 60 * 1000, // 7 days default
-  encryptionKey: 'myAppVeryStrongSecretKey123!', // Supply your own secret key!
+  encryptionKey: typeof window !== 'undefined' ? (window as any).__STORAGE_ENCRYPTION_KEY__ || process.env.STORAGE_ENCRYPTION_KEY || 'fallback_key_for_dev' : 'server_fallback',
 });
 
 export default storageService;

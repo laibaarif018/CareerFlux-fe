@@ -14,12 +14,16 @@ export default function Header() {
     location.pathname.startsWith('/job-seeker') ||
     location.pathname.startsWith('/company')
 
-  const dashboardPath =
-    role === 'jobseeker'
-      ? '/job-seeker/dashboard'
-      : role === 'company'
-        ? '/company/dashboard'
-        : '/auth/login'
+  const getDashboardPath = (): string => {
+    const dashboardRoutes: Record<string, string> = {
+      jobseeker: '/job-seeker/dashboard',
+      company: '/company/dashboard',
+    }
+
+    return dashboardRoutes[role as string] || '/auth/login'
+  }
+
+  const dashboardPath = getDashboardPath()
 
   return (
     <header className="sticky top-0 z-50 w-full bg-slate-50 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -114,7 +118,6 @@ export default function Header() {
           )}
         </div>
       </div>
-      
     </header>
   )
 }

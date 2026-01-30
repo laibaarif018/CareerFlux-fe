@@ -4,7 +4,7 @@ import Header from '@/components/Header'
 import { useNavigate } from '@tanstack/react-router'
 import { getAuthToken } from '@/utils/auth'
 import storageService from '@/utils/localstorage'
-import SampleReport from '@/components/sampleReport'
+import LazySampleReport from '@/components/LazySampleReport'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -56,7 +56,6 @@ export default function HomePage() {
       <main className="flex-1 flex flex-col">
         {/* Hero Section */}
         <section className="relative w-full py-12 md:py-20 px-4 md:px-10 bg-slate-50 dark:bg-slate-900">
-    
           <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col gap-6 text-center lg:text-left">
               <div className="space-y-4">
@@ -333,11 +332,13 @@ export default function HomePage() {
               <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-[#3EC3BC]/20 rounded-full blur-3xl -z-0"></div>
             </div>
           </div>
-          
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 bg-white dark:bg-slate-800 scroll-mt-24">
+        <section
+          id="features"
+          className="py-16 bg-white dark:bg-slate-800 scroll-mt-24"
+        >
           <div className="max-w-6xl mx-auto px-4 md:px-10">
             <div className="text-center mb-12">
               <h2
@@ -487,15 +488,6 @@ export default function HomePage() {
                   perfectly match your optimized profile.
                 </p>
               </div>
-            </div>
-
-            <div className="mt-16 text-center">
-              <button className="inline-flex items-center gap-2 text-[#0E7C8C] dark:text-[#3EC3BC] font-semibold hover:text-[#3EC3BC] dark:hover:text-[#0E7C8C] transition-colors border-b-2 border-[#0E7C8C]/20 hover:border-[#0E7C8C] pb-0.5">
-                See a sample analysis report
-                <span className="material-symbols-outlined text-sm">
-                  arrow_forward
-                </span>
-              </button>
             </div>
           </div>
         </section>
@@ -660,7 +652,7 @@ export default function HomePage() {
                 </button>
               </div>
               <div className="overflow-y-auto max-h-[calc(90vh-50px)]">
-                <SampleReport />
+                <LazySampleReport />
               </div>
             </div>
           </div>

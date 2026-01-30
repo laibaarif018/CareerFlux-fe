@@ -2,15 +2,12 @@ import { createFileRoute,  useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import { useCheckEmail } from '@/queries/auth.queries'
-import { z } from 'zod'
 import storageService from '@/utils/localstorage'
+import * as Yup from 'yup'
+import { emailSchema } from '@/validations/auth/login'
 
 export const Route = createFileRoute('/auth/login')({
   component: EmailInput
-})
-
-const emailSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
 })
 
 function EmailInput() {
@@ -24,56 +21,39 @@ function EmailInput() {
   const hasError = Boolean(validationError || checkEmail.isError)
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setEmail(value)
+  setEmail(e.target.value)
 
-    if (validationError) {
-      setValidationError('')
-    }
-    if (checkEmail.isError) {
-      checkEmail.reset()
-    }
-  }
+  if (validationError) setValidationError('')
+  if (checkEmail.isError) checkEmail.reset()
+}
 
-  const handleContinue = (e: React.FormEvent) => {
-    e.preventDefault()
-    setTouched(true)
 
-    if (!email.trim()) {
-      setValidationError('Email address is required')
-      return
-    }
+ const handleContinue = async (e: React.FormEvent) => {
+  e.preventDefault()
+  setTouched(true)
 
-    const result = emailSchema.safeParse({ email })
-
-    if (!result.success) {
-      setValidationError('Please enter a valid email address')
-      return
-    }
+  try {
+    // Validate using Yup
+    await emailSchema.validate(
+      { email },
+      { abortEarly: true } // stop at first error
+    )
 
     setValidationError('')
 
     checkEmail.mutate(email, {
       onSuccess: (data) => {
-        console.log('Check email response:', data)
-
         localStorage.setItem('email', email)
 
-        const exists = data.payload?.exists
-        const hasPassword = data.payload?.hasPassword
-        const userId = data.payload?.userId
-        const role=data.payload?.role
-        storageService.setItem('userRole',role)
+        const { exists, hasPassword, userId, role } = data.payload || {}
+        storageService.setItem('userRole', role)
 
         if (exists && hasPassword === false) {
-          // Email exists but password not set (Google signup case)
           localStorage.setItem('userId', userId as any)
           navigate({ to: '/auth/set-password' })
         } else if (exists && hasPassword === true) {
-          // Normal login flow
           navigate({ to: '/auth/password' })
         } else {
-          // New user
           navigate({ to: '/auth/signup' })
         }
       },
@@ -81,7 +61,13 @@ function EmailInput() {
         console.error('Check email error:', error)
       },
     })
+  } catch (err) {
+    if (err instanceof Yup.ValidationError) {
+      setValidationError(err.message)
+    }
   }
+}
+
   const handleGoogleSignIn = () => {
     window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/google`
   }
@@ -138,8 +124,8 @@ function EmailInput() {
               <button
                 type="submit"
                 disabled={checkEmail.isPending}
-                className="h-12 w-full rounded-lg bg-[#0E7C8C] text-sm font-bold text-white 
-             hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-blue-600/20 
+                className="h-12 w-full rounded-lg bg-[#0E7C8C] text-sm font-bold text-white
+             hover:bg-[#3EC3BC] active:bg-[#0B666D] transition-colors shadow-lg shadow-blue-600/20
              disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {checkEmail.isPending ? (

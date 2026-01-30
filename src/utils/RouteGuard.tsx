@@ -52,9 +52,10 @@ export function ProtectedRoute({
     if (!token) {
       // Check if we're already on the login page to avoid double navigation
       if (window.location.pathname !== '/auth/login') {
+        <FullPageLoader />
         navigate({ to: '/auth/login' })
       }
-      setChecking(false);
+      setChecking(false)
       return
     }
 
@@ -71,9 +72,14 @@ export function ProtectedRoute({
             : '/job-seeker/dashboard',
       })
     }
-     setChecking(false)
+    setChecking(false)
   }, [token, navigate, allowedRoles])
-    if (checking) return <div><FullPageLoader/></div>
+  if (checking)
+    return (
+      <div>
+        <FullPageLoader />
+      </div>
+    )
 
   // Render the page immediately
   return <>{children}</>
@@ -89,6 +95,8 @@ export function UnassignedOnlyRoute({ children }: { children: ReactNode }) {
     if (!token) {
       // Check if we're already on the login page to avoid double navigation
       if (window.location.pathname !== '/auth/login') {
+        <FullPageLoader />
+
         navigate({ to: '/auth/login' })
       }
       return
@@ -105,7 +113,7 @@ export function UnassignedOnlyRoute({ children }: { children: ReactNode }) {
     }
 
     if (role === 'unassigned') {
-      setChecking(false) 
+      setChecking(false)
       return
     }
 

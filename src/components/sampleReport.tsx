@@ -1,35 +1,37 @@
+import { FormattingSuggestion, LearningStep } from '@/types/models';
+
 export default function SampleReport() {
   // --------------------
   // HARD-CODED SAMPLE DATA
   // --------------------
-  const overallScore = 82
-  const scoreLabel = 'Good'
+  const overallScore: number = 82;
+  const scoreLabel: 'Excellent' | 'Good' | 'Average' | 'Poor' = 'Good';
 
-  const aiSummary =
-    'Your resume demonstrates strong technical fundamentals and relevant experience. Improving keyword alignment and formatting consistency can significantly enhance ATS compatibility.'
+  const aiSummary: string =
+    'Your resume demonstrates strong technical fundamentals and relevant experience. Improving keyword alignment and formatting consistency can significantly enhance ATS compatibility.';
 
-  const strengths = [
+  const strengths: string[] = [
     'Strong React and TypeScript knowledge',
     'Clear project experience',
     'Good problem-solving skills',
-  ]
+  ];
 
-  const weaknesses = [
+  const weaknesses: string[] = [
     'Missing industry keywords',
     'Inconsistent formatting',
     'Limited leadership examples',
-  ]
+  ];
 
-  const keywords = [
+  const keywords: string[] = [
     'React',
     'TypeScript',
     'Node.js',
     'REST APIs',
     'MongoDB',
     'Tailwind CSS',
-  ]
+  ];
 
-  const formattingSuggestions = [
+  const formattingSuggestions: FormattingSuggestion[] = [
     {
       icon: 'article',
       title: 'Content Score',
@@ -42,13 +44,13 @@ export default function SampleReport() {
       score: 74,
       description: 'Layout quality score: 74/100',
     },
-  ]
+  ];
 
-  const grammarErrors: string[] = []
+  const grammarErrors: string[] = [];
 
-  const skillGaps = ['Cloud Computing', 'System Design', 'Docker']
+  const skillGaps: string[] = ['Cloud Computing', 'System Design', 'Docker'];
 
-  const learningRoadmap = [
+  const learningRoadmap: LearningStep[] = [
     {
       title: 'Learn Docker fundamentals',
       duration: '2-3 weeks',
@@ -64,7 +66,7 @@ export default function SampleReport() {
       duration: '3-4 weeks',
       priority: 'Medium',
     },
-  ]
+  ];
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)

@@ -5,32 +5,18 @@ import { useSetPassword } from '@/queries/auth.queries'
 import { Eye, EyeOff } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as Yup from 'yup'
+import { setPasswordSchema, type PasswordFormData } from '@/validations/auth/set-password'
 import storageService from '@/utils/localstorage'
 
 export const Route = createFileRoute('/auth/set-password')({
   component: SetPassword
 })
 
-const passwordSchema = Yup.object().shape({
-  newPassword: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/\d/, 'Password must contain at least one number')
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
-    .required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('newPassword')], "Passwords don't match")
-    .required('Please confirm your password'),
-})
-
-type PasswordFormData = Yup.InferType<typeof passwordSchema>
-
 function SetPassword() {
   const navigate = useNavigate()
   const setPassword = useSetPassword()
   const role = storageService.getItem<string>('userRole')
-  
+
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
@@ -40,7 +26,7 @@ function SetPassword() {
     formState: { errors, isValid },
     setError,
   } = useForm<PasswordFormData>({
-    resolver: yupResolver(passwordSchema),
+    resolver: yupResolver(setPasswordSchema),
     mode: 'onChange',
     defaultValues: {
       newPassword: '',
@@ -51,9 +37,9 @@ function SetPassword() {
   const onSubmit = (data: PasswordFormData) => {
     const userId = localStorage.getItem('userId')
     if (!userId) {
-      setError('newPassword', { 
-        type: 'manual', 
-        message: 'User not found. Please try again.' 
+      setError('newPassword', {
+        type: 'manual',
+        message: 'User not found. Please try again.'
       })
       return
     }
@@ -170,8 +156,8 @@ function SetPassword() {
             <button
               type="submit"
               disabled={setPassword.isPending || !isValid}
-              className="w-full h-12 px-5 bg-[#0E7C8C] text-white font-semibold rounded-lg 
-                hover:bg-[#0d6b79] active:bg-[#0c5f6c] transition-all shadow-lg shadow-[#0E7C8C]/20 
+              className="w-full h-12 px-5 bg-[#0E7C8C] text-white font-semibold rounded-lg
+                hover:bg-[#0d6b79] active:bg-[#0c5f6c] transition-all shadow-lg shadow-[#0E7C8C]/20
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0E7C8C]
                 flex items-center justify-center gap-2"
             >

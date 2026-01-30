@@ -2,19 +2,12 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import Header from '@/components/Header'
 import { useForgotPassword } from '@/queries/auth.queries'
+import { forgotPasswordSchema, type EmailFormData } from '@/validations/auth/forgot-password'
 import * as Yup from 'yup'
 
 export const Route = createFileRoute('/auth/forgot-password')({
   component:ForgotPassword
 })
-
-const emailSchema = Yup.object().shape({
-  email: Yup.string()
-    .email('Please enter a valid email address')
-    .required('Email address is required'),
-})
-
-type EmailFormData = Yup.InferType<typeof emailSchema>
 
 function ForgotPassword() {
   const navigate = useNavigate()
@@ -25,13 +18,13 @@ function ForgotPassword() {
   const register = (field: keyof EmailFormData) => ({
     value: formData[field],
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }))
+      setFormData((prev:any) => ({ ...prev, [field]: e.target.value }))
       if (error) setError('')
       if (forgotPassword.isError) forgotPassword.reset()
     },
     onBlur: async () => {
       try {
-        await emailSchema.validateAt(field, formData)
+        await forgotPasswordSchema.validateAt(field, formData)
         setError('')
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
@@ -45,7 +38,7 @@ function ForgotPassword() {
     e.preventDefault()
 
     try {
-      await emailSchema.validate(formData, { abortEarly: false })
+      await forgotPasswordSchema.validate(formData, { abortEarly: false })
       setError('')
     } catch (err) {
       if (err instanceof Yup.ValidationError) {

@@ -26,9 +26,10 @@ export default function CompanySidebar() {
     logout.mutate(undefined, {
       onSuccess: () => {
         console.log('Logged out successfully')
-       storageService.removeItem('carrerFlux_userRole');
+       storageService.removeItem('userRole');
        setTimeout(()=>{
-         navigate({ to: '/auth/login' })
+         //navigate({ to: '/auth/login' })
+         window.location.href='/auth/login'
        },1000)
       },
       onError: (error) => {

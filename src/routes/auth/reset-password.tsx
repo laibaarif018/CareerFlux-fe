@@ -5,7 +5,7 @@ import Header from '@/components/Header'
 import { useResendVerificationCode, useResetPassword } from '@/queries/auth.queries'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as Yup from 'yup'
+import { resetPasswordSchema, type ResetPasswordFormData } from '@/validations/auth/reset-password'
 import { showToast } from '@/utils/swal'
 
 export const Route = createFileRoute('/auth/reset-password')({
@@ -16,24 +16,6 @@ export const Route = createFileRoute('/auth/reset-password')({
   component: ResetPassword
 })
 
-const resetPasswordSchema = Yup.object().shape({
-  code: Yup.string()
-    .length(6, 'Code must be 6 digits')
-    .matches(/^\d+$/, 'Code must contain only numbers')
-    .required('Verification code is required'),
-  newPassword: Yup.string()
-    .min(8, 'Password must be at least 8 characters')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/\d/, 'Password must contain at least one number')
-    .matches(/[!@#$%^&*(),.?":{}|<>]/, 'Password must contain at least one special character')
-    .required('Password is required'),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref('newPassword')], "Passwords don't match")
-    .required('Please confirm your password'),
-})
-
-type ResetPasswordFormData = Yup.InferType<typeof resetPasswordSchema>
-
 function ResetPassword() {
   const navigate = useNavigate()
   const { email: searchEmail } = useSearch({ from: '/auth/reset-password' })
@@ -43,7 +25,7 @@ function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [canResend, setCanResend] = useState(true)
   const [countdown, setCountdown] = useState(0)
-  
+
   const resetPassword = useResetPassword()
   const resendCode = useResendVerificationCode()
 
@@ -53,7 +35,6 @@ function ResetPassword() {
     formState: { errors, isValid },
     watch,
     setValue,
-    trigger,
   } = useForm<ResetPasswordFormData>({
     resolver: yupResolver(resetPasswordSchema),
     mode: 'onChange',
@@ -97,7 +78,7 @@ function ResetPassword() {
     const newCode = [...code]
     newCode[index] = value
     setCode(newCode)
-    
+
     const codeString = newCode.join('')
     setValue('code', codeString, { shouldValidate: true })
 
@@ -135,7 +116,7 @@ function ResetPassword() {
 
   const handleResendCode = () => {
     if (!canResend) return
-  
+
     resendCode.mutate(
       { email, purpose: 'forgot_password' },
       {
@@ -190,8 +171,8 @@ function ResetPassword() {
                       onKeyDown={(e) => handleKeyDown(index, e)}
                       className={`w-12 h-14 text-center text-xl font-semibold border-2 rounded-lg transition-all outline-none
                         bg-white dark:bg-slate-900 text-slate-900 dark:text-white
-                        ${errors.code 
-                          ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                        ${errors.code
+                          ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                           : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
                         }`}
                     />
@@ -217,8 +198,8 @@ function ResetPassword() {
                     className={`w-full px-4 py-3 pr-12 border rounded-lg transition-all outline-none
                       bg-white dark:bg-slate-900 text-slate-900 dark:text-white
                       placeholder:text-slate-400 dark:placeholder:text-slate-500
-                      ${errors.newPassword 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                      ${errors.newPassword
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                         : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
                       }`}
                   />
@@ -250,8 +231,8 @@ function ResetPassword() {
                     className={`w-full px-4 py-3 pr-12 border rounded-lg transition-all outline-none
                       bg-white dark:bg-slate-900 text-slate-900 dark:text-white
                       placeholder:text-slate-400 dark:placeholder:text-slate-500
-                      ${errors.confirmPassword 
-                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                      ${errors.confirmPassword
+                        ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
                         : 'border-slate-300 dark:border-slate-600 focus:border-[#0E7C8C] focus:ring-2 focus:ring-[#0E7C8C]/20'
                       }`}
                   />
@@ -314,7 +295,7 @@ function ResetPassword() {
                   disabled={!canResend || resendCode.isPending}
                   className={`font-semibold transition-colors ${
                     !canResend || resendCode.isPending
-                      ? 'text-slate-400 cursor-not-allowed' 
+                      ? 'text-slate-400 cursor-not-allowed'
                       : 'text-[#0E7C8C] dark:text-[#3EC3BC] hover:text-[#0d6b79] dark:hover:text-[#4dd4cd]'
                   }`}
                 >
@@ -360,4 +341,4 @@ function ResetPassword() {
       </div>
     </div>
   )
-} 
+}

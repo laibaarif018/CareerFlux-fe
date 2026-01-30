@@ -2,7 +2,7 @@ import UserHeader from '@/components/UserHeader'
 import { createFileRoute } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
+import { passwordSchema } from '@/validations/job-seeker/account-settings'
 import { useState } from 'react'
 import { useGetProfile } from '@/queries/user.queries'
 import { useChangePassword } from '@/queries/auth.queries'
@@ -12,22 +12,6 @@ import { showSuccess, showError } from '@/utils/swal'
 
 export const Route = createFileRoute('/job-seeker/account-settings')({
   component: AccountSettings,
-})
-
-// Yup validation schema
-const passwordSchema = yup.object({
-  currentPassword: yup.string().required('Current password is required'),
-  newPassword: yup
-    .string()
-    .required('New password is required')
-    .min(8, 'Password must be at least 8 characters long')
-    .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .matches(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: yup
-    .string()
-    .required('Please confirm your new password')
-    .oneOf([yup.ref('newPassword')], 'Passwords do not match'),
 })
 
 type PasswordFormData = {
